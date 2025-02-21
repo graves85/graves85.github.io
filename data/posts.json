@@ -2,6 +2,19 @@
     {
         "title": "JavaScript 최신 트렌드",
         "url": "posts/post1.html",
-        "date": "2025-02-20"
+        "date": "2025-02-20",
+        "type": "frontend"
+    },
+    {
+        "title": "CSS 이렇게만 쓰세요",
+        "url": "posts/post1.html",
+        "date": "2025-02-20",
+        "type": "frontend"
+    },
+    {
+        "title": "Typescript 기본은 알고 쓰자",
+        "url": "posts/post1.html",
+        "date": "2025-02-21",
+        "type": "frontend"
     }
 ]

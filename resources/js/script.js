@@ -7,9 +7,10 @@ fetch('/data/posts.json')
     const infraContainer = document.getElementById('infra-list-content');
     const newsContainer = document.getElementById('news-list-content');
 
+    // 날짜를 기준으로 내림차순 정렬
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
     posts.forEach(post => {
-        // 날짜를 기준으로 내림차순 정렬
-        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         // 각 포스트를 담을 div 요소 생성
         const postDiv = document.createElement('div');

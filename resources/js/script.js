@@ -1,9 +1,16 @@
 fetch('/data/posts.json')
 .then(response => response.json())
 .then(posts => {
-    const mainContent = document.getElementById('list-content');
+    const frontendContainer = document.getElementById('frontend-list-content');
+    const backendContainer = document.getElementById('backend-list-content');
+    const dbContainer = document.getElementById('db-list-content');
+    const infraContainer = document.getElementById('infra-list-content');
+    const newsContainer = document.getElementById('news-list-content');
 
     posts.forEach(post => {
+        // 날짜를 기준으로 내림차순 정렬
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
         // 각 포스트를 담을 div 요소 생성
         const postDiv = document.createElement('div');
         postDiv.classList.add('post-item'); // 'post-item' 클래스 추가
@@ -18,8 +25,18 @@ fetch('/data/posts.json')
         postDate.textContent = post.date;
         postDiv.appendChild(postDate);
 
-        // main 태그 내에 새로 생성한 div 추가
-        mainContent.appendChild(postDiv);
+        // Based on type, append to the respective container
+        if (post.type === 'frontend') {
+            frontendContainer.appendChild(postDiv);
+        } else if (post.type === 'backend') {
+            backendContainer.appendChild(postDiv);
+        } else if (post.type === 'db') {
+            dbContainer.appendChild(postDiv);
+        } else if (post.type === 'infra') {
+            infraContainer.appendChild(postDiv);
+        } else if (post.type === 'news') {
+            newsContainer.appendChild(postDiv);
+        }
     });
 })
 .catch(error => console.error('Error loading posts:', error));

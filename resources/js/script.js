@@ -27,15 +27,15 @@ fetch('/data/posts.json')
         postDiv.appendChild(postDate);
 
         // Based on type, append to the respective container
-        if (post.type === 'frontend') {
+        if (post.type === 'frontend' && frontendContainer != null) {
             frontendContainer.appendChild(postDiv);
-        } else if (post.type === 'backend') {
+        } else if (post.type === 'backend' && backendContainer != null) {
             backendContainer.appendChild(postDiv);
-        } else if (post.type === 'db') {
+        } else if (post.type === 'db' && dbContainer != null) {
             dbContainer.appendChild(postDiv);
-        } else if (post.type === 'infra') {
+        } else if (post.type === 'infra' && infraContainer != null) {
             infraContainer.appendChild(postDiv);
-        } else if (post.type === 'news') {
+        } else if (post.type === 'news' && newsContainer != null) {
             newsContainer.appendChild(postDiv);
         }
     });

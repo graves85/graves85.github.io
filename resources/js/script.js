@@ -1,8 +1,7 @@
 fetch('/data/posts.json')
 .then(response => response.json())
 .then(posts => {
-    const frontendContainer = document.getElementById('frontend-list-content');
-    const backendContainer = document.getElementById('backend-list-content');
+    const devContainer = document.getElementById('dev-list-content');
     const dbContainer = document.getElementById('db-list-content');
     const infraContainer = document.getElementById('infra-list-content');
     const newsContainer = document.getElementById('news-list-content');
@@ -27,10 +26,8 @@ fetch('/data/posts.json')
         postDiv.appendChild(postDate);
 
         // Based on type, append to the respective container
-        if (post.type === 'frontend' && frontendContainer != null) {
-            frontendContainer.appendChild(postDiv);
-        } else if (post.type === 'backend' && backendContainer != null) {
-            backendContainer.appendChild(postDiv);
+        if (post.type === 'dev' && devContainer != null) {
+            devContainer.appendChild(postDiv);
         } else if (post.type === 'db' && dbContainer != null) {
             dbContainer.appendChild(postDiv);
         } else if (post.type === 'infra' && infraContainer != null) {

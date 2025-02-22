@@ -3,30 +3,30 @@
         "title": "JavaScript 최신 트렌드",
         "url": "posts/post1.html",
         "date": "2025-01-20",
-        "type": "frontend"
+        "type": "dev"
     },
     {
         "title": "CSS 이렇게만 쓰세요",
         "url": "posts/post1.html",
         "date": "2024-03-20",
-        "type": "frontend"
+        "type": "dev"
     },
     {
         "title": "Typescript 기본은 알고 쓰자",
         "url": "posts/post1.html",
         "date": "2025-02-21",
-        "type": "frontend"
+        "type": "dev"
     },
     {
-        "title": "GO LANG으로 BACKEND 구성해볼까?",
+        "title": "GO LANG으로 시작해볼까?",
         "url": "posts/post1.html",
         "date": "2025-02-21",
-        "type": "backend"
+        "type": "dev"
     },
     {
         "title": "MVC 패턴 이해하기",
         "url": "posts/post1.html",
         "date": "2025-01-21",
-        "type": "backend"
+        "type": "dev"
     }
 ]

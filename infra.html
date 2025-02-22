@@ -1,0 +1,18 @@
+---
+layout: list-layout
+title: POST LIST 페이지
+---
+
+<h2>🛠️ Infra</h2>
+<div id="dev-list-content">
+        {% for post in site.posts %}
+            {% if post.categories contains 'infra' %} 
+                <div class="post-item">
+                    <a href="{{ post.url }}">
+                        <h4>{{ post.title }}</h4>
+                        <p>{{ post.date | date: "%Y-%m-%d" }}</p>
+                    </a>
+                </div>
+            {% endif %}
+        {% endfor %}
+</div>

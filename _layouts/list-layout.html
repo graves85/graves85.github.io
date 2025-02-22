@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Insights: IT & Development Blog</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    <header>
+        <h2>Tech Insights: IT & Development Blog</h2>
+		<nav>
+			<a href="{{ '/' | absolute_url }}">Home</a> |
+			<a href="/dev.html">DEV</a> | 
+			<a href="/db.html">DB</a> | 
+			<a href="/infra.html">Infra</a> | 
+			<a href="/news.html">IT News</a>
+		</nav>
+  </header>
+
+	<main>
+        {{ content }}
+	</main>
+
+    <footer>
+        © 2025 Tech Insights | Powered by Graves85
+    </footer>
+</body>
+</html>

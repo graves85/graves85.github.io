@@ -46,3 +46,15 @@ fetch('/data/posts.json')
     });
 })
 .catch(error => console.error('Error loading posts:', error));
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".copy-btn").forEach((button) => {
+        button.addEventListener("click", function () {
+            const codeBlock = this.previousElementSibling.innerText;
+            navigator.clipboard.writeText(codeBlock).then(() => {
+                this.textContent = "✅";
+                setTimeout(() => (this.textContent = "📋"), 1500);
+            }).catch(err => console.error("복사 실패:", err));
+        });
+    });
+});

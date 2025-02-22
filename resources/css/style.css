@@ -33,6 +33,41 @@ a {
     text-decoration: none;
 }
 
+h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+/* 네비게이션 바 스타일 */
+nav {
+    padding: 12px 0;
+    text-align: center;
+}
+
+/* 네비게이션 메뉴 스타일 */
+nav a {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    margin: 0 12px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* 호버 및 클릭 효과 */
+nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* 현재 활성화된 메뉴 스타일 */
+nav a.active {
+    background: #005f99;
+}
+
 /* 전체 리스트 스타일 */
 .post-item {
     display: flex;
@@ -97,12 +132,67 @@ a {
     border-radius: 4px;
 }
 
+/* 소제목 스타일 */
+.content-body h4 {
+    font-size: 18px;
+    color: #007acc;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #007acc;
+    font-weight: bold;
+}
+
 /* 코드 블록 안에서의 코드 태그 스타일 (pre 안의 code) */
 .content-body pre code {
     background: none;
     color: inherit;
     padding: 0;
 }
+
+/* 코드 블록 스타일 */
+.code-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+/* 복사 버튼 스타일 */
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* 본문 내 이미지 스타일 */
+.content-body img {
+    max-width: 100%; /* 부모 요소 크기 내에서 자동 조절 */
+    height: auto; /* 원본 비율 유지 */
+    display: block; /* 가운데 정렬을 위한 block 요소 */
+    margin: 16px auto; /* 위아래 여백 추가 및 가운데 정렬 */
+    border-radius: 8px; /* 모서리를 둥글게 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 살짝 그림자 효과 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 이미지 호버 효과 */
+.content-body img:hover {
+    transform: scale(1.05); /* 살짝 확대 효과 */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
 
 
 /* 태그 스타일 */

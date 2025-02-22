@@ -16,15 +16,20 @@ fetch('/data/posts.json')
         const postDiv = document.createElement('div');
         postDiv.classList.add('post-item'); // 'post-item' 클래스 추가
 
+        // 페이지를 이동할 수 있는 a 요소 생성
+        const postA = document.createElement('a');
+        postA.href = post.url;
+        postDiv.appendChild(postA);
+
         // 포스트 제목 추가
         const postTitle = document.createElement('h4');
         postTitle.textContent = post.title;
-        postDiv.appendChild(postTitle);
+        postA.appendChild(postTitle);
 
         // 포스트 날짜 추가
         const postDate = document.createElement('p');
         postDate.textContent = post.date;
-        postDiv.appendChild(postDate);
+        postA.appendChild(postDate);
 
         // Based on type, append to the respective container
         if (post.type === 'dev' && devContainer != null) {

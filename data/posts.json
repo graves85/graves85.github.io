@@ -1,31 +1,31 @@
 [
     {
         "title": "JavaScript 최신 트렌드",
-        "url": "posts/post1.html",
+        "url": "/posts/dev/post20250222_1.html",
         "date": "2025-01-20",
         "type": "dev"
     },
     {
         "title": "CSS 이렇게만 쓰세요",
-        "url": "posts/post1.html",
+        "url": "/posts/dev/post20250222_2.html",
         "date": "2024-03-20",
         "type": "dev"
     },
     {
         "title": "Typescript 기본은 알고 쓰자",
-        "url": "posts/post1.html",
+        "url": "/posts/dev/post20250222_3.html",
         "date": "2025-02-21",
         "type": "dev"
     },
     {
         "title": "GO LANG으로 시작해볼까?",
-        "url": "posts/post1.html",
+        "url": "/posts/dev/post20250222_4.html",
         "date": "2025-02-21",
         "type": "dev"
     },
     {
         "title": "MVC 패턴 이해하기",
-        "url": "posts/post1.html",
+        "url": "/posts/dev/post20250222_5.html",
         "date": "2025-01-21",
         "type": "dev"
     }

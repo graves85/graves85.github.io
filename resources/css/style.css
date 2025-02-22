@@ -33,10 +33,35 @@ a {
     text-decoration: none;
 }
 
-h3 {
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 16px;
+/* 본문 타이틀 스타일 */
+.content-title h3 {
+    font-size: 28px; /* 크기 조정 */
+    font-weight: bold;
+    color: #333; /* 어두운 회색으로 자연스럽게 강조 */
+    text-align: left; /* 왼쪽 정렬 */
+    margin: 32px 0 24px 0; /* 상하 여백 조정 */
+    padding-left: 16px; /* 왼쪽 패딩 추가 */
+    position: relative;
+}
+
+
+/* 그림자 효과 추가 */
+.content-title h3::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 6px;
+    height: 100%; /* 줄 길이 */
+    background: #007acc; /* 강조할 색상 */
+    transform: translateY(-50%);
+}
+
+/* 반응형 조정 */
+@media (max-width: 768px) {
+    .content-title h3 {
+        font-size: 20px;
+    }
 }
 
 /* 네비게이션 바 스타일 */
@@ -193,6 +218,43 @@ nav a.active {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 테이블 스타일 */
+.content-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 16px;
+    text-align: left;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 헤더 */
+.content-body thead {
+    background: #007acc;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* 테이블 헤더 & 셀 스타일 */
+.content-body th, 
+.content-body td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+/* 행 호버 효과 */
+.content-body tbody tr:hover {
+    background: rgba(0, 122, 204, 0.1);
+}
+
+/* 반응형 스크롤 적용 */
+.content-body .table-container {
+    overflow-x: auto;
+}
 
 
 /* 태그 스타일 */

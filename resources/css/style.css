@@ -73,7 +73,37 @@ a {
     background: #f9f9f9;
     border-radius: 8px;
     border-left: 4px solid #007acc;
+    text-align: left;
 }
+
+/* 코드 블록 스타일 */
+.content-body pre {
+    background: #272822; /* 다크 테마 배경 */
+    color: #f8f8f2; /* 가독성 높은 글씨 색상 */
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    overflow-x: auto; /* 가로 스크롤 가능하도록 */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* 코드 태그 스타일 */
+.content-body code {
+    font-family: "Fira Code", "Courier New", monospace;
+    background: #f4f4f4;
+    color: #c7254e;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* 코드 블록 안에서의 코드 태그 스타일 (pre 안의 code) */
+.content-body pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+}
+
 
 /* 태그 스타일 */
 .tags {

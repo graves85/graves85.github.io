@@ -5,6 +5,7 @@ fetch('/data/posts.json')
     const dbContainer = document.getElementById('db-list-content');
     const infraContainer = document.getElementById('infra-list-content');
     const newsContainer = document.getElementById('news-list-content');
+    const recentsContainer = document.getElementById('recents-list-content');
 
     // 날짜를 기준으로 내림차순 정렬
     posts.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -34,6 +35,8 @@ fetch('/data/posts.json')
             infraContainer.appendChild(postDiv);
         } else if (post.type === 'news' && newsContainer != null) {
             newsContainer.appendChild(postDiv);
+        } else if (recentsContainer != null) {
+            recentsContainer.appendChild(postDiv);
         }
     });
 })

@@ -5,14 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tech Insights: IT & Development Blog</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <script src="https://utteranc.es/client.js"
-        repo="graves85/graves85.github.io.git"
-        issue-term="pathname"
-        label="comment"
-        theme="github-light"
-        crossorigin="anonymous"
-        async>
-    </script>
 </head>
 <body>
     <header>
@@ -39,7 +31,19 @@
             <span>#{{ tag }}</span>
             {% endfor %}
         </div>
-    {% endif %}      
+    {% endif %}
+    
+    <!-- 댓글 영역 -->
+    <div id="comments">
+        <script src="https://utteranc.es/client.js"
+            repo="graves85/graves85.github.io.git"
+            issue-term="pathname"
+            label="comment"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </div>
     </main>
 
     <footer>

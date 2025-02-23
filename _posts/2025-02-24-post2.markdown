@@ -1,0 +1,75 @@
+---
+layout: content-layout
+title: "GITHUB 블로그 개설 어떻게 했더라... 🤨 껍데기 만들기편"
+date: 2025-02-24
+categories: [dev]
+tags: [Jekyll, Web, Blogging, Github]
+---
+
+## **안녕하십니까! 😀**
+
+GITHUB 블로그를 힘들게 만들었는데 점점 잊혀져 가네요... 😶‍🌫️
+
+더 잊기 전에 기록해둡시다!
+
+(저는 ~~멋있어 보이고 싶어~~ GIT은 CLI로 진행하였습니다.)
+
+### 1. GITHUB 레파지토리 생성
+
+GITHUB에 로그인 한 후 New repository를 눌러서 아래와 같이 생성합니다.
+
+![Imgur](https://i.imgur.com/I42yE66.png)
+
+📢 레파지토리 이름은 **사용자명.github.io**로 설정해야 블로그를 만들 수 있습니다!
+
+📢 다른 사용자들이 볼 수 있도록 Public으로 개설합니다!
+
+### 2. HELLO WORLD 한 번 생성해보기
+
+![Imgur](https://i.imgur.com/3k3Lfrc.png)
+
+블로그에 HELLO WORLD를 한 번 찍어봅시다.
+
+레파지토리를 들어가보면 아직 아무것도 없는 빈 공간입니다.
+
+creating a new file을 눌러서 파일 하나를 생성해봅시다.
+
+![Imgur](https://i.imgur.com/FECrsbC.png)
+
+```
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HELLO</title>
+</head>
+<body>
+    HELLO WORLD
+</body>
+</html>
+```
+
+위처럼 간단하게 코드를 입력하고 파일 이름은 **index.html**로 지정하여 Commit chages 버튼을 누릅니다!!
+
+Commit까지 마쳤다면 위 메뉴 중에 Actions라는 탭이 있습니다.
+
+![Imgur](https://i.imgur.com/RinWVpJ.png)
+
+Actions 탭에 들어가보면 github이 자동으로 빌드와 배포를 거치는 작업을 볼 수 있습니다.
+
+📌 <span style="color:red;">혹시 모르시는 분들을 위한 첨언! Github Actions를 이용하여 젠킨스를 대신해 빌드와 배포를 할 수 있다는 사실!</span>
+
+### 4. 블로그 확인해보기
+
+이제 블로그 URL을 직접 들어가서 확인해 볼 시간입니다. 🤤
+
+![Imgur](https://i.imgur.com/2fMSMtJ.png)
+
+들어가보면 HELLO WORLD가 출력되어 있는 것을 알 수 있습니다!
+
+시작이 반인데 껍데기를 만들었으니 반은 한 것 같아요! 🥲
+
+껍데기를 만들었으니 본격적으로 Jekyll 설정한 후기도 공유드리겠습니다. 🥰
+
+감사합니다!

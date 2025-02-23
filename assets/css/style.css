@@ -277,3 +277,11 @@ nav a.active {
 .tags span:hover {
     background: #005f99;
 }
+
+.comments {
+    margin-top: 50px;
+}
+
+.utterances {
+    max-width: 100% !important;
+}

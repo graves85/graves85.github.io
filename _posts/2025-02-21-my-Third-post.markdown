@@ -1,8 +1,9 @@
 ---
-layout: list-layout
+layout: content-layout
 title: "My Third Post"
 date: 2023-02-21
 categories: [dev]
+tags: [Jekyll, Web, Blogging]
 ---
 
 # Hello World!

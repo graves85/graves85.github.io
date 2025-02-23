@@ -1,8 +1,9 @@
 ---
-layout: list-layout
+layout: content-layout
 title: "My First Post"
 date: 2025-02-22
 categories: [db]
+tags: [Jekyll, Web, Blogging]
 ---
 
 # Hello World!

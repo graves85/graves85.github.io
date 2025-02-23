@@ -40,7 +40,7 @@ a {
     color: #333; /* 어두운 회색으로 자연스럽게 강조 */
     text-align: left; /* 왼쪽 정렬 */
     margin: 32px 0 24px 0; /* 상하 여백 조정 */
-    padding-left: 16px; /* 왼쪽 패딩 추가 */
+    padding: 16px; /* 왼쪽 패딩 추가 */
     position: relative;
 }
 
@@ -53,7 +53,7 @@ a {
     top: 50%;
     width: 6px;
     height: 100%; /* 줄 길이 */
-    background: #007acc; /* 강조할 색상 */
+    background: #cc0000; /* 강조할 색상 */
     transform: translateY(-50%);
 }
 

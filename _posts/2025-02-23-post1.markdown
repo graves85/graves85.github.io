@@ -18,6 +18,8 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
 
 블로그는 조금씩 살을 붙이도록 하고 글 작성하는 마크다운 작성 방법부터 알아두려고 합니다.
 
+---
+
 ## 1. 소제목
 
 ```

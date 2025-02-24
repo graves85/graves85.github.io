@@ -1,0 +1,132 @@
+---
+layout: content-layout
+title: "GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸"
+date: 2025-02-25
+categories: [dev]
+tags: [Jekyll, Web, Blogging, Github]
+---
+
+## 안녕하십니까!! 🧐
+
+기술 블로그 새내기 graves85입니다.
+
+지난 번 글 ➡️ [GITHUB 블로그 개설 어떻게 했더라... 🤨 껍데기 만들기편](/dev/2025/02/24/post2.html)
+
+이번에는 Jerkll이라는 프레임워크를 사용하여 블로그에 멋진 옷을 입혀주려고 합니다! 😮
+
+~~(GPT가 Jerkll 강추했다는...)~~
+
+✏️ <span style="color: red;">프레임워크란? 소프트웨어 개발을 쉽게 할 수 있도록 미리 만들어진 구조와 규칙의 집합</span>
+
+차근차근 한 번 해봅시다!
+
+---
+
+### 1. 루비 언어 설치
+
+우선 로컬에서 Jerkll을 적용하기 위해서는 루비를 설치해야 합니다.
+
+[루비 언어 설치](https://rubyinstaller.org/)
+
+위의 경로를 통해서 루비 언어를 설치하도록 합시다!
+
+![Imgur](https://i.imgur.com/lU73lxm.png)
+
+저는 루비 3.3.7을 설치하였습니다.
+
+설치가 끝났다면 윈도우 기준 cmd 에서 설치가 되었는지 확인해봅시다!
+
+```
+ruby -v
+gem -v
+```
+
+### 2. Jekyll 설치
+
+이제 루비의 gem 명령어를 통해서 jekyll를 설치할 수 있습니다!
+
+```
+gem install jekyll bundler
+```
+
+마찬가지로 아래 명령어로 정상 설치가 되었는지 알 수 있어요!
+
+```
+jekyll -v
+```
+
+### 3. Jekyll 프로젝트 생성
+
+우선 프로젝트를 생성할 폴더를 만들고 거기에 아래 명령어를 쳐보면 파일들이 생성됩니다!
+
+```
+jekyll new 프로젝트명
+```
+
+위 명령어를 치면 프로젝트명의 폴더가 하나 생성되고 아래와 같은 구조로 파일들이 만들어졌을 겁니다!
+
+![Imgur](https://i.imgur.com/RKZbfue.png)
+
+<span style="color: red;"> ⚠ Windows에서 jekyll new 실행 시 오류 발생 시 해결 방법 </span>
+
+```
+bundle add webrick
+```
+
+### 4. 로컬에서 프로젝트 실행해보기
+
+이제 페이지를 띄우기까지 거의 다 왔습니다!
+
+TERMINAL에서 아래 명령어로 로컬 서버를 띄어봅니다!
+
+```
+bundle exec jekyll serve
+```
+
+서버가 정상적으로 구동되었다면 `http://localhost:4000` 이 경로에 접속해서 확인을 해볼 수 있습니다!
+
+**📌 VS Code에서 빠르게 jekyll 서버를 띄우고 싶다면 ⁉️**
+
+프로젝트 루트 기준 `.vscode/tasks.json` 경로로 json 파일을 하나 만듭니다!
+
+```
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Jekyll",
+            "type": "shell",
+            "command": "bundle exec jekyll serve",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
+```
+
+그리고 나서 위처럼 파일을 만든 후에 저장하고 `Ctrl + Shift + B` 키를 누르면 자동으로 Jerkll 서버가 구동됨을 확인 할 수 있습니다.
+
+이제 로컬에서 블로그를 수리할 수 있는 환경이 만들어졌습니다! 😲
+
+이 프레임워크 구조에 대해서 많이 궁금하실텐데 저도 차근차근 학습중에 있답니다... 🤐
+
+기회가 되면 빠르게 구조도 같이 파악해보시죠!
+
+### 5. GITHUB에 올려보기!
+
+이제 만들어진 Jerkll 프로젝트를 GITHUB에 한 번 고대로 올려보겠습니다!
+
+~~(제발 한방에 잘 떠라!!!)~~
+
+![Imgur](https://i.imgur.com/jN3LJbQ.png)
+
+PUSH를 마친 후 github 블로그를 들어가보면 이렇게 기본 테마의 블로그가 뜨는 것을 확인할 수 있습니다!
+
+그런데 프레임워크를 써서 github 블로그를 띄우기는 했는데... 뭐가 좋은 것일까... 🤨
+
+다음 글에는 좀 더 Jekyll에 대해 파보도록 하겠습니다!
+
+감사합니다!

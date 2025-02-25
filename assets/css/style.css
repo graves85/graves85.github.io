@@ -33,6 +33,22 @@ a {
     text-decoration: none;
 }
 
+blockquote {
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: #555;
+    border-left: 4px solid #3498db;
+    padding: 10px 20px;
+    margin: 10px 0;
+    background: #f9f9f9;
+}
+
+blockquote p {
+    margin: 0;
+}
+  
+
 /* 본문 타이틀 스타일 */
 .content-title h3 {
     font-size: 28px; /* 크기 조정 */

@@ -6,6 +6,16 @@ categories: [dev]
 tags: [Jekyll, Web, Blogging, Github, markdown]
 ---
 
+## GTIHUB 블로그 만들기 목차
+
+> 1: [GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳](/dev/2025/02/23/post1.html)
+
+> 2: [GITHUB 블로그 개설 어떻게 했더라... 🤨 껍데기 만들기편](/dev/2025/02/24/post2.html)
+
+> 3: [GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸](/dev/2025/02/25/post3.html)
+
+---
+
 ## **안녕하십니까! 😀**
 
 기술 블로그 만들기에 한창인 graves85입니다.
@@ -20,7 +30,7 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
 
 ---
 
-## 1. 소제목
+### 1. 소제목
 
 ```
  # 제목 1
@@ -31,7 +41,7 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
  ###### 제목 6
 ```
 
-## 2. 글꼴스타일
+### 2. 글꼴스타일
 
 ```
  **굵게**
@@ -39,7 +49,7 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
  ~~취소선~~
 ```
 
-## 3. 목록 (서브 목차는 들여쓰기 할 것!)
+### 3. 목록 (서브 목차는 들여쓰기 할 것!)
 
  **순서가 없는 목차**
 ```
@@ -55,7 +65,7 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
 3. 순서3
 ```
 
-## 4. 코드블록
+### 4. 코드블록
 
 **한 줄 코드 블록**
 
@@ -72,26 +82,26 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
  \```
 ```
 
-## 5. 링크
+### 5. 링크
 
 ```
 [Naver](https://www.naver.com)
 ```
 
-## 6. 이미지
+### 6. 이미지
 
 ```
 ![이미지명](이미지링크)
 ```
 
-## 7. 인용문
+### 7. 인용문
 
 ```
 >인용문
 >>깊은 인용문
 ```
 
-## 8. 테이블
+### 8. 테이블
 
 ```
 |이름|나이|
@@ -100,14 +110,14 @@ tags: [Jekyll, Web, Blogging, Github, markdown]
 |임꺽정|328|
 ```
 
-## 9. 체크리스트
+### 9. 체크리스트
 
 ```
 - [x] 완료된 항목
 - [ ] 미완료된 항목
 ```
 
-## 10. 수평선
+### 10. 수평선
 
 ```
 ---

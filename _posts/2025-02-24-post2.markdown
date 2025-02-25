@@ -6,6 +6,16 @@ categories: [dev]
 tags: [Jekyll, Web, Blogging, Github]
 ---
 
+## GTIHUB 블로그 만들기 목차
+
+> 1: [GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳](/dev/2025/02/23/post1.html)
+
+> 2: [GITHUB 블로그 개설 어떻게 했더라... 🤨 껍데기 만들기편](/dev/2025/02/24/post2.html)
+
+> 3: [GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸](/dev/2025/02/25/post3.html)
+
+---
+
 ## **안녕하십니까! 😀**
 
 GITHUB 블로그를 힘들게 만들었는데 점점 잊혀져 가네요... 😶‍🌫️

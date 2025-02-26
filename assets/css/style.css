@@ -36,7 +36,7 @@ a {
 blockquote {
     font-family: 'Georgia', serif;
     font-size: 1rem;
-    font-style: italic;
+    font-weight: bold;
     color: #555;
     border-left: 4px solid #3498db;
     padding: 10px 20px;

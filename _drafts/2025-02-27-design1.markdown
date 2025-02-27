@@ -1,8 +1,0 @@
----
-layout: content-layout
-title: "GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳"
-date: 2025-02-23
-categories: [dev]
-tags: [디자인패턴, design pattern, 헤드퍼스트, GoF]
----
-

@@ -8,24 +8,13 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    <header>
-        <h2>Tech Insights: IT & Development Blog</h2>
-		<nav>
-			<a href="{{ '/' | absolute_url }}">Home</a> |
-			<a href="/dev.html">DEV ({{ site.categories.dev | size }})</a> | 
-			<a href="/db.html">DB ({{ site.categories.db | size }})</a> | 
-			<a href="/infra.html">Infra ({{ site.categories.infra | size }})</a> | 
-			<a href="/news.html">IT News ({{ site.categories.news | size }})</a>
-		</nav>
-  </header>
+	{% include header.html %}
 
 	<main>
 		<h2>😊 Welcome to My Tech Blog!</h2>
 		<p>이곳에서는 주로 웹 프로그래밍, IT 기술, 개발 팁 등을 다룹니다.</p>
 	</main>
 
-    <footer>
-        © 2025 Tech Insights | Powered by Graves85
-    </footer>
+	{% include footer.html %}
 </body>
 </html>

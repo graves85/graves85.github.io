@@ -5,16 +5,20 @@
     <nav>
       <ul>
         {% for item in site.data.navigation.menu %}
+        {% assign category_posts = site.categories[item.name] | default: "" %}
+        {% assign category_count = category_posts | size %}
           <li>
             {% if item.subcategories %}
-              <span><a href="{{ item.url }}">{{ item.name }}</a></span>
+              <span><a href="{{ item.url }}">{{ item.name }} ({{ category_count }})</a></span>
               <ul>
                 {% for sub in item.subcategories %}
-                  <li><a href="{{ sub.url }}">{{ sub.name }}</a></li>
+                  {% assign subcategory_posts = site.categories[sub.name] | default: "" %}
+                  {% assign subcategory_count = subcategory_posts | size %}
+                  <li><a href="{{ sub.url }}">{{ sub.name }} ({{ subcategory_count }})</a></li>
                 {% endfor %}
               </ul>
             {% else %}
-              <span><a href="{{ item.url }}">{{ item.name }}</a></span>
+              <span><a href="{{ item.url }}">{{ item.name }} ({{ category_count }})</a></span>
             {% endif %}
           </li>
         {% endfor %}

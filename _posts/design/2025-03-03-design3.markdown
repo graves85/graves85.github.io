@@ -1,0 +1,215 @@
+---
+layout: content-layout
+title: "여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄"
+date: 2025-03-03
+categories: [DEV, 디자인패턴]
+tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 데코레이터 패턴, Decorater Pattern]
+---
+
+## 디자인 패턴 분석 목차
+
+{% for post in site.categories["디자인패턴"] reversed %}
+> {{ forloop.index }}: [{{ post.title }}]({{ post.url }})    
+{% endfor %}
+
+## 참고 서적
+
+[헤드퍼스트 디자인패턴](https://product.kyobobook.co.kr/detail/S000001810483)
+
+---
+
+## 안녕하십니까! 😀
+
+세 번째로 배우는 디자인 패턴을 기록하기 위해 왔습니다!
+
+오늘 배울 패턴은 데코레이터 패턴입니다!
+
+뭔가 데코데코 느낌이 있는 거 보니 기존 클래스에 살을 붙여서 꾸미는 게 아닐까 예상됩니다...! 😖
+
+---
+
+데코레이터 패턴의 주요 업무는 <span style="background-color:rgb(200, 200, 255);">**객체에 추가 요소를 동적으로 더할 수 있습니다!**</span>
+
+단순하게 상속해서 해당 메소드 오버라이드 해서 기능 추가하면 되는 거 아닌가..? 🧐 라고 생각할 수 있지만 예제를 보면 조금 다릅니다..! 😓
+
+✏️ <span style="color: red;">객체를 덧붙일 때 팩토리 패턴이나 빌더 패턴을 같이 곁들이면 더 멋진 디자인을 구사할 수 있습니다!</span>
+
+책에서는 카페의 메뉴 가격을 측정할 때 활용할 수 있는 방안이 예제로 나왔는데요!
+
+원두 가격과 더불어서 첨가물(휘핑, 우유 등)을 넣을 때 데코레이터를 사용하여 첨가물 가격을 동적으로 더해주도록 설계하였습니다!
+
+아래 클래스 다이어그램을 보시면 더 이해가 되실 겁니다!
+
+### ✔ 데코레이터 패턴 예제: 커피 계산 시스템
+
+#### 클래스 다이어그램
+
+![Imgur](https://i.imgur.com/Sp6h76k.png)
+
+#### 기본 골격 커피 인터페이스
+
+```
+public interface Coffee {
+    double cost(); // 가격을 반환하는 메서드
+}
+```
+
+#### 기본 커피 클래스
+
+```
+public class SimpleCoffee implements Coffee {
+    @Override
+    public double cost() {
+        return 5.0; // 기본 커피의 가격
+    }
+}
+```
+
+#### 커피 데코레이터 추상 클래스
+
+```
+public abstract class CoffeeDecorator implements Coffee {
+    protected Coffee decoratedCoffee;
+
+    public CoffeeDecorator(Coffee coffee) {
+        this.decoratedCoffee = coffee;
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost();
+    }
+}
+```
+
+#### 우유 데코레이터 클래스
+
+```
+public class MilkDecorator extends CoffeeDecorator {
+    public MilkDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost() + 1.5; // 우유 추가 비용
+    }
+}
+```
+
+#### 설탕 데코레이터 클래스
+
+```
+public class SugarDecorator extends CoffeeDecorator {
+    public SugarDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost() + 0.5; // 설탕 추가 비용
+    }
+}
+```
+
+#### 실행 예제
+
+```
+public class CoffeeShop {
+    public static void main(String[] args) {
+        Coffee simpleCoffee = new SimpleCoffee();
+        System.out.println("Cost of Simple Coffee: $" + simpleCoffee.cost());
+
+        Coffee milkCoffee = new MilkDecorator(simpleCoffee);
+        System.out.println("Cost of Coffee with Milk: $" + milkCoffee.cost());
+
+        Coffee milkSugarCoffee = new SugarDecorator(milkCoffee);
+        System.out.println("Cost of Coffee with Milk and Sugar: $" + milkSugarCoffee.cost());
+    }
+}
+```
+
+#### 실행 결과
+
+```
+Cost of Simple Coffee: $5.0
+Cost of Coffee with Milk: $6.5
+Cost of Coffee with Milk and Sugar: $7.0
+```
+
+#### 대략적인 해설
+
+기본적으로 사용할 클래스와 확장을 위한 데코레이터 추상 클래스가 있는 것이 특징으로 볼 수 있습니다.
+
+🔎 <span style="color: red;">데코레이터 추상 클래스에는 decoratedCoffee라는 Coffee 클래스 변수가 하나 있습니다! (핵심 키!!!)</span>
+
+데코레이터를 상속하는 하위 클래스들은 생성자에서 상위 클래스의 생성자를 호출하게 되는데 이 때 decoratedCoffee를 삽입하게 됩니다!
+
+마지막 결과가 7 달러가 나오는 무엇일까요? 이유는 꼬리에 꼬리를 물고 decoratedCoffee 클래스의 **cost() 메소드가 가장 안쪽까지 연쇄적으로 호출**하게 됩니다.
+
+**milkSugarCoffee.cost() ➡️ decoratedCoffee.cost() (milkCoffee.cost()) ➡️ decoratedCoffee.cost() (simpleCoffee.cost())**
+
+뭔가 유용한 것 같으면서도 실무에서 잘 쓸 수 있을까? 고민이 됩니다... 😭
+
+✏️ <span style="color: red;">자바는 데코레이터 패턴을 어디에 사용했을까요? 자바 I/O의 FileInputStream > BufferedInputStream > ZipInputStream</span>
+
+---
+
+### 🧲 조금만 예습해보기 🧲
+
+조금 더 나아가 아직 배우지 않은 빌더 패턴을 첨가해보면 어떻게 코드가 짜여질까요???
+
+#### 빌더 클래스 생성
+
+```
+public class CoffeeBuilder {
+    private Coffee coffee;
+
+    public CoffeeBuilder() {
+        this.coffee = new SimpleCoffee(); // 기본 커피
+    }
+
+    public CoffeeBuilder addMilk() {
+        this.coffee = new MilkDecorator(this.coffee);
+        return this;
+    }
+
+    public CoffeeBuilder addSugar() {
+        this.coffee = new SugarDecorator(this.coffee);
+        return this;
+    }
+
+    public Coffee build() {
+        return this.coffee;
+    }
+}
+```
+
+#### 사용 예제
+
+```
+public class CoffeeShop {
+    public static void main(String[] args) {
+        Coffee coffee = new CoffeeBuilder()
+                .addMilk()
+                .addSugar()
+                .build();
+
+        System.out.println("Total Cost: $" + coffee.cost()); // 7.0
+    }
+}
+```
+
+아까는 뭔가 호출하기가 굉장히 꺼림직해보였는데 
+
+빌더 패턴도 같이 사용하니 위처럼 굉장히 호출부가 간결해지고 명확해짐을 알 수 있습니다!
+
+다시 한 번 패턴의 위대함을 알 수 있었습니다... 🤔
+
+이상입니다!
+
+---
+
+다음에는 디자인 패턴에 아주 자주 나오는... 명가... 팩토리 패턴을 뜯어봅시다!
+
+# 긴 글 봐주셔서 감사합니다! 😌

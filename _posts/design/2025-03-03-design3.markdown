@@ -153,6 +153,10 @@ Cost of Coffee with Milk and Sugar: $7.0
 
 ✏️ <span style="color: red;">자바는 데코레이터 패턴을 어디에 사용했을까요? 자바 I/O의 FileInputStream > BufferedInputStream > ZipInputStream</span>
 
+✏️ <span style="color: red;">OCP(Open-Closed Principle, 개방-폐쇄 원칙)? "클래스는 확장에는 열려 있어야(Open) 하지만, 변경에는 닫혀 있어야(Closed) 한다."</span>
+
+**데코레이터 패턴을 이용하면 기존 코드(메인 클래스)를 직접 수정하지 않고 새로운 기능(클래스)을 추가하는 방식으로 코드를 확장할 수 있게 된다는 점도 중요할 듯 합니다!**
+
 ---
 
 ### 🧲 조금만 예습해보기 🧲

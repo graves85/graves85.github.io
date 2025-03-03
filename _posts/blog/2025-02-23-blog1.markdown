@@ -2,19 +2,15 @@
 layout: content-layout
 title: "GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳"
 date: 2025-02-23
-categories: [dev]
+categories: [DEV, 블로그]
 tags: [Jekyll, Web, Blogging, Github, markdown]
 ---
 
 ## GTIHUB 블로그 만들기 목차
 
-> 1: [GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳](/dev/2025/02/23/blog1.html)
-
-> 2: [GITHUB 블로그 개설 어떻게 했더라... 🤨 껍데기 만들기편](/dev/2025/02/24/blog2.html)
-
-> 3: [GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸](/dev/2025/02/25/blog3.html)
-
-> 4: [지킬(JERKLL) 프레임워크 구조 파악하기! 🤠](/dev/2025/02/26/blog4.html)
+{% for post in site.categories["블로그"] reversed %} 
+> {{ forloop.index }}: [{{ post.title }}]({{ post.url }})    
+{% endfor %}
 
 ---
 

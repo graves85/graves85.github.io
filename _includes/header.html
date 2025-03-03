@@ -1,11 +1,23 @@
 
 <header>
     <h2>Tech Insights: IT & Development Blog</h2>
+
     <nav>
-        <a href="{{ '/' | absolute_url }}">Home</a> |
-        <a href="/dev.html">DEV ({{ site.categories.dev | size }})</a> | 
-        <a href="/db.html">DB ({{ site.categories.db | size }})</a> | 
-        <a href="/infra.html">Infra ({{ site.categories.infra | size }})</a> | 
-        <a href="/news.html">IT News ({{ site.categories.news | size }})</a>
+      <ul>
+        {% for item in site.data.navigation.menu %}
+          <li>
+            {% if item.subcategories %}
+              <span><a href="{{ item.url }}">{{ item.name }}</a></span>
+              <ul>
+                {% for sub in item.subcategories %}
+                  <li><a href="{{ sub.url }}">{{ sub.name }}</a></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span><a href="{{ item.url }}">{{ item.name }}</a></span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
     </nav>
 </header>

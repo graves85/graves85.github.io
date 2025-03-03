@@ -1,0 +1,18 @@
+# _data/navigation.yml
+menu:
+  - name: "HOME"
+    url: "/"
+
+  - name: "DEV"
+    url: "/categories/DEV/"
+    subcategories:
+      - name: "블로그"
+        url: "/categories/DEV/블로그/"
+      - name: "디자인패턴"
+        url: "/categories/DEV/디자인패턴/"
+
+  - name: "DB"
+
+  - name: "INFRA"
+
+  - name: "NEWS"

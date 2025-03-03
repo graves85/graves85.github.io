@@ -82,32 +82,67 @@ blockquote p {
 
 /* 네비게이션 바 스타일 */
 nav {
-    padding: 12px 0;
-    text-align: center;
+    background: #333;
+    padding: 10px 0;
+}
+  
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center; /* 수평 중앙 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
 }
 
-/* 네비게이션 메뉴 스타일 */
-nav a {
+nav ul li {
+    position: relative;
+    margin: 0 15px; /* 좌우 간격 */
+}
+
+nav ul li a, nav ul li span {
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
     color: #fff;
     font-size: 16px;
-    font-weight: bold;
-    text-decoration: none;
-    margin: 0 12px;
-    padding: 8px 16px;
-    border-radius: 6px;
     transition: background 0.3s ease, transform 0.2s ease;
 }
 
 /* 호버 및 클릭 효과 */
 nav a:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
 }
 
-/* 현재 활성화된 메뉴 스타일 */
-nav a.active {
-    background: #005f99;
+
+nav ul li ul {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); /* 서브메뉴 가운데 정렬 */
+    top: 100%;
+    background: #666;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    list-style: none;
+    padding: 0;
+    min-width: 150px;
 }
+
+nav ul li:hover ul {
+    display: block;
+}
+
+nav ul li ul li {
+    white-space: nowrap;
+    text-align: center;
+}
+
+nav ul li ul li a {
+    padding: 10px;
+    display: block;
+    color: #fff;
+}
+  
 
 /* 전체 리스트 스타일 */
 .post-item {

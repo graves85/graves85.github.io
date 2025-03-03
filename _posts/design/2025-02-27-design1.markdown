@@ -2,15 +2,19 @@
 layout: content-layout
 title: "디자인 패턴 익혀두기! 첫 번째 전략 패턴! 🧐"
 date: 2025-02-27
-categories: [dev]
+categories: [DEV, 디자인패턴]
 tags: [디자인패턴, design pattern, 헤드퍼스트, GoF, 전략 패턴, Strategy Pattern]
 ---
 
 ## 디자인 패턴 분석 목차
 
-> 1: [디자인 패턴 익혀두기! 첫 번째 전략 패턴! 🧐](/dev/2025/02/27/design1.html)
+{% for post in site.categories["디자인패턴"] reversed %}
+> {{ forloop.index }}: [{{ post.title }}]({{ post.url }})    
+{% endfor %}
 
-> 2: [객체들에게 연락돌리는 옵저버 패턴! 📞](/dev/2025/03/01/design2.html)
+## 참고 서적
+
+[헤드퍼스트 디자인패턴](https://product.kyobobook.co.kr/detail/S000001810483)
 
 ---
 

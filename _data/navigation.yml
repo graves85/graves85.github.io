@@ -12,7 +12,10 @@ menu:
         url: "/categories/DEV/디자인패턴/"
 
   - name: "DB"
+    url: "/categories/DB/"
 
   - name: "INFRA"
+    url: "/categories/INFRA/"
 
   - name: "NEWS"
+    url: "/categories/NEWS/"

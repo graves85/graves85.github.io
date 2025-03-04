@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Insights: IT & Development Blog</title>
+    <title>멍때리고 봐도 보이는 기술 블로그</title>
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
@@ -13,6 +13,9 @@
         <h2>{{ page.category }} 카테고리</h2>
 
         <div>
+            {% if site.categories[page.category].size == null %}
+                <p>아직 작성된 포스트가 없습니다. 🥶</p>
+            {% endif %}
             {% for post in site.categories[page.category] %}
                 <div class="post-item">
                     <a href="{{ post.url }}">

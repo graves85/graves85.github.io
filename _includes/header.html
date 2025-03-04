@@ -1,6 +1,6 @@
 
 <header>
-    <h2>Tech Insights: IT & Development Blog</h2>
+    <h2>멍때리고 봐도 보이는 기술 블로그</h2>
 
     <nav>
       <ul>
@@ -18,7 +18,11 @@
                 {% endfor %}
               </ul>
             {% else %}
+              {% if item.name == "HOME" %}
+              <span><a href="{{ item.url }}">{{ item.name }}</a></span>
+              {% else %}
               <span><a href="{{ item.url }}">{{ item.name }} ({{ category_count }})</a></span>
+              {% endif %}
             {% endif %}
           </li>
         {% endfor %}

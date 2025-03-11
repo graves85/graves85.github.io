@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멍때리고 봐도 보이는 기술 블로그</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    
+<header>
+    <h2>😵‍💫멍때리고😵‍💫 봐도 보이는 기술 블로그✍️</h2>
+
+    <nav>
+      <ul>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/">HOME</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              <span><a href="/DEV/">DEV (9)</a></span>
+              <ul>
+                
+                  
+                  
+                  <li><a href="/DEV/블로그/">블로그 (4)</a></li>
+                
+                  
+                  
+                  <li><a href="/DEV/디자인패턴/">디자인패턴 (5)</a></li>
+                
+              </ul>
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/DB/">DB (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/INFRA/">INFRA (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/NEWS/">NEWS (0)</a></span>
+              
+            
+          </li>
+        
+      </ul>
+    </nav>
+</header>
+
+    <main>
+    <div class="content-title">
+        <h3>GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</h3>
+    </div>
+    <div class="content-body">
+        <h2 id="gtihub-블로그-만들기-목차">GTIHUB 블로그 만들기 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까!! 🧐</h2>
+
+<p>기술 블로그 새내기 graves85입니다.</p>
+
+<p>이번에는 Jerkll이라는 프레임워크를 사용하여 블로그에 멋진 옷을 입혀주려고 합니다! 😮</p>
+
+<p><del>(GPT가 Jerkll 강추했다는…)</del></p>
+
+<p>✏️ <span style="color: red;">프레임워크란? 소프트웨어 개발을 쉽게 할 수 있도록 미리 만들어진 구조와 규칙의 집합</span></p>
+
+<p>차근차근 한 번 해봅시다!</p>
+
+<hr />
+
+<h3 id="1-루비-언어-설치">1. 루비 언어 설치</h3>
+
+<p>우선 로컬에서 Jerkll을 적용하기 위해서는 루비를 설치해야 합니다.</p>
+
+<p><a href="https://rubyinstaller.org/">루비 언어 설치</a></p>
+
+<p>위의 경로를 통해서 루비 언어를 설치하도록 합시다!</p>
+
+<p><img src="https://i.imgur.com/lU73lxm.png" alt="Imgur" /></p>
+
+<p>저는 루비 3.3.7을 설치하였습니다.</p>
+
+<p>설치가 끝났다면 윈도우 기준 cmd 에서 설치가 되었는지 확인해봅시다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby -v
+gem -v
+</code></pre></div></div>
+
+<h3 id="2-jekyll-설치">2. Jekyll 설치</h3>
+
+<p>이제 루비의 gem 명령어를 통해서 jekyll를 설치할 수 있습니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem install jekyll bundler
+</code></pre></div></div>
+
+<p>마찬가지로 아래 명령어로 정상 설치가 되었는지 알 수 있어요!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll -v
+</code></pre></div></div>
+
+<h3 id="3-jekyll-프로젝트-생성">3. Jekyll 프로젝트 생성</h3>
+
+<p>우선 프로젝트를 생성할 폴더를 만들고 거기에 아래 명령어를 쳐보면 파일들이 생성됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new 프로젝트명
+</code></pre></div></div>
+
+<p>위 명령어를 치면 프로젝트명의 폴더가 하나 생성되고 아래와 같은 구조로 파일들이 만들어졌을 겁니다!</p>
+
+<p><img src="https://i.imgur.com/RKZbfue.png" alt="Imgur" /></p>
+
+<p><span style="color: red;"> ⚠ Windows에서 jekyll new 실행 시 오류 발생 시 해결 방법 </span></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle add webrick
+</code></pre></div></div>
+
+<h3 id="4-로컬에서-프로젝트-실행해보기">4. 로컬에서 프로젝트 실행해보기</h3>
+
+<p>이제 페이지를 띄우기까지 거의 다 왔습니다!</p>
+
+<p>TERMINAL에서 아래 명령어로 로컬 서버를 띄어봅니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle exec jekyll serve
+</code></pre></div></div>
+
+<p>서버가 정상적으로 구동되었다면 <code class="language-plaintext highlighter-rouge">http://localhost:4000</code> 이 경로에 접속해서 확인을 해볼 수 있습니다!</p>
+
+<p><strong>📌 VS Code에서 빠르게 jekyll 서버를 띄우고 싶다면 ⁉️</strong></p>
+
+<p>프로젝트 루트 기준 <code class="language-plaintext highlighter-rouge">.vscode/tasks.json</code> 경로로 json 파일을 하나 만듭니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Jekyll",
+            "type": "shell",
+            "command": "bundle exec jekyll serve",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
+</code></pre></div></div>
+
+<p>그리고 나서 위처럼 파일을 만든 후에 저장하고 <code class="language-plaintext highlighter-rouge">Ctrl + Shift + B</code> 키를 누르면 자동으로 Jerkll 서버가 구동됨을 확인 할 수 있습니다.</p>
+
+<p>이제 로컬에서 블로그를 수리할 수 있는 환경이 만들어졌습니다! 😲</p>
+
+<p>이 프레임워크 구조에 대해서 많이 궁금하실텐데 저도 차근차근 학습중에 있답니다… 🤐</p>
+
+<p>기회가 되면 빠르게 구조도 같이 파악해보시죠!</p>
+
+<h3 id="5-github에-올려보기">5. GITHUB에 올려보기!</h3>
+
+<p>이제 만들어진 Jerkll 프로젝트를 GITHUB에 한 번 고대로 올려보겠습니다!</p>
+
+<p><del>(제발 한방에 잘 떠라!!!)</del></p>
+
+<p><img src="https://i.imgur.com/jN3LJbQ.png" alt="Imgur" /></p>
+
+<p>PUSH를 마친 후 github 블로그를 들어가보면 이렇게 기본 테마의 블로그가 뜨는 것을 확인할 수 있습니다!</p>
+
+<p>그런데 프레임워크를 써서 github 블로그를 띄우기는 했는데… 뭐가 좋은 것일까… 🤨</p>
+
+<p>다음 글에는 좀 더 Jekyll에 대해 파보도록 하겠습니다!</p>
+
+<p>감사합니다!</p>
+
+    </div>
+
+    
+        <div class="tags">
+            
+            <span>#Jekyll</span>
+            
+            <span>#Web</span>
+            
+            <span>#Blogging</span>
+            
+            <span>#Github</span>
+            
+        </div>
+    
+    
+    <!-- 댓글 영역 -->
+    <div class="comments">
+        <script src="https://utteranc.es/client.js"
+            repo="graves85/graves85.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </div>
+    </main>
+
+    <footer>
+    © 2025 Tech Insights | Powered by Graves85
+</footer>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멍때리고 봐도 보이는 기술 블로그</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    
+<header>
+    <h2>😵‍💫멍때리고😵‍💫 봐도 보이는 기술 블로그✍️</h2>
+
+    <nav>
+      <ul>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/">HOME</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              <span><a href="/DEV/">DEV (9)</a></span>
+              <ul>
+                
+                  
+                  
+                  <li><a href="/DEV/블로그/">블로그 (4)</a></li>
+                
+                  
+                  
+                  <li><a href="/DEV/디자인패턴/">디자인패턴 (5)</a></li>
+                
+              </ul>
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/DB/">DB (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/INFRA/">INFRA (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/NEWS/">NEWS (0)</a></span>
+              
+            
+          </li>
+        
+      </ul>
+    </nav>
+</header>
+
+    <main>
+    <div class="content-title">
+        <h3>지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</h3>
+    </div>
+    <div class="content-body">
+        <h2 id="gtihub-블로그-만들기-목차">GTIHUB 블로그 만들기 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까!! 🧐</h2>
+
+<p>지난번에 Jerkll이라는 프레임워크를 사용하여 블로그를 구동시켜 보았습니다!</p>
+
+<p>다만… Jerkll 프레임워크… 아직 뭐가 뭔지 모르겠네요… 😨</p>
+
+<p>그래서 Jerkll 프레임워크 구조 파악 시간을 가졌습니다!</p>
+
+<p>한 번 같이 보시죠! 😓</p>
+
+<hr />
+
+<h3 id="1-기본-구조">1. 기본 구조</h3>
+
+<p>지킬 프레임워크의 기본 구조는 대략적으로 아래와 같습니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/my-jekyll-site
+├── _config.yml        # 사이트 전역 설정 파일
+├── _posts/           # 블로그 게시글 저장 폴더
+├── _drafts/          # 게시글 임시 저장 폴더
+├── _layouts/         # 페이지의 기본 레이아웃 파일
+├── _includes/        # 공통 HTML 조각 파일 (헤더, 푸터 등)
+├── _data/            # YAML/JSON 데이터 파일
+├── _sass/            # Sass 스타일시트 파일
+├── assets/           # 정적 리소스 (CSS, JS, 이미지 등)
+├── _site/            # 최종 빌드된 정적 파일 (자동 생성됨)
+├── index.md          # 사이트 메인 페이지 (Markdown)
+├── about.md          # 예제 페이지 (Markdown)
+└── Gemfile           # Jekyll 플러그인 및 종속성 관리 파일
+</code></pre></div></div>
+
+<p>와우… 뭔가 다양한 구성들로 되어 있네요…</p>
+
+<p>하나씩 위에서부터 뜯어봅시다…</p>
+
+<h3 id="2-_configyml">2. _config.yml</h3>
+
+<p>이 파일에는 사이트의 전역 설정을 하는 파일입니다.</p>
+
+<p>테마나 도메인 등 블로그의 기본 설정 등을 담을 수 있습니다.</p>
+
+<p>일종의 Setting 파일로 보면 되겠네요.</p>
+
+<p>생각지도 못한 다양한 설정들을 변경할 수 있기 때문에 이런 것도 변경 가능한지는 GPT님이 잘 알려줄 것 같습니다… 😶‍🌫️</p>
+
+<h3 id="3-_posts">3. _posts/</h3>
+
+<p>이 폴더에는 본격적으로 글을 쓰는 markdown 파일들을 담아내는 공간입니다.</p>
+
+<p>중요한 것은 파일명의 패턴인데요!</p>
+
+<p><code class="language-plaintext highlighter-rouge">YYYY-MM-DD-title.md</code> 이 구조로 파일명을 작성해야 합니다!</p>
+
+<p>두 번째로 알아두어야 할 것은 markdown 파일 작성법인데요!</p>
+
+<p>아마 markdown에 대한 기본적인 문법은 1번 포스트에 담았습니다!</p>
+
+<p>다만 블로그에서 확인이 필요한 기본 정보를 써야하는 부분이 필요합니다!</p>
+
+<p>아래 예시를 보시면 아실 겁니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: post
+title: "내 첫 번째 포스트"
+date: 2025-02-26
+categories: 개발 블로그
+tags: [Jekyll, 블로그]
+---
+
+Jekyll을 이용한 첫 번째 블로그 포스트입니다. 🚀
+</code></pre></div></div>
+
+<p>위처럼 파일 내에 layout부터 tags 등 마크다운 파일에 대한 기본 정보를 작성해야 합니다.</p>
+
+<p><span style="color: red;">⚠ 반드시 첫 번째 줄부터 써야 기본 정보가 인식됩니다. 두 번째 줄부터 쓰면 인식이 안돼요!</span></p>
+
+<h3 id="4-_layouts">4. _layouts/</h3>
+
+<p>마크다운 파일을 작성할 때 기본 정보에 layout 이라는 정보를 보셨을겁니다!</p>
+
+<p>거기에 사용되는 html을 이 폴더에 관리하시면 됩니다!</p>
+
+<p>여기서 중요한 특징은 페이지의 기본 골격을 설정할 수 있고 JSTL 처럼 <strong>동적으로 바인딩</strong>을 할 수 있습니다!</p>
+
+<p>아래 예시를 보시면 더 이해가 되실 겁니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;\{\{ page.title \}\}&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/assets/style.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;h1&gt;\{\{ site.title \}\}&lt;/h1&gt;
+    &lt;/header&gt;
+    
+    &lt;main&gt;
+        \{\{ content \}\}
+    &lt;/main&gt;
+    
+    &lt;footer&gt;
+        &lt;p&gt;© 2025 \{\{ site.title \}\}&lt;/p&gt;
+    &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></div></div>
+
+<p>본문 안에 보면 이렇게 <code class="language-plaintext highlighter-rouge">{ {중괄호} }</code>로 감싸있는 부분이 보이실 겁니다!</p>
+
+<p>content 영역이 마크다운을 작성한 글이 노출되는 부분입니다.</p>
+
+<p>그 외에 if문, for문 등도 사용할 수 있으니 궁금하신 분들은 추가로 찾아보심을 추천드립니다!</p>
+
+<p><strong>📌 마크다운 파일 안에서도 <code class="language-plaintext highlighter-rouge">{ {내용} }</code> 바인딩이 되버리네요… 🤔</strong></p>
+
+<h3 id="5-_includes">5. _includes/</h3>
+
+<p>이 폴더는 예상을 하실 겁니다.</p>
+
+<p>헤더나 푸터, 사이드바 같이 공통적으로 포함되는 부분을 빼는 부분입니다.</p>
+
+<p>사용은 아래처럼 하시면 됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;body&gt;
+    \{\% include header.html \%\}
+    &lt;main&gt;
+    &lt;/main&gt;
+&lt;/body&gt;
+</code></pre></div></div>
+
+<h3 id="6-_data">6. _data/</h3>
+
+<p>여기는 마치 DB 대용처럼 사이트에서 사용할 데이터를 관리하는 곳입니다!</p>
+
+<p>사용은 아래처럼 하시면 됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;p&gt;작성자: \{\{ site.data.authors.john_doe.name \}\}&lt;/p&gt;
+</code></pre></div></div>
+
+<h3 id="7-_sass">7. _sass/</h3>
+
+<p>여기는 Sass 파일을 저장하는 폴더입니다!</p>
+
+<p>css는 들어봤어도 Sass는 조금 생소하실 수 있을 것 같네요!</p>
+
+<h3 id="8-_assets">8. _assets/</h3>
+
+<p>여기는 CSS 파일이나 JS 파일 등을 관리하심 됩니다!</p>
+
+<h3 id="9-_site">9. _site/</h3>
+
+<p><span style="color: red;">⛔ 여기는 직접 건드리는 곳이 아닙니다! ⛔</span></p>
+
+<p>Jekyll가 서버를 구동하면 마크다운을 조합한 html 파일을 생성하는 곳입니다.</p>
+
+<p><strong>📌 GITHUB에 PUSH하지 않아도 되므로 주로 .gitignore에 등록합니다!</strong></p>
+
+<h3 id="10-indexmd">10. index.md</h3>
+
+<p>이 파일은 블로그의 기본 페이지라고 보심 됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: default
+title: "홈페이지"
+---
+
+# 환영합니다!
+Jekyll을 이용한 정적 블로그입니다.
+</code></pre></div></div>
+
+<p>예시처럼 layouts에 있는 default.html을 호출하여 사용할 수 있습니다!</p>
+
+<h3 id="11-_drafts">11. _drafts/</h3>
+
+<p>여기는 아직 작업중인 포스트 글을 모아놓은 곳입니다.</p>
+
+<p>필수적은 공간은 아니니 필요하신 분들만 폴더 만들어서 사용하심 될 것 같네요!</p>
+
+<hr />
+
+<p>일단 얼추 지킬 프레임워크의 구조를 살펴보았습니다.</p>
+
+<p>아직도 배울 부분은 많은 것 같네요… 😭</p>
+
+<p>블로그의 실력은 차차 키워나가도록 하고 추후에 더 좋은 정보가 있다면 공유드리겠습니다!</p>
+
+<p>감사합니다!</p>
+
+    </div>
+
+    
+        <div class="tags">
+            
+            <span>#Jekyll</span>
+            
+            <span>#Web</span>
+            
+            <span>#Blogging</span>
+            
+            <span>#Github</span>
+            
+        </div>
+    
+    
+    <!-- 댓글 영역 -->
+    <div class="comments">
+        <script src="https://utteranc.es/client.js"
+            repo="graves85/graves85.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </div>
+    </main>
+
+    <footer>
+    © 2025 Tech Insights | Powered by Graves85
+</footer>
+</body>
+</html>

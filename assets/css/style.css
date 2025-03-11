@@ -1,0 +1,370 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    text-align: center;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 15px;
+    font-size: 24px;
+}
+
+main {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+footer {
+    margin-top: 20px;
+    padding: 10px;
+    background: #333;
+    color: #fff;
+}
+
+a {
+    color: #0077cc;
+    text-decoration: none;
+}
+
+blockquote {
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+    border-left: 4px solid #3498db;
+    padding: 10px 20px;
+    margin: 10px 0;
+    background: #f9f9f9;
+}
+
+blockquote p {
+    margin: 0;
+}
+  
+
+/* 본문 타이틀 스타일 */
+.content-title h3 {
+    font-size: 28px; /* 크기 조정 */
+    font-weight: bold;
+    color: #333; /* 어두운 회색으로 자연스럽게 강조 */
+    text-align: left; /* 왼쪽 정렬 */
+    margin: 32px 0 24px 0; /* 상하 여백 조정 */
+    padding: 16px; /* 왼쪽 패딩 추가 */
+    position: relative;
+}
+
+
+/* 그림자 효과 추가 */
+.content-title h3::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 6px;
+    height: 100%; /* 줄 길이 */
+    background: #cc0000; /* 강조할 색상 */
+    transform: translateY(-50%);
+}
+
+/* 반응형 조정 */
+@media (max-width: 768px) {
+    .content-title h3 {
+        font-size: 20px;
+    }
+}
+
+/* 네비게이션 바 스타일 */
+nav {
+    background: #333;
+    padding: 10px 0;
+}
+  
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center; /* 수평 중앙 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
+}
+
+nav ul li {
+    position: relative;
+    margin: 0 15px; /* 좌우 간격 */
+}
+
+nav ul li a, nav ul li span {
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+    color: #fff;
+    font-size: 16px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* 호버 및 클릭 효과 */
+nav a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+nav ul li ul {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%); /* 서브메뉴 가운데 정렬 */
+    top: 100%;
+    background: #666;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    list-style: none;
+    padding: 0;
+    min-width: 150px;
+}
+
+nav ul li:hover ul {
+    display: block;
+}
+
+nav ul li ul li {
+    white-space: nowrap;
+    text-align: center;
+}
+
+nav ul li ul li a {
+    padding: 10px;
+    display: block;
+    color: #fff;
+}
+  
+
+/* 전체 리스트 스타일 */
+.post-item {
+    display: flex;
+    flex-direction: column; /* 제목과 날짜를 세로로 배치 */
+    border: 1px solid #ddd; /* 경계선 추가 */
+    padding: 15px;
+    margin-bottom: 20px; /* 항목 간 간격 */
+    border-radius: 8px; /* 둥근 모서리 */
+    background-color: #f9f9f9; /* 배경색 */
+    transition: background-color 0.3s ease; /* 배경 색상 변환 효과 */
+}
+
+.post-item:hover {
+    background-color: #f1f1f1; /* hover 시 배경색 변경 */
+    cursor: pointer;
+}
+
+/* 제목 스타일 */
+.post-item .title {
+    font-size: 1.25rem; /* 제목 크기 */
+    font-weight: bold; /* 제목 두께 */
+    margin-bottom: 8px; /* 제목과 날짜 간 간격 */
+    color: #333; /* 제목 색상 */
+}
+
+/* 날짜 스타일 */
+.post-item .date {
+    font-size: 0.875rem; /* 날짜 크기 */
+    color: #777; /* 날짜 색상 */
+    margin-top: 0; /* 불필요한 여백 제거 */
+}
+
+.content-body {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #444;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #007acc;
+    text-align: left;
+}
+
+/* 코드 블록 스타일 */
+.content-body pre {
+    background: #272822; /* 다크 테마 배경 */
+    color: #f8f8f2; /* 가독성 높은 글씨 색상 */
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    overflow-x: auto; /* 가로 스크롤 가능하도록 */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* 코드 태그 스타일 */
+.content-body code {
+    font-family: "Fira Code", "Courier New", monospace;
+    background: #f4f4f4;
+    color: #c7254e;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* 소제목 스타일 */
+.content-body h4 {
+    font-size: 18px;
+    color: #007acc;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #007acc;
+    font-weight: bold;
+}
+
+/* 코드 블록 안에서의 코드 태그 스타일 (pre 안의 code) */
+.content-body pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+}
+
+/* 코드 블록 스타일 */
+.code-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+/* 복사 버튼 스타일 */
+.copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* 본문 내 이미지 스타일 */
+.content-body img {
+    max-width: 100%; /* 부모 요소 크기 내에서 자동 조절 */
+    height: auto; /* 원본 비율 유지 */
+    display: block; /* 가운데 정렬을 위한 block 요소 */
+    margin: 16px auto; /* 위아래 여백 추가 및 가운데 정렬 */
+    border-radius: 8px; /* 모서리를 둥글게 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 살짝 그림자 효과 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 이미지 호버 효과 */
+.content-body img:hover {
+    transform: scale(1.05); /* 살짝 확대 효과 */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 테이블 스타일 */
+.content-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 16px;
+    text-align: left;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 헤더 */
+.content-body thead {
+    background: #007acc;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* 테이블 헤더 & 셀 스타일 */
+.content-body th, 
+.content-body td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+/* 행 호버 효과 */
+.content-body tbody tr:hover {
+    background: rgba(0, 122, 204, 0.1);
+}
+
+/* 반응형 스크롤 적용 */
+.content-body .table-container {
+    overflow-x: auto;
+}
+
+
+/* 태그 스타일 */
+.tags {
+    margin-top: 16px;
+}
+
+.tags span {
+    display: inline-block;
+    background: #007acc;
+    color: #fff;
+    font-size: 14px;
+    padding: 6px 12px;
+    margin: 4px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.tags span:hover {
+    background: #005f99;
+}
+
+.comments {
+    margin-top: 50px;
+}
+
+.utterances {
+    max-width: 100% !important;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.pagination a {
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #0056b3;
+}
+
+.pagination span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}

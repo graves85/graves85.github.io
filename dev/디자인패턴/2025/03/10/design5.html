@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멍때리고 봐도 보이는 기술 블로그</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    
+<header>
+    <h2>😵‍💫멍때리고😵‍💫 봐도 보이는 기술 블로그✍️</h2>
+
+    <nav>
+      <ul>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/">HOME</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              <span><a href="/DEV/">DEV (9)</a></span>
+              <ul>
+                
+                  
+                  
+                  <li><a href="/DEV/블로그/">블로그 (4)</a></li>
+                
+                  
+                  
+                  <li><a href="/DEV/디자인패턴/">디자인패턴 (5)</a></li>
+                
+              </ul>
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/DB/">DB (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/INFRA/">INFRA (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/NEWS/">NEWS (0)</a></span>
+              
+            
+          </li>
+        
+      </ul>
+    </nav>
+</header>
+
+    <main>
+    <div class="content-title">
+        <h3>단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</h3>
+    </div>
+    <div class="content-body">
+        <h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>이번엔 싱글턴 패턴을 배워볼까 합니다!</p>
+
+<p><del>독서에 취약한 저에게는 책의 분량이 짧아 아주 좋았던 기억이 납니다… 🫠</del></p>
+
+<p>클래스 다이어그램도 굳이 필요없어 보이는 패턴입니다!</p>
+
+<p>한 번 들여다보시죠!</p>
+
+<hr />
+
+<p>싱글턴 패턴은 예제 소스 보시면 아마 단박에 아실텐데요!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private static Singleton uniqueInstance;
+
+	private Singleton() {}
+
+	public static Singleton getInstance() {
+		if(uniqueInstance == null) {
+			uniqueInstance = new Singleton();
+		}
+		return uniqueInstance;
+	}
+
+	// 기타 메소드
+}
+</code></pre></div></div>
+
+<p>싱글턴 패턴의 기본 구조는 위처럼 단 하나의 인스턴스를 관리하고 그 인스턴스를 호출 클래스에 보내줍니다!</p>
+
+<p><span style="color: red;">위같은 방식이면 Singleton이라는 클래스는 절대 2개 이상 생성할수가 없게 됩니다.</span></p>
+
+<p>단 static 메소드를 제공함으로써 해당 클래스에 어떠한 클래스도 접근은 가능하게 됩니다.</p>
+
+<p>이렇게 내용이 끝나면 아주 간단하죠… 🫡</p>
+
+<p>하지만 고민이 하나 있습니다.</p>
+
+<p>바로 멀티스레딩으로 접근하게 되는 경우입니다… 음…</p>
+
+<p>간단한 해결책은 아래와 같습니다!</p>
+
+<h3 id="방법-1-synchronized-동기화-메소드로-변경하기">방법 1. synchronized 동기화 메소드로 변경하기</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private static Singleton uniqueInstance;
+
+	private Singleton() {}
+
+	public static synchronized Singleton getInstance() {
+		if(uniqueInstance == null) {
+			uniqueInstance = new Singleton();
+		}
+		return uniqueInstance;
+	}
+
+	// 기타 메소드
+}
+</code></pre></div></div>
+
+<p>바로 static 메소드에 synchronized라는 동기화 명령어를 붙이는거죠!</p>
+
+<p>다른 스레드가 끝날때까지 해당 메소드에 접근을 기다립니다.</p>
+
+<p><span style="color: red;">단 위 방법은 접근을 하나의 스레드밖에 못하니 당연히 속도가 저하됩니다!</span></p>
+
+<p>그래서 다른 방법들이 또 있죠.</p>
+
+<h3 id="방법2-인스턴스-객체-미리-생성하기">방법2. 인스턴스 객체 미리 생성하기</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private static Singleton uniqueInstance = new Singleton();
+
+	private Singleton() {}
+
+	public static Singleton getInstance() {
+		return uniqueInstance;
+	}
+}
+</code></pre></div></div>
+
+<p>위처럼 변수 할당시에 생성까지 하는 방법입니다.</p>
+
+<p>아마도 이 방법이 심플하니 많이 사용될 수 있겠네요.</p>
+
+<p>하지만 책에는 한 가지 방법을 더 알려줍니다.</p>
+
+<h3 id="방법3-dcl을-사용하기">방법3. DCL을 사용하기</h3>
+
+<p>✏️ <span style="color: red;">DCL이란? Double-Checked Locking의 약자로 멀티스레드 환경에서 싱글톤(Singleton) 객체를 안전하게 생성하기 위해 사용하는 패턴이다.</span></p>
+
+<p>사용법은 아래와 같습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private volatile static Singleton uniqueInstance;
+
+	private Singleton() {}
+
+	public static Singleton getInstance() {
+		if(uniqueInstance == null) {
+			synchronized (Singleton.class) {
+				if(uniqueInstance == null) {
+					uniqueInstance = new Singleton();
+				}
+			}
+		}
+		return uniqueInstance;
+	}
+
+	// 기타 메소드
+}
+</code></pre></div></div>
+
+<p>아마도.. 저게 뭐임…🥺? 이라고 생각하실수도 있습니다.</p>
+
+<p>일단 변경점은 변수 부분에 volatile 키워드를 사용한 것입니다!</p>
+
+<p>그리고 이제 메소드에서 <code class="language-plaintext highlighter-rouge">synchronized (Singleton.class)</code> 라는 동기화 블록을 설정합니다.</p>
+
+<p>이렇게되면 uniqueInstance 변수가 변경되었을 때 다른 스레드도 변경됨을 인지하게 되니 uniqueInstance 값이 null이 아닌 것으로 인식하게 됩니다!</p>
+
+<p><code class="language-plaintext highlighter-rouge">volatile</code> 키워드.. 저도 자바 개발자로써 처음 알게 되었는데요…</p>
+
+<p>무조건 이 키워드가 멀티스레딩 제어에 최강이냐? 그건 또 아닌 것 같습니다.</p>
+
+<p>아래 예시를 한 번 보겠습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Counter {
+    volatile int count = 0;
+
+    void increment() {
+        count++; // 이 연산은 원자적이지 않음
+    }
+}
+</code></pre></div></div>
+
+<p>위 클래스를 멀티 스레딩으로 돌리면 count가 순차적으로 오를까요!?</p>
+
+<p><span style="background-color:rgb(200, 200, 255);"><strong>정답은 NO입니다.</strong></span></p>
+
+<p>volatile 키워드를 적용했음에도 <code class="language-plaintext highlighter-rouge">count++</code> 같이 <strong>읽고 ➡️ 수정하고 ➡️ 쓰는</strong> 복합 연산은 보장이 되지 않는다고 합니다.</p>
+
+<p>따라서 volatile 키워드는 플래그에 따른 멀티스레딩 제어나 예시에 나왔던 싱글턴 패턴의 인스턴스 생성 정도로 쓰이는 게 적당할 듯 합니다.</p>
+
+<h3 id="방법4-enum-클래스를-활용하기-추천-방식">방법4. enum 클래스를 활용하기 (추천 방식)</h3>
+
+<p>아마도.. 이게 최강 해결책일 듯 합니다. 🧐</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public enum Singleton {
+    INSTANCE; // 싱글턴 인스턴스
+
+    // 실제 싱글턴 클래스의 메서드
+    public void doSomething() {
+        System.out.println("싱글턴 인스턴스 동작!");
+    }
+}
+</code></pre></div></div>
+
+<p>저 방식으로 이미 인스턴스가 하나 생성이 된 것이죠…</p>
+
+<p>정리해보면 다음 장점이 있는 것입니다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>장점</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>가장 간단한 Singleton 구현</td>
+      <td>enum 선언만으로 Singleton 패턴을 보장</td>
+    </tr>
+    <tr>
+      <td>스레드 안전(Thread-safe) 보장</td>
+      <td>동기화 문제 없이 안전하게 사용할 수 있음</td>
+    </tr>
+    <tr>
+      <td>리플렉션(Reflection) 방어</td>
+      <td>enum은 리플렉션을 통한 객체 생성을 차단</td>
+    </tr>
+    <tr>
+      <td>직렬화(Serialization) 문제 없음</td>
+      <td>일반 Singleton 패턴에서는 Serializable을 구현해야 하지만, enum은 자동으로 직렬화 지원</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>멀티스레딩 문제도 그냥 해결되고.. 굳이 소스 길어지지도 않고… 와…</p>
+
+<h2 id="너가-그냥-최강이구나">너가 그냥 최강이구나…😘</h2>
+
+<p>그래도 다른 방법들도 알아두면 JAVA가 얼마나 발전했는가에 대한 역사 공부정도는 되지 않았을까라는… 생각을 가져봅니다.</p>
+
+<h3 id="그런데-싱글턴-패턴은-어디에-쓰일까">그런데 싱글턴 패턴은 어디에 쓰일까?</h3>
+
+<ol>
+  <li>
+    <p>데이터베이스 연결 관리</p>
+  </li>
+  <li>
+    <p>로깅 시스템</p>
+  </li>
+  <li>
+    <p>캐싱 시스템</p>
+  </li>
+  <li>
+    <p>스레드 풀 관리</p>
+  </li>
+</ol>
+
+<h3 id="결론">결론</h3>
+
+<p><strong>싱글턴 패턴은 전역으로 상태를 관리할 때 적합하다!</strong></p>
+
+<p><strong>싱글턴 패턴에 enum 클래스를 활용하면 손쉽고 안전하게 만들 수 있다!</strong></p>
+
+<p>이상입니다!</p>
+
+<hr />
+
+<p>다음에는 요청 내역을 캡슐화하는 커맨드 패턴을 알아봅시다!</p>
+
+<h1 id="긴-글-봐주셔서-감사합니다-">긴 글 봐주셔서 감사합니다! 😌</h1>
+
+    </div>
+
+    
+        <div class="tags">
+            
+            <span>#디자인패턴</span>
+            
+            <span>#Design pattern</span>
+            
+            <span>#헤드퍼스트</span>
+            
+            <span>#GoF</span>
+            
+            <span>#싱글턴 패턴</span>
+            
+            <span>#Singleton Pattern</span>
+            
+        </div>
+    
+    
+    <!-- 댓글 영역 -->
+    <div class="comments">
+        <script src="https://utteranc.es/client.js"
+            repo="graves85/graves85.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </div>
+    </main>
+
+    <footer>
+    © 2025 Tech Insights | Powered by Graves85
+</footer>
+</body>
+</html>

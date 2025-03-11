@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멍때리고 봐도 보이는 기술 블로그</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    
+<header>
+    <h2>😵‍💫멍때리고😵‍💫 봐도 보이는 기술 블로그✍️</h2>
+
+    <nav>
+      <ul>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/">HOME</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              <span><a href="/DEV/">DEV (9)</a></span>
+              <ul>
+                
+                  
+                  
+                  <li><a href="/DEV/블로그/">블로그 (4)</a></li>
+                
+                  
+                  
+                  <li><a href="/DEV/디자인패턴/">디자인패턴 (5)</a></li>
+                
+              </ul>
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/DB/">DB (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/INFRA/">INFRA (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/NEWS/">NEWS (0)</a></span>
+              
+            
+          </li>
+        
+      </ul>
+    </nav>
+</header>
+
+    <main>
+    <div class="content-title">
+        <h3>여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</h3>
+    </div>
+    <div class="content-body">
+        <h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>세 번째로 배우는 디자인 패턴을 기록하기 위해 왔습니다!</p>
+
+<p>오늘 배울 패턴은 데코레이터 패턴입니다!</p>
+
+<p>뭔가 데코데코 느낌이 있는 거 보니 기존 클래스에 살을 붙여서 꾸미는 게 아닐까 예상됩니다…! 😖</p>
+
+<hr />
+
+<p>데코레이터 패턴의 주요 업무는 <span style="background-color:rgb(200, 200, 255);"><strong>객체에 추가 요소를 동적으로 더할 수 있습니다!</strong></span></p>
+
+<p>단순하게 상속해서 해당 메소드 오버라이드 해서 기능 추가하면 되는 거 아닌가..? 🧐 라고 생각할 수 있지만 예제를 보면 조금 다릅니다..! 😓</p>
+
+<p>✏️ <span style="color: red;">객체를 덧붙일 때 팩토리 패턴이나 빌더 패턴을 같이 곁들이면 더 멋진 디자인을 구사할 수 있습니다!</span></p>
+
+<p>책에서는 카페의 메뉴 가격을 측정할 때 활용할 수 있는 방안이 예제로 나왔는데요!</p>
+
+<p>원두 가격과 더불어서 첨가물(휘핑, 우유 등)을 넣을 때 데코레이터를 사용하여 첨가물 가격을 동적으로 더해주도록 설계하였습니다!</p>
+
+<p>아래 클래스 다이어그램을 보시면 더 이해가 되실 겁니다!</p>
+
+<h3 id="-데코레이터-패턴-예제-커피-계산-시스템">✔ 데코레이터 패턴 예제: 커피 계산 시스템</h3>
+
+<h4 id="클래스-다이어그램">클래스 다이어그램</h4>
+
+<p><img src="https://i.imgur.com/Sp6h76k.png" alt="Imgur" /></p>
+
+<h4 id="기본-골격-커피-인터페이스">기본 골격 커피 인터페이스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public interface Coffee {
+    double cost(); // 가격을 반환하는 메서드
+}
+</code></pre></div></div>
+
+<h4 id="기본-커피-클래스">기본 커피 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class SimpleCoffee implements Coffee {
+    @Override
+    public double cost() {
+        return 5.0; // 기본 커피의 가격
+    }
+}
+</code></pre></div></div>
+
+<h4 id="커피-데코레이터-추상-클래스">커피 데코레이터 추상 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public abstract class CoffeeDecorator implements Coffee {
+    protected Coffee decoratedCoffee;
+
+    public CoffeeDecorator(Coffee coffee) {
+        this.decoratedCoffee = coffee;
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost();
+    }
+}
+</code></pre></div></div>
+
+<h4 id="우유-데코레이터-클래스">우유 데코레이터 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class MilkDecorator extends CoffeeDecorator {
+    public MilkDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost() + 1.5; // 우유 추가 비용
+    }
+}
+</code></pre></div></div>
+
+<h4 id="설탕-데코레이터-클래스">설탕 데코레이터 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class SugarDecorator extends CoffeeDecorator {
+    public SugarDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost() + 0.5; // 설탕 추가 비용
+    }
+}
+</code></pre></div></div>
+
+<h4 id="실행-예제">실행 예제</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CoffeeShop {
+    public static void main(String[] args) {
+        Coffee simpleCoffee = new SimpleCoffee();
+        System.out.println("Cost of Simple Coffee: $" + simpleCoffee.cost());
+
+        Coffee milkCoffee = new MilkDecorator(simpleCoffee);
+        System.out.println("Cost of Coffee with Milk: $" + milkCoffee.cost());
+
+        Coffee milkSugarCoffee = new SugarDecorator(milkCoffee);
+        System.out.println("Cost of Coffee with Milk and Sugar: $" + milkSugarCoffee.cost());
+    }
+}
+</code></pre></div></div>
+
+<h4 id="실행-결과">실행 결과</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cost of Simple Coffee: $5.0
+Cost of Coffee with Milk: $6.5
+Cost of Coffee with Milk and Sugar: $7.0
+</code></pre></div></div>
+
+<h4 id="대략적인-해설">대략적인 해설</h4>
+
+<p>기본적으로 사용할 클래스와 확장을 위한 데코레이터 추상 클래스가 있는 것이 특징으로 볼 수 있습니다.</p>
+
+<p>🔎 <span style="color: red;">데코레이터 추상 클래스에는 decoratedCoffee라는 Coffee 클래스 변수가 하나 있습니다! (핵심 키!!!)</span></p>
+
+<p>데코레이터를 상속하는 하위 클래스들은 생성자에서 상위 클래스의 생성자를 호출하게 되는데 이 때 decoratedCoffee를 삽입하게 됩니다!</p>
+
+<p>마지막 결과가 7 달러가 나오는 무엇일까요? 이유는 꼬리에 꼬리를 물고 decoratedCoffee 클래스의 <strong>cost() 메소드가 가장 안쪽까지 연쇄적으로 호출</strong>하게 됩니다.</p>
+
+<p><strong>milkSugarCoffee.cost() ➡️ decoratedCoffee.cost() (milkCoffee.cost()) ➡️ decoratedCoffee.cost() (simpleCoffee.cost())</strong></p>
+
+<p>뭔가 유용한 것 같으면서도 실무에서 잘 쓸 수 있을까? 고민이 됩니다… 😭</p>
+
+<p>✏️ <span style="color: red;">자바는 데코레이터 패턴을 어디에 사용했을까요? 자바 I/O의 FileInputStream &gt; BufferedInputStream &gt; ZipInputStream</span></p>
+
+<p>✏️ <span style="color: red;">OCP(Open-Closed Principle, 개방-폐쇄 원칙)? “클래스는 확장에는 열려 있어야(Open) 하지만, 변경에는 닫혀 있어야(Closed) 한다.”</span></p>
+
+<p><strong>데코레이터 패턴을 이용하면 기존 코드(메인 클래스)를 직접 수정하지 않고 새로운 기능(클래스)을 추가하는 방식으로 코드를 확장할 수 있게 된다는 점도 중요할 듯 합니다!</strong></p>
+
+<hr />
+
+<h3 id="-조금만-예습해보기-">🧲 조금만 예습해보기 🧲</h3>
+
+<p>조금 더 나아가 아직 배우지 않은 빌더 패턴을 첨가해보면 어떻게 코드가 짜여질까요???</p>
+
+<h4 id="빌더-클래스-생성">빌더 클래스 생성</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CoffeeBuilder {
+    private Coffee coffee;
+
+    public CoffeeBuilder() {
+        this.coffee = new SimpleCoffee(); // 기본 커피
+    }
+
+    public CoffeeBuilder addMilk() {
+        this.coffee = new MilkDecorator(this.coffee);
+        return this;
+    }
+
+    public CoffeeBuilder addSugar() {
+        this.coffee = new SugarDecorator(this.coffee);
+        return this;
+    }
+
+    public Coffee build() {
+        return this.coffee;
+    }
+}
+</code></pre></div></div>
+
+<h4 id="사용-예제">사용 예제</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CoffeeShop {
+    public static void main(String[] args) {
+        Coffee coffee = new CoffeeBuilder()
+                .addMilk()
+                .addSugar()
+                .build();
+
+        System.out.println("Total Cost: $" + coffee.cost()); // 7.0
+    }
+}
+</code></pre></div></div>
+
+<p>아까는 뭔가 호출하기가 굉장히 꺼림직해보였는데</p>
+
+<p>빌더 패턴도 같이 사용하니 위처럼 굉장히 호출부가 간결해지고 명확해짐을 알 수 있습니다!</p>
+
+<p>다시 한 번 패턴의 위대함을 알 수 있었습니다… 🤔</p>
+
+<p>이상입니다!</p>
+
+<hr />
+
+<p>다음에는 디자인 패턴에 아주 자주 나오는… 명가… 팩토리 패턴을 뜯어봅시다!</p>
+
+<h1 id="긴-글-봐주셔서-감사합니다-">긴 글 봐주셔서 감사합니다! 😌</h1>
+
+    </div>
+
+    
+        <div class="tags">
+            
+            <span>#디자인패턴</span>
+            
+            <span>#Design pattern</span>
+            
+            <span>#헤드퍼스트</span>
+            
+            <span>#GoF</span>
+            
+            <span>#데코레이터 패턴</span>
+            
+            <span>#Decorater Pattern</span>
+            
+        </div>
+    
+    
+    <!-- 댓글 영역 -->
+    <div class="comments">
+        <script src="https://utteranc.es/client.js"
+            repo="graves85/graves85.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </div>
+    </main>
+
+    <footer>
+    © 2025 Tech Insights | Powered by Graves85
+</footer>
+</body>
+</html>

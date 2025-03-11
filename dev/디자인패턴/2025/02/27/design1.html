@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멍때리고 봐도 보이는 기술 블로그</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    
+<header>
+    <h2>😵‍💫멍때리고😵‍💫 봐도 보이는 기술 블로그✍️</h2>
+
+    <nav>
+      <ul>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/">HOME</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              <span><a href="/DEV/">DEV (9)</a></span>
+              <ul>
+                
+                  
+                  
+                  <li><a href="/DEV/블로그/">블로그 (4)</a></li>
+                
+                  
+                  
+                  <li><a href="/DEV/디자인패턴/">디자인패턴 (5)</a></li>
+                
+              </ul>
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/DB/">DB (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/INFRA/">INFRA (0)</a></span>
+              
+            
+          </li>
+        
+        
+        
+          <li>
+            
+              
+              <span><a href="/NEWS/">NEWS (0)</a></span>
+              
+            
+          </li>
+        
+      </ul>
+    </nav>
+</header>
+
+    <main>
+    <div class="content-title">
+        <h3>디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</h3>
+    </div>
+    <div class="content-body">
+        <h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>오늘도 블로그 글을 작성하러 돌아왔습니다!</p>
+
+<p>개발자 일을 하면서 디자인 패턴에 대한 이야기를 많이 들었는데요.</p>
+
+<p>옵저버 패턴… 팩토리 패턴… 음… 기억이 가물가물하네요…</p>
+
+<p>AI도 빠르게 진화하는 시대에 저 또한 버전을 올릴 필요성이 있다고 봅니다. 🤯</p>
+
+<p>디자인 패턴에 대한 강의나 책 등 아주 많이 있는데요..!</p>
+
+<p>저는 헤드퍼스트의 디자인패턴 책으로 구매하여 훑어봤습니다.</p>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<p>관심 있으신 분은 위에 교보문고 링크 달아놓았습니다. 😇</p>
+
+<p>서론이 길었네요. 책에 처음 등장하는 전략 패턴부터 한 번 살펴보시죠~</p>
+
+<hr />
+
+<p>책에서는 오리의 다양한 행동을 어떻게 분리하여 구현할 것인지 소개하며 객체지향 원칙에 대해 우선 설명하고 있습니다!</p>
+
+<h3 id="객체지향-원칙">객체지향 원칙</h3>
+
+<ul>
+  <li><strong>바뀌는 부분은 캡슐화 한다.</strong></li>
+</ul>
+
+<p>✏️ <span style="color: red;">캡슐화란? 객체의 데이터(속성)와 동작(메서드)을 하나의 단위로 묶고, 외부에서 직접 접근하지 못하도록 제한하는 개념</span></p>
+
+<p><del>쉽게 얘기해서 기능별로 클래스 잘 분리해라랄까..?</del></p>
+
+<ul>
+  <li><strong>상속보다는 구성을 활용한다.</strong></li>
+</ul>
+
+<p>✏️ <span style="color: red;">구성이란? 클래스가 다른 클래스를 필드(멤버 변수)로 포함하여 기능을 조합하는 방식</span></p>
+
+<p><del>쉽게 얘기해서 ‘A에는 B가 있다. (has a)’ 라는 관계랄까…?</del></p>
+
+<ul>
+  <li><strong>구현보다는 인터페이스에 맞춰서 프로그래밍한다.</strong></li>
+</ul>
+
+<p><del>쉽게 얘기해서 인터페이스 잘 만들어라랄까….?</del></p>
+
+<p>사실 위 말들이 개발할 때 뇌에 쏙 박히지는 않을 것 같습니다… 😭</p>
+
+<p>계속 반복하여 되뇌일 수 밖에…</p>
+
+<p>다시 전략 패턴 이야기로 돌아와서 아래 클래스 다이어그램을 한 번 보시죠! 😕</p>
+
+<p><img src="https://i.imgur.com/Iu9MJSo.png" alt="Imgur" /></p>
+
+<p>책에 나온 다이어그램을 약간 간소화해서 그려봤습니다.</p>
+
+<p>이 다이어그램에서 전략 패턴의 향기를 맡기란 처음에 쉽지 않았습니다.</p>
+
+<p>✏️ <span style="color: red;">전략 패턴이란? 알고리즘군을 정의하고 캡슐화해서 각각의 알고리즘군을 수정해서 쓸 수 있게 해줍니다.</span></p>
+
+<p>다이어그램에 보시면 오리(Duck) 클래스에 FlyBehavior(나는 행동)과 QuackBehavior(우는 행동) 클래스가 선언되어 있습니다.</p>
+
+<p><strong>오리라는 객체로부터 두 개의 행위를 각각 알고리즘군으로 분리시켰기에…</strong> 전략 패턴이 사용되었구나… 라고 인지하셔야 될 듯 합니다.</p>
+
+<p>그리고 또한 위에 객체지향 원칙을 찾아볼 수 있는데요!</p>
+
+<ol>
+  <li>
+    <p>바뀔만한 부분을 하위 클래스로 분리하여 캡슐화를 진행하였구요!</p>
+  </li>
+  <li>
+    <p>나는 행동과 우는 행동을 분리하여 오리 클래스로부터 <span style="color: blue;">구성 관계</span>를 가짐으로써 느슨한 결합을 만들었습니다.</p>
+  </li>
+</ol>
+
+<p>저도 책을 보면서 생각하니까 이렇게 보이지… 아직 디자인 하수이기에… 급한 개발 건은 흔히 <strong>스파게티 코드</strong>로 구현이 될 듯 하네요… 😱</p>
+
+<p>생각해보면 개발하면서 무의식적으로 전략 패턴을 구사하고 있지 않았나? 싶기도 합니다! <del>(는 아직 멀었다…)</del></p>
+
+<p>간단한 전략 패턴 예제를 살펴 보며 마무리하도록 하겠습니다! (이건 책에 없는 GPT와 제 생각입니다…)</p>
+
+<h3 id="-전략패턴-예제-결제-시스템">✔ 전략패턴 예제: 결제 시스템</h3>
+
+<h4 id="클래스-다이어그램">클래스 다이어그램</h4>
+<p><img src="https://i.imgur.com/4gLpLDs.png" alt="Imgur" /></p>
+
+<h4 id="전략-인터페이스-정의">전략 인터페이스 정의</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 전략 인터페이스: 결제 방식 정의
+interface PaymentStrategy {
+    void pay(int amount);
+}
+</code></pre></div></div>
+<h4 id="구체적인-결제-방법-구현">구체적인 결제 방법 구현</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 신용카드 결제 전략
+class CreditCardPayment implements PaymentStrategy {
+    private String cardNumber;
+
+    public CreditCardPayment(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println(amount + "원을 신용카드(" + cardNumber + ")로 결제합니다.");
+    }
+}
+
+// 페이팔 결제 전략
+class PayPalPayment implements PaymentStrategy {
+    private String email;
+
+    public PayPalPayment(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println(amount + "원을 페이팔 계정(" + email + ")으로 결제합니다.");
+    }
+}
+
+// 암호화폐 결제 전략
+class CryptoPayment implements PaymentStrategy {
+    private String walletAddress;
+
+    public CryptoPayment(String walletAddress) {
+        this.walletAddress = walletAddress;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println(amount + "원을 암호화폐 지갑(" + walletAddress + ")에서 결제합니다.");
+    }
+}
+</code></pre></div></div>
+<h4 id="결제-컨텍스트-구현">결제 컨텍스트 구현</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 컨텍스트 클래스: 결제 수단을 동적으로 설정 가능
+class ShoppingCart {
+    private PaymentStrategy paymentStrategy;
+
+    // 전략(결제 방식) 설정
+    public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
+        this.paymentStrategy = paymentStrategy;
+    }
+
+    // 결제 실행
+    public void checkout(int amount) {
+        if (paymentStrategy == null) {
+            throw new IllegalStateException("결제 방법이 설정되지 않았습니다.");
+        }
+        paymentStrategy.pay(amount);
+    }
+}
+</code></pre></div></div>
+<h4 id="실행할-main-클래스">실행할 MAIN 클래스</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Main {
+    public static void main(String[] args) {
+        ShoppingCart cart = new ShoppingCart();
+
+        // 신용카드 결제
+        cart.setPaymentStrategy(new CreditCardPayment("1234-5678-9012-3456"));
+        cart.checkout(10000);
+
+        // 페이팔 결제
+        cart.setPaymentStrategy(new PayPalPayment("user@example.com"));
+        cart.checkout(20000);
+
+        // 암호화폐 결제
+        cart.setPaymentStrategy(new CryptoPayment("0xABC123DEF456"));
+        cart.checkout(30000);
+    }
+}
+</code></pre></div></div>
+<h4 id="실행-결과">실행 결과</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>10000원을 신용카드(1234-5678-9012-3456)로 결제합니다.
+20000원을 페이팔 계정(user@example.com)으로 결제합니다.
+30000원을 암호화폐 지갑(0xABC123DEF456)에서 결제합니다.
+</code></pre></div></div>
+
+<p>다음에는 다른 패턴으로 돌아오겠습니다!</p>
+
+<p>긴 글 봐주셔서 감사합니다! 😌</p>
+
+    </div>
+
+    
+        <div class="tags">
+            
+            <span>#디자인패턴</span>
+            
+            <span>#design pattern</span>
+            
+            <span>#헤드퍼스트</span>
+            
+            <span>#GoF</span>
+            
+            <span>#전략 패턴</span>
+            
+            <span>#Strategy Pattern</span>
+            
+        </div>
+    
+    
+    <!-- 댓글 영역 -->
+    <div class="comments">
+        <script src="https://utteranc.es/client.js"
+            repo="graves85/graves85.github.io"
+            issue-term="pathname"
+            label="comment"
+            theme="github-light"
+            crossorigin="anonymous"
+            async>
+        </script>
+    </div>
+    </main>
+
+    <footer>
+    © 2025 Tech Insights | Powered by Graves85
+</footer>
+</body>
+</html>

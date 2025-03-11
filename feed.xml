@@ -1,0 +1,1953 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://graves85.github.io//feed.xml" rel="self" type="application/atom+xml" /><link href="https://graves85.github.io//" rel="alternate" type="text/html" /><updated>2025-03-11T16:14:24+00:00</updated><id>https://graves85.github.io//feed.xml</id><title type="html">IT &amp;amp; Development Blog</title><subtitle>이곳에서는 주로 웹 프로그래밍, IT 기술, 개발 팁 등을 다룹니다.</subtitle><entry><title type="html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</title><link href="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html" rel="alternate" type="text/html" title="단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤" /><published>2025-03-10T00:00:00+00:00</published><updated>2025-03-10T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html"><![CDATA[<h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>이번엔 싱글턴 패턴을 배워볼까 합니다!</p>
+
+<p><del>독서에 취약한 저에게는 책의 분량이 짧아 아주 좋았던 기억이 납니다… 🫠</del></p>
+
+<p>클래스 다이어그램도 굳이 필요없어 보이는 패턴입니다!</p>
+
+<p>한 번 들여다보시죠!</p>
+
+<hr />
+
+<p>싱글턴 패턴은 예제 소스 보시면 아마 단박에 아실텐데요!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private static Singleton uniqueInstance;
+
+	private Singleton() {}
+
+	public static Singleton getInstance() {
+		if(uniqueInstance == null) {
+			uniqueInstance = new Singleton();
+		}
+		return uniqueInstance;
+	}
+
+	// 기타 메소드
+}
+</code></pre></div></div>
+
+<p>싱글턴 패턴의 기본 구조는 위처럼 단 하나의 인스턴스를 관리하고 그 인스턴스를 호출 클래스에 보내줍니다!</p>
+
+<p><span style="color: red;">위같은 방식이면 Singleton이라는 클래스는 절대 2개 이상 생성할수가 없게 됩니다.</span></p>
+
+<p>단 static 메소드를 제공함으로써 해당 클래스에 어떠한 클래스도 접근은 가능하게 됩니다.</p>
+
+<p>이렇게 내용이 끝나면 아주 간단하죠… 🫡</p>
+
+<p>하지만 고민이 하나 있습니다.</p>
+
+<p>바로 멀티스레딩으로 접근하게 되는 경우입니다… 음…</p>
+
+<p>간단한 해결책은 아래와 같습니다!</p>
+
+<h3 id="방법-1-synchronized-동기화-메소드로-변경하기">방법 1. synchronized 동기화 메소드로 변경하기</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private static Singleton uniqueInstance;
+
+	private Singleton() {}
+
+	public static synchronized Singleton getInstance() {
+		if(uniqueInstance == null) {
+			uniqueInstance = new Singleton();
+		}
+		return uniqueInstance;
+	}
+
+	// 기타 메소드
+}
+</code></pre></div></div>
+
+<p>바로 static 메소드에 synchronized라는 동기화 명령어를 붙이는거죠!</p>
+
+<p>다른 스레드가 끝날때까지 해당 메소드에 접근을 기다립니다.</p>
+
+<p><span style="color: red;">단 위 방법은 접근을 하나의 스레드밖에 못하니 당연히 속도가 저하됩니다!</span></p>
+
+<p>그래서 다른 방법들이 또 있죠.</p>
+
+<h3 id="방법2-인스턴스-객체-미리-생성하기">방법2. 인스턴스 객체 미리 생성하기</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private static Singleton uniqueInstance = new Singleton();
+
+	private Singleton() {}
+
+	public static Singleton getInstance() {
+		return uniqueInstance;
+	}
+}
+</code></pre></div></div>
+
+<p>위처럼 변수 할당시에 생성까지 하는 방법입니다.</p>
+
+<p>아마도 이 방법이 심플하니 많이 사용될 수 있겠네요.</p>
+
+<p>하지만 책에는 한 가지 방법을 더 알려줍니다.</p>
+
+<h3 id="방법3-dcl을-사용하기">방법3. DCL을 사용하기</h3>
+
+<p>✏️ <span style="color: red;">DCL이란? Double-Checked Locking의 약자로 멀티스레드 환경에서 싱글톤(Singleton) 객체를 안전하게 생성하기 위해 사용하는 패턴이다.</span></p>
+
+<p>사용법은 아래와 같습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Singleton {
+	private volatile static Singleton uniqueInstance;
+
+	private Singleton() {}
+
+	public static Singleton getInstance() {
+		if(uniqueInstance == null) {
+			synchronized (Singleton.class) {
+				if(uniqueInstance == null) {
+					uniqueInstance = new Singleton();
+				}
+			}
+		}
+		return uniqueInstance;
+	}
+
+	// 기타 메소드
+}
+</code></pre></div></div>
+
+<p>아마도.. 저게 뭐임…🥺? 이라고 생각하실수도 있습니다.</p>
+
+<p>일단 변경점은 변수 부분에 volatile 키워드를 사용한 것입니다!</p>
+
+<p>그리고 이제 메소드에서 <code class="language-plaintext highlighter-rouge">synchronized (Singleton.class)</code> 라는 동기화 블록을 설정합니다.</p>
+
+<p>이렇게되면 uniqueInstance 변수가 변경되었을 때 다른 스레드도 변경됨을 인지하게 되니 uniqueInstance 값이 null이 아닌 것으로 인식하게 됩니다!</p>
+
+<p><code class="language-plaintext highlighter-rouge">volatile</code> 키워드.. 저도 자바 개발자로써 처음 알게 되었는데요…</p>
+
+<p>무조건 이 키워드가 멀티스레딩 제어에 최강이냐? 그건 또 아닌 것 같습니다.</p>
+
+<p>아래 예시를 한 번 보겠습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class Counter {
+    volatile int count = 0;
+
+    void increment() {
+        count++; // 이 연산은 원자적이지 않음
+    }
+}
+</code></pre></div></div>
+
+<p>위 클래스를 멀티 스레딩으로 돌리면 count가 순차적으로 오를까요!?</p>
+
+<p><span style="background-color:rgb(200, 200, 255);"><strong>정답은 NO입니다.</strong></span></p>
+
+<p>volatile 키워드를 적용했음에도 <code class="language-plaintext highlighter-rouge">count++</code> 같이 <strong>읽고 ➡️ 수정하고 ➡️ 쓰는</strong> 복합 연산은 보장이 되지 않는다고 합니다.</p>
+
+<p>따라서 volatile 키워드는 플래그에 따른 멀티스레딩 제어나 예시에 나왔던 싱글턴 패턴의 인스턴스 생성 정도로 쓰이는 게 적당할 듯 합니다.</p>
+
+<h3 id="방법4-enum-클래스를-활용하기-추천-방식">방법4. enum 클래스를 활용하기 (추천 방식)</h3>
+
+<p>아마도.. 이게 최강 해결책일 듯 합니다. 🧐</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public enum Singleton {
+    INSTANCE; // 싱글턴 인스턴스
+
+    // 실제 싱글턴 클래스의 메서드
+    public void doSomething() {
+        System.out.println("싱글턴 인스턴스 동작!");
+    }
+}
+</code></pre></div></div>
+
+<p>저 방식으로 이미 인스턴스가 하나 생성이 된 것이죠…</p>
+
+<p>정리해보면 다음 장점이 있는 것입니다.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>장점</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>가장 간단한 Singleton 구현</td>
+      <td>enum 선언만으로 Singleton 패턴을 보장</td>
+    </tr>
+    <tr>
+      <td>스레드 안전(Thread-safe) 보장</td>
+      <td>동기화 문제 없이 안전하게 사용할 수 있음</td>
+    </tr>
+    <tr>
+      <td>리플렉션(Reflection) 방어</td>
+      <td>enum은 리플렉션을 통한 객체 생성을 차단</td>
+    </tr>
+    <tr>
+      <td>직렬화(Serialization) 문제 없음</td>
+      <td>일반 Singleton 패턴에서는 Serializable을 구현해야 하지만, enum은 자동으로 직렬화 지원</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>멀티스레딩 문제도 그냥 해결되고.. 굳이 소스 길어지지도 않고… 와…</p>
+
+<h2 id="너가-그냥-최강이구나">너가 그냥 최강이구나…😘</h2>
+
+<p>그래도 다른 방법들도 알아두면 JAVA가 얼마나 발전했는가에 대한 역사 공부정도는 되지 않았을까라는… 생각을 가져봅니다.</p>
+
+<h3 id="그런데-싱글턴-패턴은-어디에-쓰일까">그런데 싱글턴 패턴은 어디에 쓰일까?</h3>
+
+<ol>
+  <li>
+    <p>데이터베이스 연결 관리</p>
+  </li>
+  <li>
+    <p>로깅 시스템</p>
+  </li>
+  <li>
+    <p>캐싱 시스템</p>
+  </li>
+  <li>
+    <p>스레드 풀 관리</p>
+  </li>
+</ol>
+
+<h3 id="결론">결론</h3>
+
+<p><strong>싱글턴 패턴은 전역으로 상태를 관리할 때 적합하다!</strong></p>
+
+<p><strong>싱글턴 패턴에 enum 클래스를 활용하면 손쉽고 안전하게 만들 수 있다!</strong></p>
+
+<p>이상입니다!</p>
+
+<hr />
+
+<p>다음에는 요청 내역을 캡슐화하는 커맨드 패턴을 알아봅시다!</p>
+
+<h1 id="긴-글-봐주셔서-감사합니다-">긴 글 봐주셔서 감사합니다! 😌</h1>]]></content><author><name></name></author><category term="DEV" /><category term="디자인패턴" /><category term="디자인패턴" /><category term="Design pattern" /><category term="헤드퍼스트" /><category term="GoF" /><category term="싱글턴 패턴" /><category term="Singleton Pattern" /><summary type="html"><![CDATA[디자인 패턴 분석 목차]]></summary></entry><entry><title type="html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</title><link href="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html" rel="alternate" type="text/html" title="느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭" /><published>2025-03-08T00:00:00+00:00</published><updated>2025-03-08T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html"><![CDATA[<h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>이번엔 4번째로 배우는 패턴은… 바로… 팩토리 패턴입니다!</p>
+
+<p>대학생 시절부터 팩토리는 디자인 패턴 중 가장 기억에 남았던 거 같아요.</p>
+
+<p>지금은 어떻게 썼는지 기억이 안나네요…</p>
+
+<p>책을 보며 차근차근 파악해 봅시다!</p>
+
+<hr />
+
+<p>옵저버 패턴을 배울 때 느슨한 결합에 대해 들어보셨을겁니다!</p>
+
+<p><strong>관계가 느슨하면 유지보수성이 올라가 코드를 쉽게 수리할 수 있죠!</strong></p>
+
+<p>보통 객체를 생성할 때 다음과 같이 생성하게 됩니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Duck duck = new MallardDuck();
+</code></pre></div></div>
+
+<p>굳이 다른 클래스에 저렇게 선언을 해서 사용하진 않죠…</p>
+
+<p>팩토리 패턴은 굳이 저걸 다른 클래스에서 생성하여 사용합니다!</p>
+
+<p>지금은 왜 굳이 귀찮게…🥴 라는 생각이 지배적일겁니다.</p>
+
+<p>귀찮지만 해놓으면 팩토리 패턴의 진가가 발휘되는 케이스가 있더라구요.</p>
+
+<p>책에서는 new 연산자에 대해 다음과 같이 이야기하고 있습니다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">new 연산자를 바로 사용하는 것은 변경에 닫혀 있는 코드이고 확장성을 배제한 코드이다.</code></p>
+
+<p>확장에 열려 있게 하려면 팩토리 패턴을 도입해보면 됩니다…!</p>
+
+<p>말이 길어졌습니다… 🤐</p>
+
+<p>팩토리 패턴은 크게 3가지로 나뉘는 데 차근 차근 한 번 보시죠… 😵‍💫</p>
+
+<hr />
+
+<h3 id="심플-팩토리-패턴">심플 팩토리 패턴</h3>
+
+<p>심플 팩토리 패턴은 굉장히 간단한 팩토리 패턴이니 코드보면 바로 이해하기 쉬우실 겁니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public Pizza createPizza(String type) {
+    Pizza pizza = null;
+
+    if(type.equals("cheese")) {
+        pizza = new CheesePizza();
+    } else if(type.equals("pepperoni")) {
+        pizza = new PepperoniPizza();
+    }
+}
+</code></pre></div></div>
+
+<p>위처럼 파라미터에 의해 Pizza를 맞춤형 하위 클래스로 생성하도록 구성하였습니다.</p>
+
+<p>아까 언급한 느슨한 결합으로 인해 어떤 피자를 생성할지에 대한 유동적인 생성이 가능한 것이죠…!</p>
+
+<p>🚨 <span style="color: red;">이건 아주 심플하니 쉬운 패턴인데 이제 다음 팩토리부터 모르시는 분들은 조금 머리 아프니 주의하세요…</span> 🥶</p>
+
+<h3 id="팩토리-메소드-패턴">팩토리 메소드 패턴</h3>
+
+<p>클래스 자체에서 팩토리 생성하는 건 알아봤으니 이제는 메소드로 생성하는 방법도 알아보셔야 합니다!</p>
+
+<p>책에 나온 피자 가게를 토대로 우선 클래스 다이어그램을 보겠습니다.</p>
+
+<p><img src="https://i.imgur.com/IGwILgC.png" alt="Imgur" /></p>
+
+<p>피자 가게에 두 가지 유형의 피자 가게를 둔 예시입니다.</p>
+
+<p>아까처럼 상위 클래스에서 단순 팩토리 패턴을 쓰면 될까싶지만… 추가 요건이 있습니다.</p>
+
+<p>뉴욕 피자 가게는 뉴욕 스타일의 피자 4가지를 만들어야 하고…</p>
+
+<p>시카고 피자 가게는 시카고 스타일의 피자 4가지를 만들어야 한답니다… 😰</p>
+
+<p>기존처럼 createPizza 메소드에서 처리하기에는 유형이 훨씬 더 늘어난거죠…!</p>
+
+<p>그래서 위처럼 일단 뉴욕 스타일과 시카고 스타일로 캡슐화를 우선 진행했고 아래처럼 생성 메소드를 구현했습니다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class NYPizzaStore extends PizzaStore {
+
+	Pizza createPizza(String item) {
+		if (item.equals("cheese")) {
+			return new NYStyleCheesePizza();
+		} else if (item.equals("veggie")) {
+			return new NYStyleVeggiePizza();
+		} else if (item.equals("clam")) {
+			return new NYStyleClamPizza();
+		} else if (item.equals("pepperoni")) {
+			return new NYStylePepperoniPizza();
+		} else return null;
+	}
+}
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class ChicagoPizzaStore extends PizzaStore {
+
+	Pizza createPizza(String item) {
+        	if (item.equals("cheese")) {
+            		return new ChicagoStyleCheesePizza();
+        	} else if (item.equals("veggie")) {
+        	    	return new ChicagoStyleVeggiePizza();
+        	} else if (item.equals("clam")) {
+        	    	return new ChicagoStyleClamPizza();
+        	} else if (item.equals("pepperoni")) {
+            		return new ChicagoStylePepperoniPizza();
+        	} else return null;
+	}
+}
+</code></pre></div></div>
+
+<p>그리고 상위 클래스인 PizzaStore는 다음과 같은 구현되어 있죠.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public abstract class PizzaStore {
+ 
+	abstract Pizza createPizza(String item);
+ 
+	public Pizza orderPizza(String type) {
+		Pizza pizza = createPizza(type);
+		System.out.println("--- Making a " + pizza.getName() + " ---");
+		pizza.prepare();
+		pizza.bake();
+		pizza.cut();
+		pizza.box();
+		return pizza;
+	}
+}
+</code></pre></div></div>
+
+<p>위처럼 팩토리 메소드 패턴은 객체를 생설할 때 필요한 인터페이스(추상 클래스)를 만들고 <span style="background-color:rgb(200, 200, 255);"><strong>어떤 클래스의 인스턴스를 만들지는 서브 클래스에서 결정</strong></span>하는 구조입니다.</p>
+
+<p>참고로 저는 아직까지도 왜 팩토리 메소드 패턴과 명확하게 다른 점을 모르겠습니다.</p>
+
+<p>그래서 차이점을 더 파보았더니 다음과 같은 내용이 있더군요.</p>
+
+<p><span style="color: red;">팩토리 메소드 패턴은 재사용을 할 수 있도록 일반적인 프레임워크를 제공할 수 있다.</span></p>
+
+<p>무슨 뜻이냐…</p>
+
+<p>createPizza만 있는 단순 팩토리 패턴의 PizzaStore를 호출한다고 했을 때.. 호출부에서 생성된 피자로 여러 가지 코드 구현을 해야 합니다.</p>
+
+<p>만약 처리 로직이 동일한 부분을 여러 번 호출해야 한다면 PizzaStore에 재사용 가능한 orderPizza 메소드를 만들어서 orderPizza만 호출하면 될 듯 합니다.</p>
+
+<p>슈퍼 클래스가 처리를 하는 메소드가 생겼으니 생성은 밑에 서브 클래스 친구들한테 맡기는 구조가 된겁니다.</p>
+
+<p>결론은… <span style="color: red;">재사용할 수 있는 메소드를 구현함으로써 생성부를 서브 클래스로 캡슐화하여 팩토리를 구현한다…</span>라고 보심 될 것 같습니다.</p>
+
+<p>여기서 끝이 아닙니다…</p>
+
+<p>한가지 끝판왕 팩토리 패턴이 또 있어요… 😭 <del>(집에 가고 싶다…)</del></p>
+
+<h3 id="추상-팩토리-패턴">추상 팩토리 패턴</h3>
+
+<p>아까 추상화했는데 또 추상 나오니…?</p>
+
+<p>뭐가 다를까… 막막할 수 있습니다…</p>
+
+<p>그전에 알아두면 좋은 용어 한 번 보고 가시죠…</p>
+
+<p>✏️ <span style="color: red;">의존성 뒤집기 원칙이란? 추상화된 것에 의존하게 만들고 구상 클래스에 의존하지 않게 만든다.</span></p>
+
+<p><del>(대체 무슨 소리래… 🦴)</del></p>
+
+<p><strong>어려운 김에 어려운 말 조금 더 나갑니다…</strong></p>
+
+<blockquote>
+  <p>의존성 뒤집기 원칙을 지키는 방법</p>
+</blockquote>
+
+<ol>
+  <li>
+    <p>변수에 구상 클래스의 레퍼런스를 저장하지 맙시다.</p>
+  </li>
+  <li>
+    <p>구상 클래스에서 유도된 클래스를 만들지 맙시다.</p>
+  </li>
+  <li>
+    <p>베이스 클래스에 이미 구현되어 있는 메소드를 오버라이드하지 맙시다.</p>
+  </li>
+</ol>
+
+<p>위의 내용이 이해가 안되신다면.. 추상 팩토리 패턴에 녹여들어간 원칙이라고 보심 될 것 같습니다.</p>
+
+<p><strong>위 두 가지 패턴보다 난이도가 1.5배정도 올라가니 한 번 잘 살펴보십시다…</strong></p>
+
+<p>일단 예시에서 변경된 Pizza 클래스부터 보겠습니다.</p>
+
+<p>AS-IS</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public abstract class Pizza {
+	String name;
+	String dough;
+	String sauce;
+	ArrayList&lt;String&gt; toppings = new ArrayList&lt;String&gt;();
+ 
+	void prepare() {
+		System.out.println("Prepare " + name);
+		System.out.println("Tossing dough...");
+		System.out.println("Adding sauce...");
+		System.out.println("Adding toppings: ");
+		for (String topping : toppings) {
+			System.out.println("   " + topping);
+		}
+	}
+  
+	// 이하 생략
+}
+</code></pre></div></div>
+
+<p>TO-BE</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public abstract class Pizza {
+	String name;
+
+	Dough dough;
+	Sauce sauce;
+	Veggies veggies[];
+	Cheese cheese;
+	Pepperoni pepperoni;
+	Clams clam;
+
+	abstract void prepare();
+
+    // 이하 생략
+}
+</code></pre></div></div>
+
+<p>Pizza 재료를 처리하는 prepare 메소드가 추상화로 변신을 일단 했습니다.</p>
+
+<p>그 다음 prepare를 구현하는 하위 클래스를 한 번 보겠습니다.</p>
+
+<p>AS-IS (피자 종류별로 클래스를 만들어서 처리했음)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class NYStyleCheesePizza extends Pizza {
+
+	public NYStyleCheesePizza() { 
+		name = "NY Style Sauce and Cheese Pizza";
+		dough = "Thin Crust Dough";
+		sauce = "Marinara Sauce";
+ 
+		toppings.add("Grated Reggiano Cheese");
+	}
+}
+</code></pre></div></div>
+
+<p>TO-BE (피자의 주 원재료별로 클래스를 만들어서 처리했음)</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CheesePizza extends Pizza {
+	PizzaIngredientFactory ingredientFactory;
+ 
+	public CheesePizza(PizzaIngredientFactory ingredientFactory) {
+		this.ingredientFactory = ingredientFactory;
+	}
+ 
+	void prepare() {
+		System.out.println("Preparing " + name);
+		dough = ingredientFactory.createDough();
+		sauce = ingredientFactory.createSauce();
+		cheese = ingredientFactory.createCheese();
+	}
+}
+</code></pre></div></div>
+
+<p>가장 크게 바뀐 점은 기존 피자 클래스에서는 속성을 지정하여 반환하고 끝이었습니다.</p>
+
+<p>이제는 피자 클래스에 새로운 팩토리 클래스가 변수로 가지고 있음을 알 수 있습니다.</p>
+
+<p>상황에 따라 변칙적인 치즈 피자로 만들 수 있겠군요. (확장성 업그레이드 완료)</p>
+
+<p>그럼 아까 구현한 createPizza 메소드는 어떻게 바뀌는 걸까요?</p>
+
+<p>뉴욕 스타일의 피자 가게 클래스를 한 번 살펴보시죠.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class NYPizzaStore extends PizzaStore {
+ 
+	protected Pizza createPizza(String item) {
+		Pizza pizza = null;
+		PizzaIngredientFactory ingredientFactory = 
+			new NYPizzaIngredientFactory();
+ 
+		if (item.equals("cheese")) {
+  
+			pizza = new CheesePizza(ingredientFactory);
+			pizza.setName("New York Style Cheese Pizza");
+  
+		} else if (item.equals("veggie")) {
+ 
+			pizza = new VeggiePizza(ingredientFactory);
+			pizza.setName("New York Style Veggie Pizza");
+ 
+		} else if (item.equals("clam")) {
+ 
+			pizza = new ClamPizza(ingredientFactory);
+			pizza.setName("New York Style Clam Pizza");
+ 
+		} else if (item.equals("pepperoni")) {
+
+			pizza = new PepperoniPizza(ingredientFactory);
+			pizza.setName("New York Style Pepperoni Pizza");
+ 
+		} 
+		return pizza;
+	}
+}
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">PizzaIngredientFactory ingredientFactory =	new NYPizzaIngredientFactory();</code> 이 부분이 보이시나요!?</p>
+
+<p>원재료를 생성하는 클래스를 생성하여 가지고 있고 피자를 만들 때 이 팩토리 클래스를 인자로 넘겨주고 있습니다!</p>
+
+<p>마지막으로 새로 생긴 PizzaIngredientFactory 이 팩토리와 이를 구현하고 있는 NYPizzaIngredientFactory 이 클래스를 한 번 살펴보시죠.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public interface PizzaIngredientFactory {
+ 
+	public Dough createDough();
+	public Sauce createSauce();
+	public Cheese createCheese();
+	public Veggies[] createVeggies();
+	public Pepperoni createPepperoni();
+	public Clams createClam();
+ 
+}
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class NYPizzaIngredientFactory implements PizzaIngredientFactory {
+ 
+	public Dough createDough() {
+		return new ThinCrustDough();
+	}
+ 
+	public Sauce createSauce() {
+		return new MarinaraSauce();
+	}
+ 
+	public Cheese createCheese() {
+		return new ReggianoCheese();
+	}
+ 
+	public Veggies[] createVeggies() {
+		Veggies veggies[] = { new Garlic(), new Onion(), new Mushroom(), new RedPepper() };
+		return veggies;
+	}
+ 
+	public Pepperoni createPepperoni() {
+		return new SlicedPepperoni();
+	}
+
+	public Clams createClam() {
+		return new FreshClams();
+	}
+}
+</code></pre></div></div>
+
+<p>위에 보시는 것처럼 뉴욕 스타일에 맞는 소스, 치즈, 야채 등을 리턴하고 있음을 알 수 있습니다.</p>
+
+<p>아마 저보다 이해력 좋으신 분들은 예제만 보고도 추상 팩토리 패턴과 팩토리 메소드 패턴의 차이점이 뭔지 이해되실 겁니다.</p>
+
+<p>저는 여러 번의 이해와 노력 끝에 파악을 조금 했답니다… 😮‍💨</p>
+
+<p>우선 추상 팩토리 패턴은 <span style="background-color:rgb(200, 200, 255);"><strong>구상 클래스에 의존하지 않고도 서로 연관되거나 의존적인 객체로 이루어진 제품군을 생산하는 인터페이스를 제공</strong></span>합니다.</p>
+
+<p>아까 예제에 나왔던 PizzaIngredientFactory 클래스가 핵심 역할이라고 할 수 있죠.</p>
+
+<p>느낌만 한 번 말씀드리면</p>
+
+<p>이전에 팩토리 메소드 패턴은 뭔가 PizzaStore 서브 클래스에서 직접 피자를 생산하여 고정된 재료로 만들었다고 치면</p>
+
+<p>추상 팩토리 패턴은 이제 PizzaStore 서브 클래스 마저도 PizzaIngredientFactory한테 맡기고 재료도 그룹지어 종류별로 세분화하게 관리되는 느낌입니다.</p>
+
+<h3 id="여기서-잠깐-추상-팩토리-패턴의-장단점을-알아보자-출처-gpt">여기서 잠깐!!! 추상 팩토리 패턴의 장단점을 알아보자! (출처: GPT)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>장점</th>
+      <th>단점</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>객체 생성 로직을 캡슐화하여 클라이언트 코드 변경 없이 확장 가능</td>
+      <td>너무 많은 클래스 수 증가</td>
+    </tr>
+    <tr>
+      <td>클라이언트 코드가 구체적인 클래스에 의존하지 않음 → 결합도 낮아짐</td>
+      <td>새로운 개별 제품(예: 과일토핑 추가) 추가 시 인터페이스 및 서브 클래스 전부 변경 필요</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="추상-팩토리-패턴과-팩토리-메소드-패턴의-차이점-확인하기-출처-gpt">추상 팩토리 패턴과 팩토리 메소드 패턴의 차이점 확인하기! (출처: GPT)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>구분</th>
+      <th>팩토리 메소드 패턴</th>
+      <th>추상 팩토리 패턴</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>초점</td>
+      <td>단일 객체의 생성을 캡슐화</td>
+      <td>관련된 여러 객체를 그룹으로 생성</td>
+    </tr>
+    <tr>
+      <td>확장성</td>
+      <td>새로운 객체 유형 추가 가능 (클래스 상속 활용)</td>
+      <td>새로운 제품군 추가 가능 (팩토리 인터페이스 확장)</td>
+    </tr>
+    <tr>
+      <td>코드 복잡도</td>
+      <td>비교적 간단</td>
+      <td>상대적으로 복잡</td>
+    </tr>
+    <tr>
+      <td>유지보수성</td>
+      <td>특정 객체에 대한 변경에 유리</td>
+      <td>여러 객체의 일관성을 유지하기 좋음</td>
+    </tr>
+    <tr>
+      <td>사용 사례</td>
+      <td>객체 생성을 위임하여 유연성을 확보하고 싶을 때</td>
+      <td>제품군 전체를 일관되게 관리해야 할 때</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="팩토리-메소드-패턴을-사용한-예시">팩토리 메소드 패턴을 사용한 예시</h3>
+
+<ol>
+  <li>
+    <p>특정 타입의 데이터베이스 커넥션(MySQLConnection, PostgreSQLConnection)을 생성하는 경우</p>
+  </li>
+  <li>
+    <p>특정 형태의 문서(PDFDocument, WordDocument)를 생성하는 경우</p>
+  </li>
+</ol>
+
+<h3 id="추상-팩토리-패턴을-사용한-예시">추상 팩토리 패턴을 사용한 예시</h3>
+
+<ol>
+  <li>
+    <p>GUI 라이브러리에서 Windows/MacOS UI 컴포넌트(Button, Checkbox, TextField 등)를 통일성 있게 생성하는 경우</p>
+  </li>
+  <li>
+    <p>게임에서 서로 다른 종족(예: 엘프, 오크)의 유닛(Warrior, Archer, Mage 등)을 생성하는 경우</p>
+  </li>
+</ol>
+
+<h3 id="결론">결론</h3>
+
+<p>디자인 패턴을 무조건 쓴다고 해서 좋은 건 아니구나라는 것을 팩토리 패턴에게 좀 느꼈습니다.. <del>(물론 이해하기 어려워서 안쓰고 싶은 생각도 있습니다.)</del></p>
+
+<hr />
+
+<p>다음에는 혼자가 좋은… 싱글턴 패턴을 뜯어봅시다!</p>
+
+<h1 id="긴-글-봐주셔서-감사합니다-">긴 글 봐주셔서 감사합니다! 😌</h1>]]></content><author><name></name></author><category term="DEV" /><category term="디자인패턴" /><category term="디자인패턴" /><category term="Design pattern" /><category term="헤드퍼스트" /><category term="GoF" /><category term="팩토리 패턴" /><category term="Factory Pattern" /><summary type="html"><![CDATA[디자인 패턴 분석 목차]]></summary></entry><entry><title type="html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</title><link href="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html" rel="alternate" type="text/html" title="여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄" /><published>2025-03-03T00:00:00+00:00</published><updated>2025-03-03T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html"><![CDATA[<h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>세 번째로 배우는 디자인 패턴을 기록하기 위해 왔습니다!</p>
+
+<p>오늘 배울 패턴은 데코레이터 패턴입니다!</p>
+
+<p>뭔가 데코데코 느낌이 있는 거 보니 기존 클래스에 살을 붙여서 꾸미는 게 아닐까 예상됩니다…! 😖</p>
+
+<hr />
+
+<p>데코레이터 패턴의 주요 업무는 <span style="background-color:rgb(200, 200, 255);"><strong>객체에 추가 요소를 동적으로 더할 수 있습니다!</strong></span></p>
+
+<p>단순하게 상속해서 해당 메소드 오버라이드 해서 기능 추가하면 되는 거 아닌가..? 🧐 라고 생각할 수 있지만 예제를 보면 조금 다릅니다..! 😓</p>
+
+<p>✏️ <span style="color: red;">객체를 덧붙일 때 팩토리 패턴이나 빌더 패턴을 같이 곁들이면 더 멋진 디자인을 구사할 수 있습니다!</span></p>
+
+<p>책에서는 카페의 메뉴 가격을 측정할 때 활용할 수 있는 방안이 예제로 나왔는데요!</p>
+
+<p>원두 가격과 더불어서 첨가물(휘핑, 우유 등)을 넣을 때 데코레이터를 사용하여 첨가물 가격을 동적으로 더해주도록 설계하였습니다!</p>
+
+<p>아래 클래스 다이어그램을 보시면 더 이해가 되실 겁니다!</p>
+
+<h3 id="-데코레이터-패턴-예제-커피-계산-시스템">✔ 데코레이터 패턴 예제: 커피 계산 시스템</h3>
+
+<h4 id="클래스-다이어그램">클래스 다이어그램</h4>
+
+<p><img src="https://i.imgur.com/Sp6h76k.png" alt="Imgur" /></p>
+
+<h4 id="기본-골격-커피-인터페이스">기본 골격 커피 인터페이스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public interface Coffee {
+    double cost(); // 가격을 반환하는 메서드
+}
+</code></pre></div></div>
+
+<h4 id="기본-커피-클래스">기본 커피 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class SimpleCoffee implements Coffee {
+    @Override
+    public double cost() {
+        return 5.0; // 기본 커피의 가격
+    }
+}
+</code></pre></div></div>
+
+<h4 id="커피-데코레이터-추상-클래스">커피 데코레이터 추상 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public abstract class CoffeeDecorator implements Coffee {
+    protected Coffee decoratedCoffee;
+
+    public CoffeeDecorator(Coffee coffee) {
+        this.decoratedCoffee = coffee;
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost();
+    }
+}
+</code></pre></div></div>
+
+<h4 id="우유-데코레이터-클래스">우유 데코레이터 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class MilkDecorator extends CoffeeDecorator {
+    public MilkDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost() + 1.5; // 우유 추가 비용
+    }
+}
+</code></pre></div></div>
+
+<h4 id="설탕-데코레이터-클래스">설탕 데코레이터 클래스</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class SugarDecorator extends CoffeeDecorator {
+    public SugarDecorator(Coffee coffee) {
+        super(coffee);
+    }
+
+    @Override
+    public double cost() {
+        return decoratedCoffee.cost() + 0.5; // 설탕 추가 비용
+    }
+}
+</code></pre></div></div>
+
+<h4 id="실행-예제">실행 예제</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CoffeeShop {
+    public static void main(String[] args) {
+        Coffee simpleCoffee = new SimpleCoffee();
+        System.out.println("Cost of Simple Coffee: $" + simpleCoffee.cost());
+
+        Coffee milkCoffee = new MilkDecorator(simpleCoffee);
+        System.out.println("Cost of Coffee with Milk: $" + milkCoffee.cost());
+
+        Coffee milkSugarCoffee = new SugarDecorator(milkCoffee);
+        System.out.println("Cost of Coffee with Milk and Sugar: $" + milkSugarCoffee.cost());
+    }
+}
+</code></pre></div></div>
+
+<h4 id="실행-결과">실행 결과</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cost of Simple Coffee: $5.0
+Cost of Coffee with Milk: $6.5
+Cost of Coffee with Milk and Sugar: $7.0
+</code></pre></div></div>
+
+<h4 id="대략적인-해설">대략적인 해설</h4>
+
+<p>기본적으로 사용할 클래스와 확장을 위한 데코레이터 추상 클래스가 있는 것이 특징으로 볼 수 있습니다.</p>
+
+<p>🔎 <span style="color: red;">데코레이터 추상 클래스에는 decoratedCoffee라는 Coffee 클래스 변수가 하나 있습니다! (핵심 키!!!)</span></p>
+
+<p>데코레이터를 상속하는 하위 클래스들은 생성자에서 상위 클래스의 생성자를 호출하게 되는데 이 때 decoratedCoffee를 삽입하게 됩니다!</p>
+
+<p>마지막 결과가 7 달러가 나오는 무엇일까요? 이유는 꼬리에 꼬리를 물고 decoratedCoffee 클래스의 <strong>cost() 메소드가 가장 안쪽까지 연쇄적으로 호출</strong>하게 됩니다.</p>
+
+<p><strong>milkSugarCoffee.cost() ➡️ decoratedCoffee.cost() (milkCoffee.cost()) ➡️ decoratedCoffee.cost() (simpleCoffee.cost())</strong></p>
+
+<p>뭔가 유용한 것 같으면서도 실무에서 잘 쓸 수 있을까? 고민이 됩니다… 😭</p>
+
+<p>✏️ <span style="color: red;">자바는 데코레이터 패턴을 어디에 사용했을까요? 자바 I/O의 FileInputStream &gt; BufferedInputStream &gt; ZipInputStream</span></p>
+
+<p>✏️ <span style="color: red;">OCP(Open-Closed Principle, 개방-폐쇄 원칙)? “클래스는 확장에는 열려 있어야(Open) 하지만, 변경에는 닫혀 있어야(Closed) 한다.”</span></p>
+
+<p><strong>데코레이터 패턴을 이용하면 기존 코드(메인 클래스)를 직접 수정하지 않고 새로운 기능(클래스)을 추가하는 방식으로 코드를 확장할 수 있게 된다는 점도 중요할 듯 합니다!</strong></p>
+
+<hr />
+
+<h3 id="-조금만-예습해보기-">🧲 조금만 예습해보기 🧲</h3>
+
+<p>조금 더 나아가 아직 배우지 않은 빌더 패턴을 첨가해보면 어떻게 코드가 짜여질까요???</p>
+
+<h4 id="빌더-클래스-생성">빌더 클래스 생성</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CoffeeBuilder {
+    private Coffee coffee;
+
+    public CoffeeBuilder() {
+        this.coffee = new SimpleCoffee(); // 기본 커피
+    }
+
+    public CoffeeBuilder addMilk() {
+        this.coffee = new MilkDecorator(this.coffee);
+        return this;
+    }
+
+    public CoffeeBuilder addSugar() {
+        this.coffee = new SugarDecorator(this.coffee);
+        return this;
+    }
+
+    public Coffee build() {
+        return this.coffee;
+    }
+}
+</code></pre></div></div>
+
+<h4 id="사용-예제">사용 예제</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class CoffeeShop {
+    public static void main(String[] args) {
+        Coffee coffee = new CoffeeBuilder()
+                .addMilk()
+                .addSugar()
+                .build();
+
+        System.out.println("Total Cost: $" + coffee.cost()); // 7.0
+    }
+}
+</code></pre></div></div>
+
+<p>아까는 뭔가 호출하기가 굉장히 꺼림직해보였는데</p>
+
+<p>빌더 패턴도 같이 사용하니 위처럼 굉장히 호출부가 간결해지고 명확해짐을 알 수 있습니다!</p>
+
+<p>다시 한 번 패턴의 위대함을 알 수 있었습니다… 🤔</p>
+
+<p>이상입니다!</p>
+
+<hr />
+
+<p>다음에는 디자인 패턴에 아주 자주 나오는… 명가… 팩토리 패턴을 뜯어봅시다!</p>
+
+<h1 id="긴-글-봐주셔서-감사합니다-">긴 글 봐주셔서 감사합니다! 😌</h1>]]></content><author><name></name></author><category term="DEV" /><category term="디자인패턴" /><category term="디자인패턴" /><category term="Design pattern" /><category term="헤드퍼스트" /><category term="GoF" /><category term="데코레이터 패턴" /><category term="Decorater Pattern" /><summary type="html"><![CDATA[디자인 패턴 분석 목차]]></summary></entry><entry><title type="html">객체들에게 연락돌리는 옵저버 패턴! 📞</title><link href="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html" rel="alternate" type="text/html" title="객체들에게 연락돌리는 옵저버 패턴! 📞" /><published>2025-03-01T00:00:00+00:00</published><updated>2025-03-01T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html"><![CDATA[<h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>두 번째 디자인 패턴을 기억하기 위해 키보드를 잡았습니다!</p>
+
+<p>거두절미하고 옵저버 패턴 한 번 되뇌이며 적어보겠습니다.</p>
+
+<hr />
+
+<p>옵저버 패턴.. <del>(스타크래프트를 해봤다면 옵저버는 잘 알고 있죠…)</del></p>
+
+<p>책을 읽기 전 관찰자 역할을 하는 패턴임은 머리 속에 기억하고 있습니다.</p>
+
+<p>요즘 들어서는 옵저버 패턴 -&gt; KAFKA 느낌도 많이 받습니다. (✂️ GPT가 아니라고 합니다.)</p>
+
+<p>근데 이걸 어떻게 구현하더라… 👽</p>
+
+<p>일단 이론을 좀 더 파악하면 옵저버 패턴은 다음과 같습니다.</p>
+
+<p>✏️ <span style="color: red;">옵저버 패턴 = 신문사(주제) + 구독자(옵저버)</span></p>
+
+<p>특수한 주제에 대해 옵저버들은 전달을 받을 수 있고 옵저버들은 각자 입맛에 맞게 주제에 대해 가공이 가능합니다.</p>
+
+<p>고로 <span style="background-color:rgb(200, 200, 255);">일대다 관계</span>가 성립되는 패턴이라고 볼 수 있습니다!</p>
+
+<h3 id="새로-배우는-디자인-원칙">새로 배우는 디자인 원칙</h3>
+
+<p>✏️ <span style="color: red;">상호작용하는 개체 사이에서는 느슨한 결합을 사용해라!? 느슨한 결합은 객체 사이의 상호의존성을 낮춘다.</span></p>
+
+<p>옵저버 패턴은 느슨한 결합을 사용하는 패턴 중 하나라고 합니다!</p>
+
+<p>🧑‍🏫 <strong>여기서 질문</strong>❗ <strong>자바에서 사용하는 옵저버 패턴은</strong>❓ <strong>SWING 라이브러리 &gt; ActionListener</strong></p>
+
+<p><strong>SWING에 구현된 addActionListener를 적용하면 JButton 등에서 이벤트 발생시 리스너(옵저버)들을 호출하게 됩니다.</strong></p>
+
+<p>옵저버 패턴을 이해하기 위해 클래스 다이어그램과 소스 코드의 예시를 한 번 보시죠!</p>
+
+<hr />
+
+<h3 id="-옵저버-패턴-예제-기상-시스템">✔ 옵저버 패턴 예제: 기상 시스템</h3>
+
+<h4 id="클래스-다이어그램">클래스 다이어그램</h4>
+
+<p><img src="https://i.imgur.com/rVHtF6B.png" alt="Imgur" /></p>
+
+<h4 id="주제-인터페이스">주제 인터페이스</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>interface Subject {
+    void addObserver(Observer observer);
+    void removeObserver(Observer observer);
+    void notifyObservers();
+}
+</code></pre></div></div>
+
+<h4 id="옵저버-인터페이스">옵저버 인터페이스</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>interface Observer {
+    void update(float temperature, float humidity, float pressure);
+}
+</code></pre></div></div>
+
+<h4 id="기상스테이션-클래스-신문사-주제">기상스테이션 클래스 (신문사 주제)</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class WeatherStation implements Subject {
+    private final List&lt;Observer&gt; observers = new ArrayList&lt;&gt;();
+    private float temperature;
+    private float humidity;
+    private float pressure;
+
+    @Override
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(temperature, humidity, pressure);
+        }
+    }
+
+    // 날씨 데이터 변경 메서드
+    public void setMeasurements(float temperature, float humidity, float pressure) {
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.pressure = pressure;
+        notifyObservers();
+    }
+}
+</code></pre></div></div>
+
+<h4 id="일반-날씨-디스플레이-클래스-구독자1-옵저버">일반 날씨 디스플레이 클래스 (구독자1 옵저버)</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class WeatherDisplay implements Observer {
+    private final String name;
+
+    public WeatherDisplay(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void update(float temperature, float humidity, float pressure) {
+        System.out.println(name + " - 온도: " + temperature + "°C, 습도: " + humidity + "%, 기압: " + pressure + " hPa");
+    }
+}
+</code></pre></div></div>
+
+<h4 id="통계-디스플레이-클래스-구독자2-옵저버">통계 디스플레이 클래스 (구독자2 옵저버)</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>class StatisticsDisplay implements Observer {
+    private float maxTemp = Float.MIN_VALUE;
+    private float minTemp = Float.MAX_VALUE;
+    private float tempSum = 0.0f;
+    private int numReadings = 0;
+
+    @Override
+    public void update(float temperature, float humidity, float pressure) {
+        tempSum += temperature;
+        numReadings++;
+
+        if (temperature &gt; maxTemp) {
+            maxTemp = temperature;
+        }
+
+        if (temperature &lt; minTemp) {
+            minTemp = temperature;
+        }
+
+        System.out.println("📊 통계 디스플레이 - 최고 온도: " + maxTemp + "°C, 최저 온도: " + minTemp + "°C, 평균 온도: " + (tempSum / numReadings) + "°C");
+    }
+}
+</code></pre></div></div>
+
+<h4 id="실행-클래스">실행 클래스</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class ObserverPatternExample {
+    public static void main(String[] args) {
+        WeatherStation weatherStation = new WeatherStation();
+
+        // 옵저버 생성 및 등록
+        WeatherDisplay display1 = new WeatherDisplay("디스플레이 1");
+        StatisticsDisplay display2 = new StatisticsDisplay(); // 새로운 통계 디스플레이
+        
+        weatherStation.addObserver(display1);
+        weatherStation.addObserver(display2);
+
+        // 날씨 정보 업데이트 (옵저버들에게 알림)
+        weatherStation.setMeasurements(25.5f, 65.0f, 1013.1f);
+        weatherStation.setMeasurements(22.3f, 70.0f, 1012.8f);
+
+        // 옵저버 제거 후 다시 업데이트
+        weatherStation.removeObserver(display1);
+        weatherStation.setMeasurements(20.0f, 75.0f, 1012.5f);
+    }
+}
+</code></pre></div></div>
+
+<h4 id="실행-결과">실행 결과</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>디스플레이 1 - 현재 온도: 25.5°C, 습도: 65.0%, 기압: 1013.1 hPa
+📊 통계 디스플레이 - 최고 온도: 25.5°C, 최저 온도: 25.5°C, 평균 온도: 25.5°C
+디스플레이 1 - 현재 온도: 22.3°C, 습도: 70.0%, 기압: 1012.8 hPa
+📊 통계 디스플레이 - 최고 온도: 25.5°C, 최저 온도: 22.3°C, 평균 온도: 23.9°C
+📊 통계 디스플레이 - 최고 온도: 25.5°C, 최저 온도: 20.0°C, 평균 온도: 22.6°C
+</code></pre></div></div>
+
+<h4 id="대략적인-해설">대략적인 해설</h4>
+
+<p>우선 주제를 정한 후 구독을 받을 옵저버들을 add합니다!</p>
+
+<p>이후 실행을 하게 되면 setMeasurements 메소드에서 notifyObservers 메소드를 호출하면서 각 옵저버 클래스의 update 메소드가 실행됩니다.</p>
+
+<p>만약에 케이스 별로 구독자를 나눠야하면 remove를 걸어서 일부 구독자는 제외할 수 있을 겁니다.</p>
+
+<p>✏️ <span style="color: red;">Subject 클래스와 Observer 클래스 간의 느슨한 결합으로 인해 자유롭게 Observer를 늘리고 줄일 수 있습니다!</span></p>
+
+<h4 id="활용-방안-정리">활용 방안 정리</h4>
+
+<p>정리해서 생각해보면 다양한 경우에 옵저버 패턴을 활용 해볼 수 있을 것 같습니다.</p>
+
+<ol>
+  <li>
+    <p>오픈마켓 상품 관리 &gt; 상품이 구매되거나 취소되었을 때 제휴중인 각 오픈 마켓의 상품 재고를 반영한다.</p>
+  </li>
+  <li>
+    <p>주식 관리 &gt; 주가가 변경되었을 때 여러 증권사 시스템에 주가를 반영한다.</p>
+  </li>
+  <li>
+    <p>로그 시스템 &gt; 로그가 발생할 때 여러 타입(파일, 콘솔, DB 등)에 저장하도록 반영한다.</p>
+  </li>
+</ol>
+
+<h4 id="기타-정리">기타 정리</h4>
+
+<ol>
+  <li>
+    <p>상황에 따라서 <code class="language-plaintext highlighter-rouge">private final ExecutorService executor = Executors.newCachedThreadPool(); // 스레드 풀 사용</code> 을 이용하여 비동기 방식으로 옵저버를 호출할수도 있습니다.</p>
+  </li>
+  <li>
+    <p>자바에서 제공했었던 Observavle 클래스는 JAVA 9 이후로 쓰이지 않습니다!</p>
+  </li>
+</ol>
+
+<hr />
+
+<p>다음에는 뭔가 쉬운 데코레이터 패턴으로 돌아오겠습니다!</p>
+
+<h1 id="긴-글-봐주셔서-감사합니다-">긴 글 봐주셔서 감사합니다! 😌</h1>]]></content><author><name></name></author><category term="DEV" /><category term="디자인패턴" /><category term="디자인패턴" /><category term="Design pattern" /><category term="헤드퍼스트" /><category term="GoF" /><category term="옵저버 패턴" /><category term="Observer Pattern" /><summary type="html"><![CDATA[디자인 패턴 분석 목차]]></summary></entry><entry><title type="html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</title><link href="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html" rel="alternate" type="text/html" title="디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐" /><published>2025-02-27T00:00:00+00:00</published><updated>2025-02-27T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html"><![CDATA[<h2 id="디자인-패턴-분석-목차">디자인 패턴 분석 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/02/27/design1.html">디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/01/design2.html">객체들에게 연락돌리는 옵저버 패턴! 📞</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/03/design3.html">여러 겹으로 메이크업 가능한 데코레이터 패턴 알아보기! 💄</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/08/design4.html">느슨한 결합의 핵심! 팩토리 패턴 알아보기! 🏭</a></p>
+</blockquote>
+
+<blockquote>
+  <p>5: <a href="/dev/%EB%94%94%EC%9E%90%EC%9D%B8%ED%8C%A8%ED%84%B4/2025/03/10/design5.html">단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤</a></p>
+</blockquote>
+
+<h2 id="참고-서적">참고 서적</h2>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까! 😀</h2>
+
+<p>오늘도 블로그 글을 작성하러 돌아왔습니다!</p>
+
+<p>개발자 일을 하면서 디자인 패턴에 대한 이야기를 많이 들었는데요.</p>
+
+<p>옵저버 패턴… 팩토리 패턴… 음… 기억이 가물가물하네요…</p>
+
+<p>AI도 빠르게 진화하는 시대에 저 또한 버전을 올릴 필요성이 있다고 봅니다. 🤯</p>
+
+<p>디자인 패턴에 대한 강의나 책 등 아주 많이 있는데요..!</p>
+
+<p>저는 헤드퍼스트의 디자인패턴 책으로 구매하여 훑어봤습니다.</p>
+
+<p><a href="https://product.kyobobook.co.kr/detail/S000001810483">헤드퍼스트 디자인패턴</a></p>
+
+<p>관심 있으신 분은 위에 교보문고 링크 달아놓았습니다. 😇</p>
+
+<p>서론이 길었네요. 책에 처음 등장하는 전략 패턴부터 한 번 살펴보시죠~</p>
+
+<hr />
+
+<p>책에서는 오리의 다양한 행동을 어떻게 분리하여 구현할 것인지 소개하며 객체지향 원칙에 대해 우선 설명하고 있습니다!</p>
+
+<h3 id="객체지향-원칙">객체지향 원칙</h3>
+
+<ul>
+  <li><strong>바뀌는 부분은 캡슐화 한다.</strong></li>
+</ul>
+
+<p>✏️ <span style="color: red;">캡슐화란? 객체의 데이터(속성)와 동작(메서드)을 하나의 단위로 묶고, 외부에서 직접 접근하지 못하도록 제한하는 개념</span></p>
+
+<p><del>쉽게 얘기해서 기능별로 클래스 잘 분리해라랄까..?</del></p>
+
+<ul>
+  <li><strong>상속보다는 구성을 활용한다.</strong></li>
+</ul>
+
+<p>✏️ <span style="color: red;">구성이란? 클래스가 다른 클래스를 필드(멤버 변수)로 포함하여 기능을 조합하는 방식</span></p>
+
+<p><del>쉽게 얘기해서 ‘A에는 B가 있다. (has a)’ 라는 관계랄까…?</del></p>
+
+<ul>
+  <li><strong>구현보다는 인터페이스에 맞춰서 프로그래밍한다.</strong></li>
+</ul>
+
+<p><del>쉽게 얘기해서 인터페이스 잘 만들어라랄까….?</del></p>
+
+<p>사실 위 말들이 개발할 때 뇌에 쏙 박히지는 않을 것 같습니다… 😭</p>
+
+<p>계속 반복하여 되뇌일 수 밖에…</p>
+
+<p>다시 전략 패턴 이야기로 돌아와서 아래 클래스 다이어그램을 한 번 보시죠! 😕</p>
+
+<p><img src="https://i.imgur.com/Iu9MJSo.png" alt="Imgur" /></p>
+
+<p>책에 나온 다이어그램을 약간 간소화해서 그려봤습니다.</p>
+
+<p>이 다이어그램에서 전략 패턴의 향기를 맡기란 처음에 쉽지 않았습니다.</p>
+
+<p>✏️ <span style="color: red;">전략 패턴이란? 알고리즘군을 정의하고 캡슐화해서 각각의 알고리즘군을 수정해서 쓸 수 있게 해줍니다.</span></p>
+
+<p>다이어그램에 보시면 오리(Duck) 클래스에 FlyBehavior(나는 행동)과 QuackBehavior(우는 행동) 클래스가 선언되어 있습니다.</p>
+
+<p><strong>오리라는 객체로부터 두 개의 행위를 각각 알고리즘군으로 분리시켰기에…</strong> 전략 패턴이 사용되었구나… 라고 인지하셔야 될 듯 합니다.</p>
+
+<p>그리고 또한 위에 객체지향 원칙을 찾아볼 수 있는데요!</p>
+
+<ol>
+  <li>
+    <p>바뀔만한 부분을 하위 클래스로 분리하여 캡슐화를 진행하였구요!</p>
+  </li>
+  <li>
+    <p>나는 행동과 우는 행동을 분리하여 오리 클래스로부터 <span style="color: blue;">구성 관계</span>를 가짐으로써 느슨한 결합을 만들었습니다.</p>
+  </li>
+</ol>
+
+<p>저도 책을 보면서 생각하니까 이렇게 보이지… 아직 디자인 하수이기에… 급한 개발 건은 흔히 <strong>스파게티 코드</strong>로 구현이 될 듯 하네요… 😱</p>
+
+<p>생각해보면 개발하면서 무의식적으로 전략 패턴을 구사하고 있지 않았나? 싶기도 합니다! <del>(는 아직 멀었다…)</del></p>
+
+<p>간단한 전략 패턴 예제를 살펴 보며 마무리하도록 하겠습니다! (이건 책에 없는 GPT와 제 생각입니다…)</p>
+
+<h3 id="-전략패턴-예제-결제-시스템">✔ 전략패턴 예제: 결제 시스템</h3>
+
+<h4 id="클래스-다이어그램">클래스 다이어그램</h4>
+<p><img src="https://i.imgur.com/4gLpLDs.png" alt="Imgur" /></p>
+
+<h4 id="전략-인터페이스-정의">전략 인터페이스 정의</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 전략 인터페이스: 결제 방식 정의
+interface PaymentStrategy {
+    void pay(int amount);
+}
+</code></pre></div></div>
+<h4 id="구체적인-결제-방법-구현">구체적인 결제 방법 구현</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 신용카드 결제 전략
+class CreditCardPayment implements PaymentStrategy {
+    private String cardNumber;
+
+    public CreditCardPayment(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println(amount + "원을 신용카드(" + cardNumber + ")로 결제합니다.");
+    }
+}
+
+// 페이팔 결제 전략
+class PayPalPayment implements PaymentStrategy {
+    private String email;
+
+    public PayPalPayment(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println(amount + "원을 페이팔 계정(" + email + ")으로 결제합니다.");
+    }
+}
+
+// 암호화폐 결제 전략
+class CryptoPayment implements PaymentStrategy {
+    private String walletAddress;
+
+    public CryptoPayment(String walletAddress) {
+        this.walletAddress = walletAddress;
+    }
+
+    @Override
+    public void pay(int amount) {
+        System.out.println(amount + "원을 암호화폐 지갑(" + walletAddress + ")에서 결제합니다.");
+    }
+}
+</code></pre></div></div>
+<h4 id="결제-컨텍스트-구현">결제 컨텍스트 구현</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 컨텍스트 클래스: 결제 수단을 동적으로 설정 가능
+class ShoppingCart {
+    private PaymentStrategy paymentStrategy;
+
+    // 전략(결제 방식) 설정
+    public void setPaymentStrategy(PaymentStrategy paymentStrategy) {
+        this.paymentStrategy = paymentStrategy;
+    }
+
+    // 결제 실행
+    public void checkout(int amount) {
+        if (paymentStrategy == null) {
+            throw new IllegalStateException("결제 방법이 설정되지 않았습니다.");
+        }
+        paymentStrategy.pay(amount);
+    }
+}
+</code></pre></div></div>
+<h4 id="실행할-main-클래스">실행할 MAIN 클래스</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>public class Main {
+    public static void main(String[] args) {
+        ShoppingCart cart = new ShoppingCart();
+
+        // 신용카드 결제
+        cart.setPaymentStrategy(new CreditCardPayment("1234-5678-9012-3456"));
+        cart.checkout(10000);
+
+        // 페이팔 결제
+        cart.setPaymentStrategy(new PayPalPayment("user@example.com"));
+        cart.checkout(20000);
+
+        // 암호화폐 결제
+        cart.setPaymentStrategy(new CryptoPayment("0xABC123DEF456"));
+        cart.checkout(30000);
+    }
+}
+</code></pre></div></div>
+<h4 id="실행-결과">실행 결과</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>10000원을 신용카드(1234-5678-9012-3456)로 결제합니다.
+20000원을 페이팔 계정(user@example.com)으로 결제합니다.
+30000원을 암호화폐 지갑(0xABC123DEF456)에서 결제합니다.
+</code></pre></div></div>
+
+<p>다음에는 다른 패턴으로 돌아오겠습니다!</p>
+
+<p>긴 글 봐주셔서 감사합니다! 😌</p>]]></content><author><name></name></author><category term="DEV" /><category term="디자인패턴" /><category term="디자인패턴" /><category term="design pattern" /><category term="헤드퍼스트" /><category term="GoF" /><category term="전략 패턴" /><category term="Strategy Pattern" /><summary type="html"><![CDATA[디자인 패턴 분석 목차]]></summary></entry><entry><title type="html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</title><link href="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html" rel="alternate" type="text/html" title="지킬(JERKLL) 프레임워크 구조 파악하기! 🤠" /><published>2025-02-26T00:00:00+00:00</published><updated>2025-02-26T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html"><![CDATA[<h2 id="gtihub-블로그-만들기-목차">GTIHUB 블로그 만들기 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까!! 🧐</h2>
+
+<p>지난번에 Jerkll이라는 프레임워크를 사용하여 블로그를 구동시켜 보았습니다!</p>
+
+<p>다만… Jerkll 프레임워크… 아직 뭐가 뭔지 모르겠네요… 😨</p>
+
+<p>그래서 Jerkll 프레임워크 구조 파악 시간을 가졌습니다!</p>
+
+<p>한 번 같이 보시죠! 😓</p>
+
+<hr />
+
+<h3 id="1-기본-구조">1. 기본 구조</h3>
+
+<p>지킬 프레임워크의 기본 구조는 대략적으로 아래와 같습니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/my-jekyll-site
+├── _config.yml        # 사이트 전역 설정 파일
+├── _posts/           # 블로그 게시글 저장 폴더
+├── _drafts/          # 게시글 임시 저장 폴더
+├── _layouts/         # 페이지의 기본 레이아웃 파일
+├── _includes/        # 공통 HTML 조각 파일 (헤더, 푸터 등)
+├── _data/            # YAML/JSON 데이터 파일
+├── _sass/            # Sass 스타일시트 파일
+├── assets/           # 정적 리소스 (CSS, JS, 이미지 등)
+├── _site/            # 최종 빌드된 정적 파일 (자동 생성됨)
+├── index.md          # 사이트 메인 페이지 (Markdown)
+├── about.md          # 예제 페이지 (Markdown)
+└── Gemfile           # Jekyll 플러그인 및 종속성 관리 파일
+</code></pre></div></div>
+
+<p>와우… 뭔가 다양한 구성들로 되어 있네요…</p>
+
+<p>하나씩 위에서부터 뜯어봅시다…</p>
+
+<h3 id="2-_configyml">2. _config.yml</h3>
+
+<p>이 파일에는 사이트의 전역 설정을 하는 파일입니다.</p>
+
+<p>테마나 도메인 등 블로그의 기본 설정 등을 담을 수 있습니다.</p>
+
+<p>일종의 Setting 파일로 보면 되겠네요.</p>
+
+<p>생각지도 못한 다양한 설정들을 변경할 수 있기 때문에 이런 것도 변경 가능한지는 GPT님이 잘 알려줄 것 같습니다… 😶‍🌫️</p>
+
+<h3 id="3-_posts">3. _posts/</h3>
+
+<p>이 폴더에는 본격적으로 글을 쓰는 markdown 파일들을 담아내는 공간입니다.</p>
+
+<p>중요한 것은 파일명의 패턴인데요!</p>
+
+<p><code class="language-plaintext highlighter-rouge">YYYY-MM-DD-title.md</code> 이 구조로 파일명을 작성해야 합니다!</p>
+
+<p>두 번째로 알아두어야 할 것은 markdown 파일 작성법인데요!</p>
+
+<p>아마 markdown에 대한 기본적인 문법은 1번 포스트에 담았습니다!</p>
+
+<p>다만 블로그에서 확인이 필요한 기본 정보를 써야하는 부분이 필요합니다!</p>
+
+<p>아래 예시를 보시면 아실 겁니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: post
+title: "내 첫 번째 포스트"
+date: 2025-02-26
+categories: 개발 블로그
+tags: [Jekyll, 블로그]
+---
+
+Jekyll을 이용한 첫 번째 블로그 포스트입니다. 🚀
+</code></pre></div></div>
+
+<p>위처럼 파일 내에 layout부터 tags 등 마크다운 파일에 대한 기본 정보를 작성해야 합니다.</p>
+
+<p><span style="color: red;">⚠ 반드시 첫 번째 줄부터 써야 기본 정보가 인식됩니다. 두 번째 줄부터 쓰면 인식이 안돼요!</span></p>
+
+<h3 id="4-_layouts">4. _layouts/</h3>
+
+<p>마크다운 파일을 작성할 때 기본 정보에 layout 이라는 정보를 보셨을겁니다!</p>
+
+<p>거기에 사용되는 html을 이 폴더에 관리하시면 됩니다!</p>
+
+<p>여기서 중요한 특징은 페이지의 기본 골격을 설정할 수 있고 JSTL 처럼 <strong>동적으로 바인딩</strong>을 할 수 있습니다!</p>
+
+<p>아래 예시를 보시면 더 이해가 되실 겁니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;\{\{ page.title \}\}&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/assets/style.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header&gt;
+        &lt;h1&gt;\{\{ site.title \}\}&lt;/h1&gt;
+    &lt;/header&gt;
+    
+    &lt;main&gt;
+        \{\{ content \}\}
+    &lt;/main&gt;
+    
+    &lt;footer&gt;
+        &lt;p&gt;© 2025 \{\{ site.title \}\}&lt;/p&gt;
+    &lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></div></div>
+
+<p>본문 안에 보면 이렇게 <code class="language-plaintext highlighter-rouge">{ {중괄호} }</code>로 감싸있는 부분이 보이실 겁니다!</p>
+
+<p>content 영역이 마크다운을 작성한 글이 노출되는 부분입니다.</p>
+
+<p>그 외에 if문, for문 등도 사용할 수 있으니 궁금하신 분들은 추가로 찾아보심을 추천드립니다!</p>
+
+<p><strong>📌 마크다운 파일 안에서도 <code class="language-plaintext highlighter-rouge">{ {내용} }</code> 바인딩이 되버리네요… 🤔</strong></p>
+
+<h3 id="5-_includes">5. _includes/</h3>
+
+<p>이 폴더는 예상을 하실 겁니다.</p>
+
+<p>헤더나 푸터, 사이드바 같이 공통적으로 포함되는 부분을 빼는 부분입니다.</p>
+
+<p>사용은 아래처럼 하시면 됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;body&gt;
+    \{\% include header.html \%\}
+    &lt;main&gt;
+    &lt;/main&gt;
+&lt;/body&gt;
+</code></pre></div></div>
+
+<h3 id="6-_data">6. _data/</h3>
+
+<p>여기는 마치 DB 대용처럼 사이트에서 사용할 데이터를 관리하는 곳입니다!</p>
+
+<p>사용은 아래처럼 하시면 됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;p&gt;작성자: \{\{ site.data.authors.john_doe.name \}\}&lt;/p&gt;
+</code></pre></div></div>
+
+<h3 id="7-_sass">7. _sass/</h3>
+
+<p>여기는 Sass 파일을 저장하는 폴더입니다!</p>
+
+<p>css는 들어봤어도 Sass는 조금 생소하실 수 있을 것 같네요!</p>
+
+<h3 id="8-_assets">8. _assets/</h3>
+
+<p>여기는 CSS 파일이나 JS 파일 등을 관리하심 됩니다!</p>
+
+<h3 id="9-_site">9. _site/</h3>
+
+<p><span style="color: red;">⛔ 여기는 직접 건드리는 곳이 아닙니다! ⛔</span></p>
+
+<p>Jekyll가 서버를 구동하면 마크다운을 조합한 html 파일을 생성하는 곳입니다.</p>
+
+<p><strong>📌 GITHUB에 PUSH하지 않아도 되므로 주로 .gitignore에 등록합니다!</strong></p>
+
+<h3 id="10-indexmd">10. index.md</h3>
+
+<p>이 파일은 블로그의 기본 페이지라고 보심 됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+layout: default
+title: "홈페이지"
+---
+
+# 환영합니다!
+Jekyll을 이용한 정적 블로그입니다.
+</code></pre></div></div>
+
+<p>예시처럼 layouts에 있는 default.html을 호출하여 사용할 수 있습니다!</p>
+
+<h3 id="11-_drafts">11. _drafts/</h3>
+
+<p>여기는 아직 작업중인 포스트 글을 모아놓은 곳입니다.</p>
+
+<p>필수적은 공간은 아니니 필요하신 분들만 폴더 만들어서 사용하심 될 것 같네요!</p>
+
+<hr />
+
+<p>일단 얼추 지킬 프레임워크의 구조를 살펴보았습니다.</p>
+
+<p>아직도 배울 부분은 많은 것 같네요… 😭</p>
+
+<p>블로그의 실력은 차차 키워나가도록 하고 추후에 더 좋은 정보가 있다면 공유드리겠습니다!</p>
+
+<p>감사합니다!</p>]]></content><author><name></name></author><category term="DEV" /><category term="블로그" /><category term="Jekyll" /><category term="Web" /><category term="Blogging" /><category term="Github" /><summary type="html"><![CDATA[GTIHUB 블로그 만들기 목차]]></summary></entry><entry><title type="html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</title><link href="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html" rel="alternate" type="text/html" title="GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸" /><published>2025-02-25T00:00:00+00:00</published><updated>2025-02-25T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html"><![CDATA[<h2 id="gtihub-블로그-만들기-목차">GTIHUB 블로그 만들기 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="안녕하십니까-">안녕하십니까!! 🧐</h2>
+
+<p>기술 블로그 새내기 graves85입니다.</p>
+
+<p>이번에는 Jerkll이라는 프레임워크를 사용하여 블로그에 멋진 옷을 입혀주려고 합니다! 😮</p>
+
+<p><del>(GPT가 Jerkll 강추했다는…)</del></p>
+
+<p>✏️ <span style="color: red;">프레임워크란? 소프트웨어 개발을 쉽게 할 수 있도록 미리 만들어진 구조와 규칙의 집합</span></p>
+
+<p>차근차근 한 번 해봅시다!</p>
+
+<hr />
+
+<h3 id="1-루비-언어-설치">1. 루비 언어 설치</h3>
+
+<p>우선 로컬에서 Jerkll을 적용하기 위해서는 루비를 설치해야 합니다.</p>
+
+<p><a href="https://rubyinstaller.org/">루비 언어 설치</a></p>
+
+<p>위의 경로를 통해서 루비 언어를 설치하도록 합시다!</p>
+
+<p><img src="https://i.imgur.com/lU73lxm.png" alt="Imgur" /></p>
+
+<p>저는 루비 3.3.7을 설치하였습니다.</p>
+
+<p>설치가 끝났다면 윈도우 기준 cmd 에서 설치가 되었는지 확인해봅시다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruby -v
+gem -v
+</code></pre></div></div>
+
+<h3 id="2-jekyll-설치">2. Jekyll 설치</h3>
+
+<p>이제 루비의 gem 명령어를 통해서 jekyll를 설치할 수 있습니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem install jekyll bundler
+</code></pre></div></div>
+
+<p>마찬가지로 아래 명령어로 정상 설치가 되었는지 알 수 있어요!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll -v
+</code></pre></div></div>
+
+<h3 id="3-jekyll-프로젝트-생성">3. Jekyll 프로젝트 생성</h3>
+
+<p>우선 프로젝트를 생성할 폴더를 만들고 거기에 아래 명령어를 쳐보면 파일들이 생성됩니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new 프로젝트명
+</code></pre></div></div>
+
+<p>위 명령어를 치면 프로젝트명의 폴더가 하나 생성되고 아래와 같은 구조로 파일들이 만들어졌을 겁니다!</p>
+
+<p><img src="https://i.imgur.com/RKZbfue.png" alt="Imgur" /></p>
+
+<p><span style="color: red;"> ⚠ Windows에서 jekyll new 실행 시 오류 발생 시 해결 방법 </span></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle add webrick
+</code></pre></div></div>
+
+<h3 id="4-로컬에서-프로젝트-실행해보기">4. 로컬에서 프로젝트 실행해보기</h3>
+
+<p>이제 페이지를 띄우기까지 거의 다 왔습니다!</p>
+
+<p>TERMINAL에서 아래 명령어로 로컬 서버를 띄어봅니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle exec jekyll serve
+</code></pre></div></div>
+
+<p>서버가 정상적으로 구동되었다면 <code class="language-plaintext highlighter-rouge">http://localhost:4000</code> 이 경로에 접속해서 확인을 해볼 수 있습니다!</p>
+
+<p><strong>📌 VS Code에서 빠르게 jekyll 서버를 띄우고 싶다면 ⁉️</strong></p>
+
+<p>프로젝트 루트 기준 <code class="language-plaintext highlighter-rouge">.vscode/tasks.json</code> 경로로 json 파일을 하나 만듭니다!</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Jekyll",
+            "type": "shell",
+            "command": "bundle exec jekyll serve",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
+</code></pre></div></div>
+
+<p>그리고 나서 위처럼 파일을 만든 후에 저장하고 <code class="language-plaintext highlighter-rouge">Ctrl + Shift + B</code> 키를 누르면 자동으로 Jerkll 서버가 구동됨을 확인 할 수 있습니다.</p>
+
+<p>이제 로컬에서 블로그를 수리할 수 있는 환경이 만들어졌습니다! 😲</p>
+
+<p>이 프레임워크 구조에 대해서 많이 궁금하실텐데 저도 차근차근 학습중에 있답니다… 🤐</p>
+
+<p>기회가 되면 빠르게 구조도 같이 파악해보시죠!</p>
+
+<h3 id="5-github에-올려보기">5. GITHUB에 올려보기!</h3>
+
+<p>이제 만들어진 Jerkll 프로젝트를 GITHUB에 한 번 고대로 올려보겠습니다!</p>
+
+<p><del>(제발 한방에 잘 떠라!!!)</del></p>
+
+<p><img src="https://i.imgur.com/jN3LJbQ.png" alt="Imgur" /></p>
+
+<p>PUSH를 마친 후 github 블로그를 들어가보면 이렇게 기본 테마의 블로그가 뜨는 것을 확인할 수 있습니다!</p>
+
+<p>그런데 프레임워크를 써서 github 블로그를 띄우기는 했는데… 뭐가 좋은 것일까… 🤨</p>
+
+<p>다음 글에는 좀 더 Jekyll에 대해 파보도록 하겠습니다!</p>
+
+<p>감사합니다!</p>]]></content><author><name></name></author><category term="DEV" /><category term="블로그" /><category term="Jekyll" /><category term="Web" /><category term="Blogging" /><category term="Github" /><summary type="html"><![CDATA[GTIHUB 블로그 만들기 목차]]></summary></entry><entry><title type="html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</title><link href="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html" rel="alternate" type="text/html" title="GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편" /><published>2025-02-24T00:00:00+00:00</published><updated>2025-02-24T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html"><![CDATA[<h2 id="gtihub-블로그-만들기-목차">GTIHUB 블로그 만들기 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="안녕하십니까-"><strong>안녕하십니까! 😀</strong></h2>
+
+<p>GITHUB 블로그를 힘들게 만들었는데 점점 잊혀져 가네요… 😶‍🌫️</p>
+
+<p>더 잊기 전에 기록해둡시다!</p>
+
+<p>(저는 <del>멋있어 보이고 싶어</del> GIT은 CLI로 진행하였습니다.)</p>
+
+<hr />
+
+<h3 id="1-github-레파지토리-생성">1. GITHUB 레파지토리 생성</h3>
+
+<p>GITHUB에 로그인 한 후 New repository를 눌러서 아래와 같이 생성합니다.</p>
+
+<p><img src="https://i.imgur.com/I42yE66.png" alt="Imgur" /></p>
+
+<p>📢 레파지토리 이름은 <strong>사용자명.github.io</strong>로 설정해야 블로그를 만들 수 있습니다!</p>
+
+<p>📢 다른 사용자들이 볼 수 있도록 Public으로 개설합니다!</p>
+
+<h3 id="2-hello-world-한-번-생성해보기">2. HELLO WORLD 한 번 생성해보기</h3>
+
+<p><img src="https://i.imgur.com/3k3Lfrc.png" alt="Imgur" /></p>
+
+<p>블로그에 HELLO WORLD를 한 번 찍어봅시다.</p>
+
+<p>레파지토리를 들어가보면 아직 아무것도 없는 빈 공간입니다.</p>
+
+<p>creating a new file을 눌러서 파일 하나를 생성해봅시다.</p>
+
+<p><img src="https://i.imgur.com/FECrsbC.png" alt="Imgur" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;HELLO&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    HELLO WORLD
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></div></div>
+
+<p>위처럼 간단하게 코드를 입력하고 파일 이름은 <strong>index.html</strong>로 지정하여 Commit chages 버튼을 누릅니다!!</p>
+
+<p>Commit까지 마쳤다면 위 메뉴 중에 Actions라는 탭이 있습니다.</p>
+
+<p><img src="https://i.imgur.com/RinWVpJ.png" alt="Imgur" /></p>
+
+<p>Actions 탭에 들어가보면 github이 자동으로 빌드와 배포를 거치는 작업을 볼 수 있습니다.</p>
+
+<p>📌 <span style="color:red;">혹시 모르시는 분들을 위한 첨언! Github Actions를 이용하여 젠킨스를 대신해 빌드와 배포를 할 수 있다는 사실!</span></p>
+
+<h3 id="4-블로그-확인해보기">4. 블로그 확인해보기</h3>
+
+<p>이제 블로그 URL을 직접 들어가서 확인해 볼 시간입니다. 🤤</p>
+
+<p><img src="https://i.imgur.com/2fMSMtJ.png" alt="Imgur" /></p>
+
+<p>들어가보면 HELLO WORLD가 출력되어 있는 것을 알 수 있습니다!</p>
+
+<p>시작이 반인데 껍데기를 만들었으니 반은 한 것 같아요! 🥲</p>
+
+<p>껍데기를 만들었으니 본격적으로 Jekyll 설정한 후기도 공유드리겠습니다. 🥰</p>
+
+<p>감사합니다!</p>]]></content><author><name></name></author><category term="DEV" /><category term="블로그" /><category term="Jekyll" /><category term="Web" /><category term="Blogging" /><category term="Github" /><summary type="html"><![CDATA[GTIHUB 블로그 만들기 목차]]></summary></entry><entry><title type="html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</title><link href="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html" rel="alternate" type="text/html" title="GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳" /><published>2025-02-23T00:00:00+00:00</published><updated>2025-02-23T00:00:00+00:00</updated><id>https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1</id><content type="html" xml:base="https://graves85.github.io//dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html"><![CDATA[<h2 id="gtihub-블로그-만들기-목차">GTIHUB 블로그 만들기 목차</h2>
+
+<blockquote>
+  <p>1: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/23/blog1.html">GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳</a></p>
+</blockquote>
+
+<blockquote>
+  <p>2: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/24/blog2.html">GITHUB 블로그 개설 어떻게 했더라… 🤨 껍데기 만들기편</a></p>
+</blockquote>
+
+<blockquote>
+  <p>3: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/25/blog3.html">GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸</a></p>
+</blockquote>
+
+<blockquote>
+  <p>4: <a href="/dev/%EB%B8%94%EB%A1%9C%EA%B7%B8/2025/02/26/blog4.html">지킬(JERKLL) 프레임워크 구조 파악하기! 🤠</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="안녕하십니까-"><strong>안녕하십니까! 😀</strong></h2>
+
+<p>기술 블로그 만들기에 한창인 graves85입니다.</p>
+
+<p>요즘 관심을 갖기 시작한 GITHUB 블로그는 어떻게 만드는 것일까…</p>
+
+<p>(이 양반… 시작한지 너무 늦음…) 🥶</p>
+
+<p>이제서야 비로소 글을 작성할 수 있는 뼈대를 만들었으니…</p>
+
+<p>블로그는 조금씩 살을 붙이도록 하고 글 작성하는 마크다운 작성 방법부터 알아두려고 합니다.</p>
+
+<hr />
+
+<h3 id="1-소제목">1. 소제목</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> # 제목 1
+ ## 제목 2
+ ### 제목 3
+ #### 제목 4
+ ##### 제목 5
+ ###### 제목 6
+</code></pre></div></div>
+
+<h3 id="2-글꼴스타일">2. 글꼴스타일</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> **굵게**
+ *기울임*
+ ~~취소선~~
+</code></pre></div></div>
+
+<h3 id="3-목록-서브-목차는-들여쓰기-할-것">3. 목록 (서브 목차는 들여쓰기 할 것!)</h3>
+
+<p><strong>순서가 없는 목차</strong></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- 목차1
+  - 서브목차1
+  - 서브목차2
+</code></pre></div></div>
+<p><strong>순서가 있는 목차</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. 순서1
+2. 순서2
+3. 순서3
+</code></pre></div></div>
+
+<h3 id="4-코드블록">4. 코드블록</h3>
+
+<p><strong>한 줄 코드 블록</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>`코드 블록`
+</code></pre></div></div>
+
+<p><strong>여러 줄 코드 블록은 아래 참고</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> \``` 
+ def hello()
+ (백슬래시 빼고 쓰세요!)
+ \```
+</code></pre></div></div>
+
+<h3 id="5-링크">5. 링크</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Naver](https://www.naver.com)
+</code></pre></div></div>
+
+<h3 id="6-이미지">6. 이미지</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>![이미지명](이미지링크)
+</code></pre></div></div>
+
+<h3 id="7-인용문">7. 인용문</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;인용문
+&gt;&gt;깊은 인용문
+</code></pre></div></div>
+
+<h3 id="8-테이블">8. 테이블</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>|이름|나이|
+|----|----|
+|홍길동|539|
+|임꺽정|328|
+</code></pre></div></div>
+
+<h3 id="9-체크리스트">9. 체크리스트</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- [x] 완료된 항목
+- [ ] 미완료된 항목
+</code></pre></div></div>
+
+<h3 id="10-수평선">10. 수평선</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
+</code></pre></div></div>
+
+<p>아직 초보라 글 쓰기 쉽지가 않네요… 😭</p>
+
+<p>가독성을 차차 늘려 좋은 발전과 공유를 드릴 수 있도록 노력하겠습니다.</p>
+
+<p>감사합니다!</p>]]></content><author><name></name></author><category term="DEV" /><category term="블로그" /><category term="Jekyll" /><category term="Web" /><category term="Blogging" /><category term="Github" /><category term="markdown" /><summary type="html"><![CDATA[GTIHUB 블로그 만들기 목차]]></summary></entry></feed>

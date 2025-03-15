@@ -1,0 +1,226 @@
+---
+layout: content-layout
+title: "메소드까지 캡슐화해버리는 커맨드 패턴 알아보기! 💪"
+date: 2025-03-15
+categories: [DEV, 디자인패턴]
+tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 커맨드 패턴, Command Pattern]
+---
+
+## 디자인 패턴 분석 목차
+
+{% for post in site.categories["디자인패턴"] reversed %}
+> {{ forloop.index }}: [{{ post.title }}]({{ post.url }})    
+{% endfor %}
+
+## 참고 서적
+
+[헤드퍼스트 디자인패턴](https://product.kyobobook.co.kr/detail/S000001810483)
+
+---
+
+## 안녕하십니까! 😀
+
+이번엔 커맨드 패턴을 배워보려 합니다!
+
+~~(리시빙 커맨더가 생각나는 것은 저 뿐인가요...? 죄송합니다..)~~
+
+뭔가 명령을 처리하는 패턴일 것 같긴 한데 한 번 천천히 살펴보시죠. 
+
+<span style="color: red;">🥊 난이도는 싱글턴보다 살짝 더 맵습니다.</span>
+
+---
+
+### ❇️ 문제 살펴보기
+
+책에서는 만능 리모컨을 예시로 서두를 작성하였는데요!
+
+리모컨에는 정말 수많은 기능들이 들어 있습니다.
+
+이 기능을 기준으로 전부 클래스를 만들면 얼마나 많을까요!? 😱
+
+그래서 구상한 것이 수많은 기능 클래스를 중간에 컨트롤하는 클래스가 들어가는 방법을 강구하게 된 것입니다.
+
+**리모컨을 생각하기 전에 더 단순한 예시인 음식 주문 과정을 예시로 살펴보겠습니다.**
+
+1. 고객이 종업원에게 주문을 한다.
+
+2. 종업원이 카운터에 전달하고 주방장에게 주문서를 전달한다.
+
+3. 주방장이 주문서를 보고 음식을 만들어서 주문을 완료한다.
+
+**다음으로 등장 인물들을 객체지향용어와 매칭시켜 보겠습니다.**
+
+- 고객 ▶️ 클라이언트 객체
+- 종업원 ▶️ 인보커 객체
+- 주문서 ▶️ 커맨드 객체
+- 주방장 ▶️ 리시버 객체
+
+아마도 인보커? 리시버? 커맨드? 용어 매칭을 했지만 더욱 헤깔리실 수 있습니다. 저도 헤깔리네요... 👀
+
+여기에 정말 커맨드 패턴이 녹여져 있는걸까?
+
+소스 코드를 보면서 아마 이해가 되실 듯 합니다.
+
+### ❇️ 커맨드 패턴 소스 코드 예제 살펴보기
+
+#### 클라이언트 객체 (고객)
+
+```
+public class Customer {
+	Waitress waitress;
+	Order order;
+	public Customer(Waitress waitress) {
+		this.waitress = waitress;
+	}
+	public void createOrder(Order order) {
+		this.order = order;
+	}
+	public void hungry() {
+		waitress.takeOrder(order);
+	}
+}
+```
+
+고객은 위처럼 종업원에게 주문을 할 수 있는 클라이언트입니다.
+
+#### 인보커 객체 (종업원)
+
+```
+public class Waitress {
+	Order order;
+	public Waitress() {}
+	public void takeOrder(Order order) {
+		this.order = order; 
+		order.orderUp();
+	}
+}
+```
+
+종업원은 위처럼 주문을 받아 등록할 수 있는 기능이 있지요!
+
+✏️ <span style="color: red;">인보커는 명령을 받아 커맨드 객체에게 수행해달라고 전달하는 객체입니다!</span>
+
+#### 커맨드 객체 (주문서)
+
+```
+@FunctionalInterface
+public interface Order {
+	public void orderUp();
+}
+```
+
+```
+public class BurgerAndFriesOrder implements Order {
+	Cook cook;
+	public BurgerAndFriesOrder(Cook cook) {
+		this.cook = cook;
+	}
+	public void orderUp() {
+		cook.makeBurger();
+		cook.makeFries();
+	}
+}
+```
+
+커맨드는 인터페이스와 인터페이스를 구현한 하위 커맨드로 구성되어 있습니다.
+
+하위 커맨드 중 하나인 버거주문은 어떤 함수들을 지시하는지 알 수가 있죠.
+
+✏️ <span style="color: red;">커맨드는 모든 커맨드 객체에서 구현해야 하는 인터페이스입니다! 리시버에게 특정 작업을 처리하라는 지시를 전달하죠!</span>
+
+#### 리시버 객체 (주방장)
+
+```
+public class Cook {
+
+	public Cook() {}
+
+	public void makeBurger() {
+		System.out.println("Making a burger");
+	}
+
+	public void makeFries() {
+		System.out.println("Making fries");
+	}
+}
+```
+
+주방장은 본격적으로 주문서의 명령을 수행합니다.
+
+✏️ <span style="color: red;">리시버는 요구사항을 수행하는 객체로 실제 어떤 행위를 하는지 구현하는 객체입니다!</span>
+
+#### 식당 (메인)
+
+```
+public class Diner {
+	public static void main(String[] args) {
+		Cook cook = new Cook();
+		Waitress waitress = new Waitress();
+		Customer customer = new Customer(waitress);
+		customer.createOrder(new BurgerAndFriesOrder(cook));
+		customer.hungry();
+	}
+}
+```
+
+종합적으로 보았을 때 고객이 위처럼 주문을 수행하여 처리할 수 있습니다.
+
+### ❇️ 클래스 다이어그램으로 살펴보기
+
+![Imgur](https://i.imgur.com/3lQkNiV.png)
+
+다이어그램으로 보면 약간 이해가 되실까요???
+
+그래서 커맨드 패턴이 대체 뭐야? 😩라고 물으신다면 다음과 같이 축약할 수 있을 것 같네요.
+
+<span style="background-color:rgb(200, 200, 255);">**요청 내역을 객체로 캡슐화해서 객체를 서로 다른 요청 내역에 따라 매개변수화 하는 과정!**</span>
+
+쉽게 이해해서 위의 다이어그램을 예시로 Order라는 요청 내역을 캡슐화하고
+
+BurgerAndFriesOrder, PizzaOrder, StakeOrder 등등으로 메소드를 다르게 구현하여 제공하는 것을 말합니다!
+
+위의 구현이 핵심이고 부가적으로 리시버와 인보커가 딸려나와 커맨드 패턴을 완성시키는 것이죠!
+
+### ❇️ 커맨드를 수행 안하는 클래스도 필요한데?
+
+```
+public class NoCommand implements Command {
+	public void execute() {}
+}
+```
+
+만약에 아무 것도 수행을 하지 않는 커맨드가 필요하다면 위처럼 Null 객체를 구현하여 활용하기도 한답니다.
+
+### ❇️ 한번에 커맨드를 수행하고 싶으면?
+
+```
+public class MacroCommand implements Command {
+	Command[] commands;
+
+	public void execute() {
+		for(int i=0; i<commands.length; i++) {
+			commands[i].execute();
+		}
+	}
+}
+```
+
+위처럼 커맨드를 일괄 처리하는 커맨드를 구현하면 된답니다!
+
+<span style="color: red;">이 외에도 커맨드에 prev 변수를 하나 만들어서 이전 커맨드로 돌아가게끔 undo 메소드 구현도 활용해볼 수 있죠!</span>
+
+### ❇️ 커맨드 패턴이 사용되는 곳은?
+
+1. 스레드 풀이나 작업 큐와 같은 다양한 작업이 있는 곳
+
+2. Java Swing 리스너
+
+3. 실행 취소나 매크로 기능에 활용
+
+이번에 배운 커맨드 패턴을 익혀둔다면 정말 다양한 기능이 있는 메인 프로세스를 캡슐화하여 구현할 수 있을 것만 같습니다.
+
+---
+
+다음에는 컨버팅에 특화된 어댑터 패턴과 퍼사드 패턴을 알아봅시다!
+
+# 긴 글 봐주셔서 감사합니다! 😌

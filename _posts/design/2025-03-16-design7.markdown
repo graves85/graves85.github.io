@@ -1,0 +1,219 @@
+---
+layout: content-layout
+title: "컨버팅의 달인 어댑터 및 퍼사드 패턴 알아보기! 💑"
+date: 2025-03-16
+categories: [DEV, 디자인패턴]
+tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 어댑터 패턴, Adapter Pattern, 퍼사드 패턴, Facade Pattern]
+---
+
+## 디자인 패턴 분석 목차
+
+{% for post in site.categories["디자인패턴"] reversed %}
+> {{ forloop.index }}: [{{ post.title }}]({{ post.url }})    
+{% endfor %}
+
+## 참고 서적
+
+[헤드퍼스트 디자인패턴](https://product.kyobobook.co.kr/detail/S000001810483)
+
+---
+
+## 안녕하십니까! 😀
+
+이번엔 어댑터 패턴과 퍼사드 패턴을 알아볼 차례입니다.
+
+**패턴 하나 배우기도 벅찬데 무슨 2개씩이나 익히나...**라는 생각을 할수도 있습니다.
+
+책에서는 이 둘의 성향이 비슷하여 묶어서 한 챕터로 보여주고 있답니다!
+
+그럼 쉬운 어댑터 패턴부터 먼저 훑어보겠습니다. 😇
+
+---
+
+### ❇️ 어댑터 패턴부터 살펴보기
+
+어릴적에 부모님이 '어댑터 좀 가져와바라..' 라는 이야기좀 들어보셨을까요??? ~~(너무 검정고무신 시절 내용이라면 죄송합니다..)~~
+
+요즘엔 여행용으로 챙기기도 하겠네요!
+
+220v를 110v로 변환하기 위해 중간에 장비를 쓰는 것처럼
+
+두 클래스 사이에 목적성은 같지만 메소드가 다른 경우 어댑터 패턴이 등장하여 해결을 해줍니다.
+
+소스를 보시면 더 간단히 이해되실겁니다!
+
+```
+public interface Duck {
+	public void quack();
+	public void fly();
+}
+```
+
+```
+public interface Turkey {
+	public void gobble();
+	public void fly();
+}
+```
+
+위처럼 2개의 오리와 칠면조의 인터페이스가 있습니다.
+
+quack과 gobble 메소드를 연결하고 싶다면 어떻게 하면 될까요? 😟
+
+칠면조를 오리에 맞추는 어댑터 클래스를 만들면 됩니다!
+
+```
+public class TurkeyAdapter implments Duck {
+	Turkey turkey;
+	
+	public TurkeyAdapter(Turkey turkey) {
+		this.turkey = turkey;
+	}
+
+	public void quack() {
+		turkey.gobble();
+	}
+
+	public void fly() {
+		for(int i=0; i<5; i++) {
+			turkey.fly();
+		}
+	}
+}
+```
+
+터키 어댑터 클래스는 오리 클래스를 구현하고 있으며 변수로 터키 클래스를 가지고 있습니다.
+
+마치 오리의 자식 같지만 터키의 흉내를 낼 수 있는 구조이지요. 🤔
+
+위의 방식이 이제 <span style="background-color:rgb(200, 200, 255);">**객체 어댑터**</span> 방식이라고 하는데요!
+
+어댑터 방식은 한 가지 더 있습니다! 어떻게 다른지 소스부터 바로 보시죠.
+
+```
+public class TurkeyAdapter extends Turkey implments Duck {
+	@Override
+	public void quack() {
+		gobble();
+	}
+}
+```
+
+칠면조 클래스를 상속함으로써 오리 클래스의 메소드를 구현하고 바로 칠면조 클래스의 메소드를 사용하는 방식입니다!
+
+이 방식을 <span style="background-color:rgb(200, 200, 255);">**클래스 어댑터**</span> 방식이라고 하며 객체 어댑터보다 좀 더 성능이 좋다고 하죠! (단 복수 개의 구현이 불가합니다.)
+
+✏️ <span style="color: red;">어댑터 패턴은 특정 클래스 인터페이스를 클라이언트에서 요구하는 다른 이터페이스로 변환하는 패턴입니다!</span>
+
+### ❇️ 어댑터 패턴은 어디에 쓰일까요?
+
+1. Enumeration을 Iterator에 적응시킬 때
+2. 지도 API를 교체할 때 (ex 구글 -> 네이버)
+3. 데이터 변환이 필요할 때 (ex CSV -> JSON)
+
+이렇게 어댑터 패턴도 여러 곳에서 사용중에 있습니다!
+
+배움이 여기서 마무리되면 꿀이겠지만 한 가지 패턴을 더 배워햐 하지요... 🤢
+
+### ❇️ 어댑터보다 조그음 더 어려운 퍼사드 패턴 알아보기
+
+퍼사드(외관) 패턴은 결론부터 말씀드리면 어지럽게 클래스로 나열되어 있는 시스템을 간결하게 호출하여 끝내게 만들어주는 패턴입니다!
+
+(일종의 홈시어터 같은거죠! 🤩)
+
+소스를 한 번 보실까요???
+
+#### 퍼사드 패턴 적용 전
+
+```
+// 사용 예제 (퍼사드 패턴 적용 전)
+public class HomeTheaterBeforeFacade {
+    public static void main(String[] args) {
+        Projector projector = new Projector();
+        SoundSystem soundSystem = new SoundSystem();
+        BluRayPlayer bluRayPlayer = new BluRayPlayer();
+
+        // 영화 보기 위한 복잡한 과정
+        projector.on();
+        soundSystem.on();
+        soundSystem.setVolume(10);
+        bluRayPlayer.on();
+        bluRayPlayer.playMovie("Inception");
+
+        // 코드가 복잡하고, 유지보수가 어려움
+    }
+}
+```
+
+#### 퍼사드 패턴 적용 후
+
+```
+public class HomeTheaterWithFacade {
+    public static void main(String[] args) {
+        // 서브 시스템 생성
+        Projector projector = new Projector();
+        SoundSystem soundSystem = new SoundSystem();
+        BluRayPlayer bluRayPlayer = new BluRayPlayer();
+
+        // 퍼사드 객체 생성
+        HomeTheaterFacade homeTheater = new HomeTheaterFacade(projector, soundSystem, bluRayPlayer);
+
+        // 간단한 인터페이스로 영화 감상
+        homeTheater.watchMovie("Inception");
+        homeTheater.endMovie();
+    }
+}
+```
+
+퍼사드 객체를 생성해서 메소드 하나만 호출하면 퍼사드에서 복잡한 과정을 처리합니다!
+
+여기서 익혀두어야 할 용어가 하나 있습니다.
+
+✏️ <span style="color: red;">최소 지식 원칙이란? 시스템을 디자인할 때 어떤 객체든 상호작용을 한느 클래스의 개수와 방식에 주의를 기울여야 한다는 뜻입니다!</span>
+
+쉽게 이야기해서 호출부가 많아지면 나중에 제거할 때 여러 곳의 수정 포인트가 생기게 되겠죠!
+
+하지만 이를 호출하는 통합 클래스가 하나라면 호출하는 클래스 하나만 제외하면 될 것입니다! 😏
+
+예시를 한 번 보시죠.
+
+#### 최소 지식 원칙을 따르지 않는 방식
+
+```
+public float getTemp() {
+	Thermometer thermometer = station.getThermometer();
+	return thermometer.getTemperature();
+}
+```
+
+#### 최소 지식 원칙을 따른 방식
+
+```
+public float getTemp() {
+	return station.getTemperature();
+}
+```
+
+Thermometer 클래스를 생성하지 않고 station을 이용해 바로 응답받는 것입니다! 의존성을 하나 줄인 것이죠!
+
+**그럼 이게 퍼사드와 무슨 관련이냐???** 🥴
+
+클라이언트가 기존에 다양한 인터페이스들을 의존하며 호출했다면 이제 퍼사드 클래스만 의존하여 호출하면 되는 것입니다. 그래서 연관이 있는 용어가 된 것이죠!
+
+다시 한 번 정리해보면...
+
+✏️ <span style="color: red;">퍼사드 패턴은 서브시스템에 있는 일련의 인터페이스를 통합 인터페이스로 묶어 줍니다.</span>
+
+### ❇️ 퍼사드 패턴은 어디에 사용될까?
+
+1. 데이터베이스 연결 (DriverManager.getConnection)
+2. Spring의 JdbcTemplate
+3. Java Logging (java.util.logging.Logger)
+
+결국 퍼사드는 소스보다 이론이 조금 더 어려운 패턴이었답니다...
+
+---
+
+다음에는 알고리즘 자체를 캡슐화해버리는 템플릿 메소드 패턴을 알아봅시다!
+
+# 긴 글 봐주셔서 감사합니다! 😌

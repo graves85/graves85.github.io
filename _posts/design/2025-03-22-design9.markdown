@@ -1,0 +1,490 @@
+---
+layout: content-layout
+title: "컬렉션 담당 반복자 패턴과 컴포지트 패턴 알아보기! 🔄"
+date: 2025-03-29
+categories: [DEV, 디자인패턴]
+tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 반복자 패턴, Iterator Pattern, 컴포지트 패턴, Composite Pattern]
+---
+
+## 디자인 패턴 분석 목차
+
+{% for post in site.categories["디자인패턴"] reversed %}
+> {{ forloop.index }}: [{{ post.title }}]({{ post.url }})    
+{% endfor %}
+
+## 참고 서적
+
+[헤드퍼스트 디자인패턴](https://product.kyobobook.co.kr/detail/S000001810483)
+
+---
+
+## 안녕하십니까! 😀
+
+오늘도 역시나 비슷한 패턴 2가지를 데려왔습니다.
+
+코딩을 하다보면 for문... 굉장히 많이 사용하는데요.
+
+아무래도 for문에 효과적인 패턴이 아닐까..? 하는 심리로 보시면 되지 않을까라는 생각이 드네요... ~~(응... 틀림 🥵)~~
+
+그럼 반복자 패턴부터 천천히 살펴보시죠...
+
+---
+
+### 반복자 패턴부터 살펴보기
+
+책에서는 각각 다른 조식과 저녁의 리스트 메뉴를 통합할 수 있는 방법에 대해 서론을 시작하는데요...
+
+메뉴의 리스트를 캡슐화해서 메소드 하나를 통해서 출력할 수 있는 방법은 무엇일지... 한 번 살펴보겠습니다.
+
+반복자 패턴은 꼭 필요한 인터페이스가 있습니다. 그것은 바로 **Iterator** 인터페이스인데요!
+
+Iterator 인터페이스는 hasNext() 메소드와 next() 메소드 그리고 remove() 메소드를 가지고 있습니다.
+
+반복자 패턴의 구조는 다음과 같습니다!
+
+![Imgur](https://i.imgur.com/0noBcOa.png)
+
+구조가 생각보다 조금 복잡하죠...!? 😬
+
+✏️ <span style="color: red;"> 반복자 패턴이란? 컬렉션의 구현 방법을 노출하지 않으면서 집합체 내의 모든 항목에 접근하는 방법을 제공하는 패턴입니다!</span>
+
+하나씩 설명을 드려볼께요! 
+
+Aggregate는 우선 공용 인터페이스로 반복자 클래스를 호출하는 역할을 합니다! (메인(클라이언트) 클래스의 코드를 더 간결하게 할 수 있죠!)
+
+Iterator는 말그대로 반복자를 커스터마이징 하는 클래스입니다!
+
+이 큰 2개의 인터페이스를 상속하는 여러 클래스가 있을 것입니다.
+
+성격은 같지만 구성이 다른 여러 개의 반복자를 구성할 때 이 반복자 패턴을 활용해 볼 수 있을 것 같아요!
+
+✏️ <span style="color: red;"> 객체 지향 중요 원칙! 하나의 역할은 하나의 클래스에서만 맡아야 한다. 클래스의 수정 원인은 한 가지여야 한다!</span>
+
+책에 나왔던 코드 예시를 한 번 보겠습니다.
+
+#### 종업원 클래스 (Client)
+
+```
+public class Waitress {
+	Menu pancakeHouseMenu;
+	Menu dinerMenu;
+	Menu cafeMenu;
+ 
+	public Waitress(Menu pancakeHouseMenu, Menu dinerMenu, Menu cafeMenu) {
+		this.pancakeHouseMenu = pancakeHouseMenu;
+		this.dinerMenu = dinerMenu;
+		this.cafeMenu = cafeMenu;
+	}
+ 
+	public void printMenu() {
+		Iterator<MenuItem> pancakeIterator = pancakeHouseMenu.createIterator();
+		Iterator<MenuItem> dinerIterator = dinerMenu.createIterator();
+		Iterator<MenuItem> cafeIterator = cafeMenu.createIterator();
+
+		System.out.println("MENU\n----\nBREAKFAST");
+		printMenu(pancakeIterator);
+		System.out.println("\nLUNCH");
+		printMenu(dinerIterator);
+		System.out.println("\nDINNER");
+		printMenu(cafeIterator);
+	}
+}
+```
+
+종업원은 반복자를 호출하는 Client 객체입니다.
+
+#### 메뉴 인터페이스 (Aggregate)
+
+```
+import java.util.Iterator;
+
+public interface Menu {
+	public Iterator<MenuItem> createIterator();
+}
+```
+
+#### 저녁 메뉴 클래스 (Aggregate Child)
+
+```
+public class DinerMenu implements Menu {
+	static final int MAX_ITEMS = 6;
+	int numberOfItems = 0;
+	MenuItem[] menuItems;
+  
+	public DinerMenu() {
+		menuItems = new MenuItem[MAX_ITEMS];
+ 
+		addItem("Vegetarian BLT",
+			"(Fakin') Bacon with lettuce & tomato on whole wheat", true, 2.99);
+		addItem("BLT",
+			"Bacon with lettuce & tomato on whole wheat", false, 2.99);
+		addItem("Soup of the day",
+			"Soup of the day, with a side of potato salad", false, 3.29);
+		addItem("Hotdog",
+			"A hot dog, with sauerkraut, relish, onions, topped with cheese",
+			false, 3.05);
+		addItem("Steamed Veggies and Brown Rice",
+			"A medly of steamed vegetables over brown rice", true, 3.99);
+		addItem("Pasta",
+			"Spaghetti with Marinara Sauce, and a slice of sourdough bread",
+			true, 3.89);
+	}
+  
+	public void addItem(String name, String description, 
+	                     boolean vegetarian, double price) 
+	{
+		// ...
+	}
+ 
+	public MenuItem[] getMenuItems() {
+		return menuItems;
+	}
+  
+	public Iterator<MenuItem> createIterator() {
+		return new DinerMenuIterator(menuItems);
+	}
+ 
+	// other menu methods here
+}
+```
+
+여러 가지 메뉴가 있지만 저녁 메뉴만 살펴보겠습니다.
+
+저녁 메뉴 클래스에서는 메뉴 리스트를 관리하고 있고 반복자를 호출할 수 있습니다!
+
+**(실무에서는 저 리스트 영역은 DB로 관리하고 있겠죠..?)**
+
+#### 저녁 메뉴 반복자 클래스 (Iterator)
+
+```
+public class DinerMenuIterator implements Iterator<MenuItem> {
+	MenuItem[] list;
+	int position = 0;
+ 
+	public DinerMenuIterator(MenuItem[] list) {
+		this.list = list;
+	}
+ 
+	public MenuItem next() {
+		MenuItem menuItem = list[position];
+		position = position + 1;
+		return menuItem;
+	}
+ 
+	public boolean hasNext() {
+		if (position >= list.length || list[position] == null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public void remove() {
+		if (position <= 0) {
+			throw new IllegalStateException
+				("You can't remove an item until you've done at least one next()");
+		}
+		if (list[position-1] != null) {
+			for (int i = position-1; i < (list.length-1); i++) {
+				list[i] = list[i+1];
+			}
+			list[list.length-1] = null;
+		}
+	}
+
+}
+```
+
+반복자 클래스에서는 Iterator에 필요한 메소드를 구현해두었습니다.
+
+#### 메뉴 아이템 클래스 (VO)
+
+```
+public class MenuItem {
+	String name;
+	String description;
+	boolean vegetarian;
+	double price;
+ 
+	public MenuItem(String name, 
+	                String description, 
+	                boolean vegetarian, 
+	                double price) 
+	{
+		this.name = name;
+		this.description = description;
+		this.vegetarian = vegetarian;
+		this.price = price;
+	}
+  
+	public String getName() {
+		return name;
+	}
+  
+	public String getDescription() {
+		return description;
+	}
+  
+	public double getPrice() {
+		return price;
+	}
+  
+	public boolean isVegetarian() {
+		return vegetarian;
+	}
+}
+```
+
+#### 메인 클래스 
+
+```
+public class MenuTestDrive {
+	public static void main(String args[]) {
+		PancakeHouseMenu pancakeHouseMenu = new PancakeHouseMenu();
+		DinerMenu dinerMenu = new DinerMenu();
+		CafeMenu cafeMenu = new CafeMenu();
+ 
+		Waitress waitress = new Waitress(pancakeHouseMenu, dinerMenu, cafeMenu);
+ 
+		waitress.printMenu();
+	}
+}
+```
+
+메인 클래스에서 종업원을 통해 메뉴 출력 메소드를 호출하면 각각의 메뉴가 출력이 되게 됩니다.!
+
+결과적으로 반복자 패턴을 이용하면 단순 For문에서 객체를 변경하는 게 아닌 클래스를 통해서 커스터마이징 할 수 있다는 것을 알 수 있습니다!
+
+캡슐화도 되고.. 수정 발생시 확인 요소도 정확하게 분리가 될 것 같습니다.
+
+다만... 실무에서 이걸 쓸 일이 많이 있을까...? 라는 생각이 조금 드네요... 🥺
+
+그래서 찾아봤습니다!
+
+### 반복자 패턴은 어디에 사용되나요?
+
+1. Java의 List, Set, Map과 같은 컬렉션들은 내부적으로 반복자 패턴을 사용한다.
+
+2. JDBC에서 SQL 쿼리 결과를 순회할 때도 반복자 패턴을 사용한다.
+
+3. 트리 구조를 탐색할 때도 반복자 패턴이 많이 사용된다.
+
+### 여기서 잠깐!
+
+만약 커스터마이징이 필요한 반복자가 계속 늘어난다면...? 아무래도 클래스가 계속 증식될 것입니다... 🤮
+
+여기서 나온 예시가 컴포지트 패턴입니다!
+
+### 컴포지트 패턴 알아보기
+
+✏️ <span style="color: red;"> 컴포지트 패턴이란? 객체를 트리구조로 구성해서 부분-전체 계층구조를 구현</span>
+
+컴포지트 패턴은 다음 클래스 구조를 가지고 있습니다!
+
+![Imgur](https://i.imgur.com/BhoJu3x.png)
+
+컴포지트 패턴은 트리 구조 모양으로 구성된다고 보시면 되는데요.
+
+소스를 보시면 빠르게 이해되실 겁니다! (예제는 아까와 동일한 식당 예제입니다.)
+
+#### 종업원 클래스
+
+```
+public class Waitress {
+	MenuComponent allMenus;
+ 
+	public Waitress(MenuComponent allMenus) {
+		this.allMenus = allMenus;
+	}
+ 
+	public void printMenu() {
+		allMenus.print();
+	}
+}
+```
+
+반복자 패턴과 다르게 MenuComponent라는 클래스가 보일 겁니다!
+
+#### 메뉴 구성 클래스 (Component)
+
+```
+public abstract class MenuComponent {
+   
+	public void add(MenuComponent menuComponent) {
+		throw new UnsupportedOperationException();
+	}
+	public void remove(MenuComponent menuComponent) {
+		throw new UnsupportedOperationException();
+	}
+	public MenuComponent getChild(int i) {
+		throw new UnsupportedOperationException();
+	}
+  
+	public String getName() {
+		throw new UnsupportedOperationException();
+	}
+	public String getDescription() {
+		throw new UnsupportedOperationException();
+	}
+	public double getPrice() {
+		throw new UnsupportedOperationException();
+	}
+	public boolean isVegetarian() {
+		throw new UnsupportedOperationException();
+	}
+
+	public abstract Iterator<MenuComponent> createIterator();
+ 
+	public void print() {
+		throw new UnsupportedOperationException();
+	}
+}
+```
+
+MenuComponent 이 클래스는 상위 클래스로써 나뭇가지 같은 존재이지요.
+
+구현체가 필요합니다.
+
+#### 메뉴 클래스 (Composite)
+
+```
+public class Menu extends MenuComponent {
+	Iterator<MenuComponent> iterator = null;
+	ArrayList<MenuComponent> menuComponents = new ArrayList<MenuComponent>();
+	String name;
+	String description;
+  
+	public Menu(String name, String description) {
+		this.name = name;
+		this.description = description;
+	}
+ 
+	public void add(MenuComponent menuComponent) {
+		menuComponents.add(menuComponent);
+	}
+ 
+	public void remove(MenuComponent menuComponent) {
+		menuComponents.remove(menuComponent);
+	}
+ 
+	public MenuComponent getChild(int i) {
+		return menuComponents.get(i);
+	}
+ 
+	public String getName() {
+		return name;
+	}
+ 
+	public String getDescription() {
+		return description;
+	}
+  
+	public Iterator<MenuComponent> createIterator() {
+		if (iterator == null) {
+			iterator = new CompositeIterator(menuComponents.iterator());
+		}
+		return iterator;
+	}
+ 
+	public void print() {
+		System.out.print("\n" + getName());
+		System.out.println(", " + getDescription());
+		System.out.println("---------------------");
+  
+		Iterator<MenuComponent> iterator = menuComponents.iterator();
+		while (iterator.hasNext()) {
+			MenuComponent menuComponent = iterator.next();
+			menuComponent.print();
+		}
+	}
+}
+```
+
+아까 생성한 MenuComponent 구현체입니다! 다만 자식 클래스가 있을 수 있죠.
+
+#### 메뉴 클래스 (Leaf)
+
+```
+public class MenuItem extends MenuComponent {
+ 
+	String name;
+	String description;
+	boolean vegetarian;
+	double price;
+    
+	public MenuItem(String name, 
+	                String description, 
+	                boolean vegetarian, 
+	                double price) 
+	{ 
+		this.name = name;
+		this.description = description;
+		this.vegetarian = vegetarian;
+		this.price = price;
+	}
+  
+	public String getName() {
+		return name;
+	}
+  
+	public String getDescription() {
+		return description;
+	}
+  
+	public double getPrice() {
+		return price;
+	}
+  
+	public boolean isVegetarian() {
+		return vegetarian;
+	}
+
+	public Iterator<MenuComponent> createIterator() {
+		return new NullIterator();
+	}
+ 
+	public void print() {
+		System.out.print("  " + getName());
+		if (isVegetarian()) {
+			System.out.print("(v)");
+		}
+		System.out.println(", " + getPrice());
+		System.out.println("     -- " + getDescription());
+	}
+
+}
+```
+
+Composite와 비슷한 것 같지만 이 클래스가 최하위 자식 클래스입니다.
+
+컴포지트 패턴은 반복자 패턴과 뭔가 유사한 것처럼 보이지만 핵심은 <span style="background-color:rgb(200, 200, 255);">**재귀 호출**</span>입니다!
+
+`ArrayList<MenuComponent> menuComponents = new ArrayList<MenuComponent>();` 이 부분에서 우선 자식 클래스들을 가지고 있습니다!
+
+그리고 
+
+```
+Iterator<MenuComponent> iterator = menuComponents.iterator();
+while (iterator.hasNext()) {
+    MenuComponent menuComponent = iterator.next();
+    menuComponent.print();
+}
+```
+
+이 부분에서 자식 클래스들의 출력을 또 하고 있는 것이죠..!
+
+### 컴포지트 패턴은 어디에 사용하나요?
+
+1. 계층 구조(트리 구조)를 관리해야 할 때
+
+2. 클라이언트가 개별 객체와 복합 객체를 동일하게 다뤄야 할 때
+
+3. 재귀적으로 처리해야 하는 경우
+
+---
+
+오늘은 조금 복잡하지만 재미있었던 패턴을 배워보았습니다... 🫣
+
+다음에는 객체의 상태를 관리하는 상태 패턴에 대해 보겠습니다!
+
+# 긴 글 봐주셔서 감사합니다! 😌

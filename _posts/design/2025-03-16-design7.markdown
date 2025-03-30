@@ -30,7 +30,7 @@ tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 어댑터 패턴, 
 
 ---
 
-### ❇️ 어댑터 패턴부터 살펴보기
+###  어댑터 패턴부터 살펴보기
 
 어릴적에 부모님이 '어댑터 좀 가져와바라..' 라는 이야기좀 들어보셨을까요??? ~~(너무 검정고무신 시절 내용이라면 죄송합니다..)~~
 
@@ -105,7 +105,7 @@ public class TurkeyAdapter extends Turkey implments Duck {
 
 ✏️ <span style="color: red;">어댑터 패턴은 특정 클래스 인터페이스를 클라이언트에서 요구하는 다른 이터페이스로 변환하는 패턴입니다!</span>
 
-### ❇️ 어댑터 패턴은 어디에 쓰일까요?
+###  어댑터 패턴은 어디에 쓰일까요?
 
 1. Enumeration을 Iterator에 적응시킬 때
 2. 지도 API를 교체할 때 (ex 구글 -> 네이버)
@@ -115,7 +115,7 @@ public class TurkeyAdapter extends Turkey implments Duck {
 
 배움이 여기서 마무리되면 꿀이겠지만 한 가지 패턴을 더 배워햐 하지요... 🤢
 
-### ❇️ 어댑터보다 조그음 더 어려운 퍼사드 패턴 알아보기
+###  어댑터보다 조그음 더 어려운 퍼사드 패턴 알아보기
 
 퍼사드(외관) 패턴은 결론부터 말씀드리면 어지럽게 클래스로 나열되어 있는 시스템을 간결하게 호출하여 끝내게 만들어주는 패턴입니다!
 
@@ -204,7 +204,7 @@ Thermometer 클래스를 생성하지 않고 station을 이용해 바로 응답�
 
 ✏️ <span style="color: red;">퍼사드 패턴은 서브시스템에 있는 일련의 인터페이스를 통합 인터페이스로 묶어 줍니다.</span>
 
-### ❇️ 퍼사드 패턴은 어디에 사용될까?
+###  퍼사드 패턴은 어디에 사용될까?
 
 1. 데이터베이스 연결 (DriverManager.getConnection)
 2. Spring의 JdbcTemplate

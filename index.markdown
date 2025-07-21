@@ -16,7 +16,7 @@ permalink: /
 
 **DEV**: Java, Spring, Kafka 등 개발에 대한 경험 소개<br>
 **DB**: 오라클, MYSQL 등 SQL 튜닝에 대한 경험 소개<br>
-**INFRA**: 도커, 쿠버네티스, 노마드, AWS 등 인프라 환경 구축에 대한 경험 소개<br>
+**INFRA**: 도커, 쿠버네티스 등 인프라 환경 구축에 대한 경험 소개<br>
 **NEWS**: 최근에 주목받을 만한 IT 기술에 대한 소개<br>
 
 ---

@@ -1,0 +1,151 @@
+---
+layout: content-layout
+title: "GIT CLI 간단하게 알아보기!🤤"
+date: 2025-04-16
+categories: [DEV, 버전관리]
+tags: [DEV, GIT, GIT CLI, GITHUB]
+---
+
+## 안녕하십니까! 😀
+
+오랜만에 인사드립니다!
+
+오늘은 GIT CLI를 좀 공부해서 정리하고자 이 글을 쓰게 되었습니다!
+
+GIT은 주로 PUSH, PULL을 주로 쓰게 되는데요!
+
+**이 외에도 어떤 기능이 있는지 한 번 보겠습니다!** 😆
+
+---
+
+### 자주 사용하는 GIT 툴 소개
+
+보통 개발 IDE에 GIT이 내장되어 있어서 GIT 따로 쓰는 경우가 많지는 않을 것 같긴 합니다!
+
+하지만 GIT을 따로 쓰는 분들도 종종 보이기도 하지요.
+
+그래서 개발 IDE에 내장된 GIT 외에 주로 어떤 것을 쓰고 왜 쓰는지 한 번 확인해보겠습니다! 🥸
+
+#### GIT BASH
+
+GIT BASH는 가장 기본적인 GIT CLI를 사용할 수 있는 툴입니다.
+
+GIT의 모든 명령을 사용할 수 있죠!
+
+다운로드는 아래에서 받아서 사용하실 수 있습니다!
+
+[GIT 공식 사이트](https://git-scm.com/downloads)
+
+#### SOURCE TREE
+
+![Imgur](https://imgur.com/RYOoihO)
+
+GIT 하면 가장 유명한 GUI 도구인 소스트리가 있죠!
+
+GUI를 제공함과 동시에 터미널을 연결하여 CLI를 사용할 수 있도록 제공도 해줍니다!
+
+[소스트리 공식 사이트](https://www.sourcetreeapp.com/)
+
+#### GIT KRAKEN
+
+![Imgur](https://imgur.com/04HJwwY)
+
+GUI 도구에서 핫하게 떠오르고 있는 깃 크라켄입니다!
+
+유료라서 아쉽긴 하지만 뭔가 UI가 소스트리보다 더 현대적이고 GIT에 진심인 것 맞는 것 같습니다.
+
+[깃 크라켄 공식 사이트](https://www.gitkraken.com/)
+
+### 성공적인 GIT 분기 모델 방식
+
+![Imgur](https://i.imgur.com/rEcAWVH.png)
+
+아주 유명한 Vincent Driessen이 작성한 모델 예시입니다!
+
+[참고 URL 바로가기](https://nvie.com/posts/a-successful-git-branching-model/#why-git)
+
+브랜치를 간단히 소개하면 다음과 같습니다!
+
+|브랜치명|설명|
+|----|----|
+|feature/*|기능 개발용|
+|develop|개발기 서버 배포용|
+|release/*|릴리즈 준비용(알파,스테이징용)|
+|hotfix/*|핫픽스 수정용(운영기 장애 처리용)|
+|master|운영기 배포용|
+
+✏️ <span style="color: red;">해당 모델의 주요 포인트는 릴리스용 브랜치와 핫픽스 브랜치만 master(운영기)브랜치에 배포한다는 점입니다!</span>
+
+### GIT CLI 주요 명령어 소개
+
+|명령어|내용|예시|
+|----|----|----|
+|init|현재 디렉토리로 GIT 초기화|`git init`|
+|clone|원격 저장소 복제|`git clone <url>`|
+|status|변경사항 확인|`git status`|
+|add|변경사항 staging area에 올리는 명령어|`git add .` 또는 `git add <파일명>`|
+|commit|커밋 생성|`git commit` 또는 `git commit -m "메세지"`|
+|log|커밋 내역 확인|`git log`|
+|diff|변경사항 비교|`git diff`|
+|branch|브랜치 생성|`git branch` <br>삭제를 원하는 경우 `git branch -d <브랜치명>`|
+|switch|브랜치 이동|`git switch` <br>생성 후 이동을 원하는 경우 `git switch -c <브랜치명>`|
+|merge|브랜치 병합|`git merge <브랜치명>`|
+|push|원격 저장소 브랜치 푸시|`git push` <br>초기 푸시인 경우 `git push -u origin <브랜치명>`|
+|pull|원격 저장소 변경사항 가져오기|`git pull`|
+|fetch|원격 저장소 변경사항 가져오기(병합 X)|`git fetch`|
+|stash|변경사항 임시 저장 후 비우기|`git stash` <br>다시 가져오려면 `git stash pop`|
+|reset|변경사항 초기화|`git reset --hard 또는 --soft 또는 --mixed <커밋해시>`|
+|cherry-pick|특정 커밋 가져오기(병합할 브랜치로 이동 후 사용)|`git cherry-pick <커밋해시>`|
+|rebase|브랜치 기반 변경(커밋 정리)|`git rebase <브랜치명>`|
+|tag|태그 생성|`git tag <태그명>`|
+|submodule|다른 Git 저장소를 하위 모듈로 추가|`git submodule add <url> [경로]` <br>업데이트 필요한 경우 `git submodule update` <br>초기 설정 필요한 경우 `git submodule init`|
+
+### GIT 컨벤션 소개
+
+GIT도 커밋할 때 메세지의 컨벤션이 있다는 것을 알고 계셨나요!?
+
+주요 포맷은 다음과 같습니다!
+
+```
+<type>(<scope>): <subject>
+
+[본문 설명 생략 가능]
+
+[footer (이슈 번호)]
+```
+
+type에는 다음과 같은 종류가 있는데요!
+
+|타입명|설명|
+|----|----|
+|feat|새로운 기능 추가|
+|fix|버그 수정|
+|docs|문서 변경|
+|style|코드 스타일 (포매팅, 세미콜론 등)|
+|refactor|리팩토링 (기능 변경 X)|
+|test|테스트 코드 추가|
+|chore|빌드 업무, 패키지 업데이트 등|
+|perf|성능 개선|
+|ci|CI/CD 관련 변경|
+
+**예시**
+```
+feat(user): 로그인 기능 추가
+
+- 로그인 체크 로직에 스크립트 수정
+- 로그인 보안 정책 추가
+
+closes JIRA이슈번호
+```
+
+---
+
+옛날에 어떤 개발자 선임분이 한 말이 기억나네요. 
+
+**"GIT 창조자가 SVN이 답답해서 GIT을 새로 만들었다. 🤬"**
+
+사실여부는 확인하지 못했지만 정말 GIT에 대해 몰랐던 다양한 기능이 있는 것 같아요! 
+
+다음에는 다른 것으로 돌아오겠습니다!
+
+긴 글 봐주셔서 감사합니다! 😌

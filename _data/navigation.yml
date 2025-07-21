@@ -10,6 +10,8 @@ menu:
         url: "/categories/DEV/블로그/"
       - name: "디자인패턴"
         url: "/categories/DEV/디자인패턴/"
+      - name: "버전관리"
+        url: "/categories/DEV/버전관리/"
 
   - name: "DB"
     url: "/categories/DB/"

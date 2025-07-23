@@ -38,7 +38,7 @@ GIT의 모든 명령을 사용할 수 있죠!
 
 #### SOURCE TREE
 
-![Imgur](https://imgur.com/RYOoihO)
+![Imgur](https://i.imgur.com/RYOoihO.png)
 
 GIT 하면 가장 유명한 GUI 도구인 소스트리가 있죠!
 
@@ -48,7 +48,7 @@ GUI를 제공함과 동시에 터미널을 연결하여 CLI를 사용할 수 있
 
 #### GIT KRAKEN
 
-![Imgur](https://imgur.com/04HJwwY)
+![Imgur](https://i.imgur.com/04HJwwY.png)
 
 GUI 도구에서 핫하게 떠오르고 있는 깃 크라켄입니다!
 

@@ -1,7 +1,7 @@
 ---
 layout: content-layout
-title: "2025년 08월 10일자 📓 개발자 NEWS 📓"
-date: 2025-08-10
+title: "2025년 08월 11일자 📓 개발자 NEWS 📓"
+date: 2025-08-11
 categories: [NEWS]
 tags: [IT, IT NEWS, 개발 소식]
 ---

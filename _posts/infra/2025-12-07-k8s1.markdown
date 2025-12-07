@@ -1,0 +1,74 @@
+---
+layout: content-layout
+title: "쿠버네티스 간단하게 알아보기!🤤"
+date: 2025-12-07
+categories: [INFRA]
+tags: [INFRA, Kubernetes, k8s, 쿠버네티스]
+---
+
+## 안녕하십니까! 😀
+
+인프런 강의를 통해 배운 쿠버네티스를 정리했습니다!
+
+---
+
+0. 왜 쿠버네티스를 사용하나?
+- Docker와 같이 클라우드 서비스 형태의 컨테이너를 오케스트레이션하여 부하를 제어하고 관리한다.
+
+1. 기본 오브젝트 이해하기
+- Pod : 가장 기본이 되는 배포 단위 (언제든지 소멸될 수 있음)
+- Service : Pod들의 집합에 대해 고정된 IP(ClusterIP)와 DNS 이름을 제공하는 로드밸런서
+  - ClusterIP 타입 : Service에 여러 개의 Pod를 연결함, 인가된 사용자용, Pod의 서비스상태 디버깅용으로 사용
+  - NodePort 타입 : Pod 별로 포트를 생성함, 내부망 안에서 접근해야 할 때, 데모나 임시 연결용으로 사용
+  - Load Balancer 타입 : 외부 시스템 노출용
+- Volumn : Pod 안의 컨테이너들이 공유하고 지속적으로 사용할 수 있는 저장 공간
+- ConfigMap, Secret : 운영 환경에 따른 분기 처리를 해야할 경우 사용되는 Object
+- Namespace, ResourceQuota, LimitRange : Pod의 자원사용량을 조절하기 위한 Object
+
+2. 컨트롤러
+- 클러스터 상태를 지속적으로 감시(watch)하고, 원하는 상태(Desired State)와 실제 상태(Actual State)가 일치하도록 자동으로 조정하는 자동화 관리자
+- ReplicaSet Controller : Pod 개수 유지
+- Deployment Controller : 원하는 수의 Pod 유지, 롤링 업데이트 가능
+- DaemonSet Controller : 모든 Node에 Pod 1개씩 배포
+- Job Controller : 일회성 작업 실행
+- CronJob Controller : 스케줄 기반 작업 실행
+
+3. Pod 상세
+- 생명주기 : Pending -> Running -> Successded -> Failed
+- readinessProbe : Pod가 생성되어도 App이 구동되는 시간동안 트래픽을 받지 않도록 해줌
+  - initialDelaySeconds : Pod 생성 후 해당 지연 시간이 지난 후에 헬스체크 시작
+  - periodSeconds : 10초 간격으로 헬스 체크
+  - successThreshold : 성공시 Service와 연결됨
+  - failureThreshold : 실패시 재시도
+- livenessProbe : App 장애시 헬스체크를 통해 Pod를 restart 시켜줌
+- QoS classes : 컨테이너의 리소스 설정에 따라 클래스가 결정된다.
+- Node Affinity : Node에 스케쥴링을 할 수 있는 다양한 기능들을 제공한다.
+  - matchExcpression : 규칙에 부합하는 Node에 pod를 배치한다.
+  - required : 해당 옵션 지정시 절대적으로 matchExcpression에 부합하는 Node에만 배치된다.
+  - preferred : 해당 옵션 지정시 matchExcpression에 부합하는 Node가 없으면, 자원이 많이 남아있는 Node에 배치된다.
+  - preferred.weight : 두 개 이상의 preferred 옵션을 설정시, 우선순위를 매길 수 있는 파라미터
+- Taint : Pod가 특정 Node에 배치되는 걸 제한하기 위해 사용
+- Toleration : Taint가 있는 Node에 Pod를 배치할 때 사용
+
+4. 기본 오브젝트 확장
+- pod가 다른 서비스로 접근하기 위한 방법은? ClusterIP 사용
+- Headless Service : Service의 IP는 할당되지 않음, Pod의 Doamin 이름으로 호출이 가능한 서비스
+- 별도 솔루션을 이용한 Volume 관리
+- Master 노드에서 설정하는 것들
+  - Authorization (권한)
+  - Authentication (인증)
+
+5. 컨트롤러
+- StatefulSet : Pod별 각각의 Volume이 동적으로 생성
+- ReplicaSet : 수동으로 하나의 공유 Volumn 생성
+- Ingress : 도메인 기반 라우팅
+- HPA, VPA, CA
+
+6. 아키텍처
+- Networking 아키텍처
+- 스토리지 아키텍처
+- 모니터링 아키텍처
+
+다음에는 다른 것으로 돌아오겠습니다!
+
+긴 글 봐주셔서 감사합니다! 😌

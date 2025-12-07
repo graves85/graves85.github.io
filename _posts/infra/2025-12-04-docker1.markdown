@@ -1,13 +1,14 @@
 ---
 layout: content-layout
 title: "DOCKER 간단하게 알아보기!🤤"
-date: 2025-04-16
+date: 2025-12-04
 categories: [INFRA]
 tags: [INFRA, DOCKER, 도커]
 ---
 
 ## 안녕하십니까! 😀
 
+인프런 강의를 통해 배운 Docker를 정리했습니다!
 
 ---
 

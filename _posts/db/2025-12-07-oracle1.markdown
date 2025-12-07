@@ -1,0 +1,68 @@
+---
+layout: content-layout
+title: "ORACLE SQL 튜닝 사례 1🤤"
+date: 2025-12-07
+categories: [DB]
+tags: [DB, 오라클, ORACLE, SQL 튜닝]
+---
+
+## 안녕하십니까! 😀
+
+실무에서 진행한 SQL 튜닝 정리했습니다!
+
+---
+
+1. STOP KEY를 활용한 속도 개선
+AS-IS
+```
+SELECT *
+FROM A_TABLE A
+WHERE A.REG_DATE = (
+    SELECT MAX(REG_DTE)
+      FROM B_TABLE B
+     WHERE B.KEY = 'A'
+)
+```
+TO-BE
+```
+SELECT *
+FROM A_TABLE A
+WHERE A.rowid = (
+    SELECT rid
+      FROM (
+    SELECT rowid AS rid
+      FROM B_TABLE B
+     WHERE B.KEY = 'A'
+      )
+    WHERE rownum >= 1
+)
+```
+rownum 조건을 걸어서 STOPKEY 조건을 만들어 쿼리 실행을 빠르게 처리하게 했다.
+
+2. 인덱스 추가
+- 분포도가 낮아야 한다. 통상 5~7% 정도면 괜찮음
+- WHERE 조건에 많이 사용되는지 확인
+- JOIN ON 절에 많이 사용되는지 확인
+- 여러 조건이 무조건 사용된다면 단일 인덱스보다 복합 인덱스로 구성하는 게 더 유리하다.
+- 인덱스 수가 많으면 INSERT/UPDATE 속도가 저하될 수 있다.
+
+3. 파티셔닝 테이블 사용
+- 조회 성능(SELECT 속도) 크게 향상
+- Insert/Write 성능 향상
+- 오래된 데이터 삭제 작업이 폭발적으로 빨라짐
+- 데이터 보관 기간 관리가 쉬움 (Retention 관리)
+- 대규모 테이블의 인덱스 효율 증가
+- 병렬 처리가 가능해짐
+- 테이블 단편화(Fragmentation) 감소
+- 테이블이 거대해도 관리가 단순함
+
+4. 그 외 적용한 사례
+- 컬럼에 메소드를 입혀 인덱스 무효화 시키는 것 제거
+- LIKE 검색에서 앞 % 제거하여 Full Scan 안타도록 수정
+- IN 절을 EXISTS 절로 변경 (조건 일치 시 즉시 중단 STOPKEY)
+- DISTINCT 연산자 제거
+- OR 조건 -> UNION ALL 절로 변경
+
+다음에는 다른 것으로 돌아오겠습니다!
+
+긴 글 봐주셔서 감사합니다! 😌

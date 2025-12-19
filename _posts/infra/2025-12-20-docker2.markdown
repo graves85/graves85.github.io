@@ -1,0 +1,88 @@
+---
+layout: content-layout
+title: "리눅스에 DOCKER 간단하게 설치해보기!🤤"
+date: 2025-12-20
+categories: [INFRA]
+tags: [INFRA, DOCKER, 도커]
+---
+
+## 안녕하십니까! 😀
+
+Docker를 리눅스에 간단하게 설치해보는 실습입니다!
+
+---
+
+### 0️⃣ 기본 준비 (공통)
+
+- 실습 환경 구성
+  - Oracle VirualBox 설치
+  - Ubunte 24.04 LTS 버전 이미지 다운로드하여 설치
+- 호스트에서 게스트로 복사 붙여넣기 작동하게 하기!
+  - 우분투를 종료한 상태에서 설정(Settings) > 일반(General) > 고급(Advanced) 탭으로 이동합니다.
+  - 클립보드 공유(Shared Clipboard)와 드래그 앤 드롭(Drag'n'Drop) 항목을 모두 양방향(Bidirectional)으로 설정합니다.
+  - 필요 패키지 설치: 우분투 터미널에서 아래 명령어를 입력하여 빌드 도구를 설치합니다.
+```
+sudo apt update
+sudo apt install build-essential dkms linux-headers-$(uname -r)
+```
+  - CD 이미지 삽입: 가상머신 상단 메뉴의 장치(Devices) > 게스트 확장 CD 이미지 삽입(Insert Guest Additions CD Image)을 클릭합니다.
+  - 설치 실행: 자동으로 실행되지 않으면 터미널에서 CD 경로로 이동해 설치 스크립트를 실행합니다.
+```
+sudo /media/$USER/VBox_GAs_버전명/VBoxLinuxAdditions.run
+```
+  - 재부팅: 설치 완료 후 가상머신을 다시 시작합니다 (sudo reboot)
+  - 우분투 24.04는 기본적으로 로그인 화면 우측 하단의 톱니바퀴 아이콘을 눌러 'Ubuntu on Xorg'로 세션을 변경하여 접속
+  - VBoxClient: error: VbglR3InitUser failed: VERR_ACCESS_DENIED 오류가 보인다면?
+```
+sudo setfacl -m u:$USER:rw /dev/vboxuser
+```
+- 리눅스 설치되었다면 다음 명령어 실행
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl ca-certificates gnupg lsb-release apt-transport-https
+```
+- 스왑 비활성화 (필수)<br>
+※ 이거 왜 하나요? **디스크의 메모리 지원 없이 실제 메모리만을 사용하기 위한 조치 (나중에 쿠버네티스 실습에 용이)**
+```
+sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
+```
+
+### 1️⃣ Docker 설치 (공식 방식)
+- 1-1. Docker GPG 키 등록
+```
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+- 1-2. Docker 저장소 추가
+```
+echo \
+"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/ubuntu \
+$(lsb_release -cs) stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+- 1-3. Docker 설치
+```
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+```
+- 1-4. Docker 실행 확인
+```
+sudo systemctl enable docker
+sudo systemctl start docker
+docker --version
+```
+- (선택) sudo 없이 docker 쓰기
+```
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+---
+
+도커가 정상적으로 실행되었다면 이제 다음엔 쿠버네티스를 설치해보겠습니다~
+
+감사합니다!

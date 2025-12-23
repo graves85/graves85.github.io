@@ -1,0 +1,146 @@
+---
+layout: content-layout
+title: "쿠버네티스 간단하게 설치해보기!🤤"
+date: 2025-12-23
+categories: [INFRA]
+tags: [INFRA, Kubernetes, k8s, 쿠버네티스]
+---
+
+## 안녕하십니까! 😀
+
+지난 번 도커에 이어 쿠버네티스를 리눅스에 간단하게 설치해보는 실습입니다!
+
+---
+
+### 1. containerd 설정 (K8s 필수)
+Kubernetes는 systemd cgroup 설정이 중요합니다.
+```
+sudo containerd config default | sudo tee /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' \
+/etc/containerd/config.toml
+sudo systemctl restart containerd
+```
+
+### 2. Kubernetes 설치 (kubeadm 방식)
+#### 2-1. Kubernetes 저장소 추가
+```
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | \
+sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+```
+```
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] \
+https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | \
+sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+#### 2-2. kubeadm, kubelet, kubectl 설치
+```
+sudo apt update
+sudo apt install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+```
+
+### 3. 클러스터 초기화 (싱글 노드)
+```
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+```
+kubectl 설정
+```
+mkdir -p $HOME/.kube
+sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+확인 (상태 NotReady)
+```
+kubectl get nodes
+```
+
+### 4. CNI 네트워크 설치 (Flannel)
+```
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+```
+몇 초 후: 상태가 NotReady에서 Ready로 바뀌었는지 확인
+```
+kubectl get nodes
+```
+
+### 5. 싱글 노드에서 Pod 실행 허용
+```
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+```
+
+### 6. 실행 테스트
+```
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --type=NodePort --port=80
+kubectl get svc
+```
+확인
+```
+kubectl get nodes
+kubectl get pods -A
+```
+다음과 같이 Running 상태로 되어 있는지 확인
+```
+vboxuser@vboxuser:~/Desktop$ kubectl get pods -n kube-system
+NAME                               READY   STATUS    RESTARTS   AGE
+coredns-55cb58b774-jvksb           1/1     Running   0          104s
+coredns-55cb58b774-nfgdj           1/1     Running   0          104s
+etcd-vboxuser                      1/1     Running   1          119s
+kube-apiserver-vboxuser            1/1     Running   1          2m
+kube-controller-manager-vboxuser   1/1     Running   1          119s
+kube-proxy-c8wqr                   1/1     Running   0          104s
+kube-scheduler-vboxuser            1/1     Running   1          119s
+```
+
+### 추가. K8S 대시보드 설치 (실무에서는 잘 사용 안함!!!)
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+```
+#### 대시보드 접근하기
+프록시 열어두기
+```
+kubectl proxy
+```
+브라우저 열어서 다음 URL 접속
+```
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+```
+#### 토큰 생성
+새로 터미널 창 하나 띄우기
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+EOF
+```
+다음으로 토큰 발급하기 (필요할때마다 생성 가능)
+```
+kubectl -n kubernetes-dashboard create token admin-user
+```
+결과로 나온 Token을 복사하여 브라우저에 붙여넣고 Token으로 로그인 진행하기
+
+아래처럼 대시보드 화면 나오면 최종 성공
+
+![대시보드 화면](/assets/images/2025-12-23%2017%2028%2027.png)
+
+---
+
+다음에는 다른 것으로 돌아오겠습니다!
+
+긴 글 봐주셔서 감사합니다! 😌

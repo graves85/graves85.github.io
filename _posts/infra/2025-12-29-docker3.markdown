@@ -86,6 +86,6 @@ docker tag 깃ID/web-game1-frontend:latest 도커허브ID/web-game1-frontend:lat
 
 ---
 
-도커가 정상적으로 실행되었다면 이제 다음엔 쿠버네티스를 설치해보겠습니다~
+도커 허브까지 잘 올라갔다면 다음에는 올라간 이미지를 활용하여 더 응용해보겠습니다!
 
 감사합니다!

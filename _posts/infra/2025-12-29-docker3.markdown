@@ -1,0 +1,91 @@
+---
+layout: content-layout
+title: "리눅스에서 도커허브 업로드 실습!🤤"
+date: 2025-12-29
+categories: [INFRA]
+tags: [INFRA, DOCKER, 도커]
+---
+
+## 안녕하십니까! 😀
+
+리눅스에서 도커허브로 간단하게 PUSH해보는 실습입니다!
+
+---
+
+### 1️⃣ Git 설치 & 레포지토리 받기
+
+#### GIT 설치
+
+```
+sudo apt update
+sudo apt install -y git
+```
+
+#### 레포지토리 클론 (처음 한 번)
+
+```
+git clone https://github.com/capybara2345/web-game1-frontend.git
+cd web-game1-frontend
+```
+
+#### 소스 PULL 받기
+
+```
+git pull origin main
+```
+
+### 2️⃣ Docker 설치 확인
+
+```
+docker --version
+```
+
+### 3️⃣ Dockerfile 확인 / 작성
+
+```
+FROM node:20.11-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+CMD ["npm", "run", "preview"]
+```
+
+### 4️⃣ Docker 이미지 빌드
+
+```
+docker build -t capybara2345/web-game1-frontend:latest .
+docker images
+```
+
+### 5️⃣ Docker Hub 로그인
+
+```
+docker login
+```
+
+### 6️⃣ Docker Hub에 업로드 (Push)
+
+```
+docker push 도커허브ID/web-game1-frontend:latest
+```
+
+**GIT ID와 도커허브 ID가 다른 경우에는 TAG 추가 필수!**
+
+```
+docker tag 깃ID/web-game1-frontend:latest 도커허브ID/web-game1-frontend:latest
+```
+
+![도커허브 업로드 화면](/assets/images/2025-12-30_00_18_03.png)
+
+---
+
+도커가 정상적으로 실행되었다면 이제 다음엔 쿠버네티스를 설치해보겠습니다~
+
+감사합니다!

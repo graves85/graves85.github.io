@@ -42,6 +42,7 @@ docker --version
 
 ### 3️⃣ Dockerfile 확인 / 작성
 
+#### FRONT 예시 (React + Next)
 ```
 FROM node:20.11-alpine
 
@@ -55,6 +56,36 @@ RUN npm run build
 
 EXPOSE 3000
 CMD ["npm", "run", "preview"]
+```
+
+#### BACK 예시 (GOLANG)
+```
+# 1단계: 빌드
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+# 의존성 먼저 복사 (캐시 최적화)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# 전체 소스 복사
+COPY . .
+
+# 👇 main.go 위치 명시
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -o app ./cmd/api
+
+# 2단계: 실행
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/app .
+
+EXPOSE 8080
+
+CMD ["./app"]
 ```
 
 ### 4️⃣ Docker 이미지 빌드

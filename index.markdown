@@ -21,7 +21,8 @@ permalink: /
 
 ---
 
-![Imgur](https://i.imgur.com/fS28Jqb.jpg)
+<img src="https://i.imgur.com/fS28Jqb.jpg" alt="프로필 이미지" style="max-width: 300px; width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px;">
+
 ### 🙋‍♂️ 블로그 운영자 (Graves85) 소개
 **직업**: Java 기반 웹 애플리케이션 개발자  
 **관심 분야**: DDD, TDD, 클린 아키텍처, 최신 Java 버전 적용  

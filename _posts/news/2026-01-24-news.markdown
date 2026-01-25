@@ -1,7 +1,9 @@
 ---
-title: '2026년 1월 24일 IT/프로그래밍 뉴스'
-date: 2026-01-24
-categories: [news]
+layout: content-layout
+title: "2026년 01월 25일자 📓 개발자 NEWS 📓"
+date: 2026-01-25
+categories: [NEWS]
+tags: [IT, IT NEWS, 개발 소식]
 ---
 
 # 1. 오픈AI, GPT-5 공개 임박! 인공지능 대화의 새 기준 제시

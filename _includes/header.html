@@ -1,10 +1,10 @@
-
 <header>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <h2>😵‍💫멍때리고😵‍💫 봐도 보이는 기술 블로그✍️</h2>
 
     <nav>
-      <ul>
+      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">☰</button>
+      <ul id="navMenu">
         {% for item in site.data.navigation.menu %}
         {% assign category_posts = site.categories[item.name] | default: "" %}
         {% assign category_count = category_posts | size %}
@@ -29,4 +29,34 @@
         {% endfor %}
       </ul>
     </nav>
+
+    <script>
+      // 햄버거 메뉴 토글
+      document.addEventListener('DOMContentLoaded', function() {
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        
+        if (navToggle) {
+          navToggle.addEventListener('click', function() {
+            navMenu.classList.toggle('active');
+            const isExpanded = navMenu.classList.contains('active');
+            navToggle.setAttribute('aria-label', isExpanded ? '메뉴 닫기' : '메뉴 열기');
+          });
+
+          // 모바일에서 서브메뉴 토글
+          const menuItems = document.querySelectorAll('nav ul li');
+          menuItems.forEach(function(item) {
+            const submenu = item.querySelector('ul');
+            if (submenu) {
+              item.addEventListener('click', function(e) {
+                if (window.innerWidth <= 600) {
+                  item.classList.toggle('active');
+                  e.stopPropagation();
+                }
+              });
+            }
+          });
+        }
+      });
+    </script>
 </header>

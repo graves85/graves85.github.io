@@ -32,6 +32,21 @@ header {
     position: relative;
 }
 
+header .header-title {
+    margin: 0;
+    padding: 0;
+    line-height: 1.4;
+}
+
+/* 데스크탑에서는 전체 타이틀, 모바일에서는 축약 타이틀 */
+.title-mobile {
+    display: none;
+}
+
+.title-desktop {
+    display: inline;
+}
+
 /* ========================================
    네비게이션 (Navigation)
    ======================================== */
@@ -47,14 +62,14 @@ nav {
     background: none;
     border: none;
     color: #fff;
-    font-size: 28px;
+    font-size: 32px;
     cursor: pointer;
-    padding: 10px 20px;
+    padding: 8px;
     position: absolute;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
+    top: -45px; /* 헤더 내부 상단으로 배치 */
+    right: 15px;
     z-index: 1000;
+    line-height: 1;
 }
 
 .nav-toggle:focus {
@@ -498,9 +513,21 @@ ol li {
     }
 
     header {
-        font-size: 20px;
+        font-size: 18px;
         padding: 12px 16px;
-        padding-right: 60px; /* 햄버거 메뉴 공간 확보 */
+    }
+
+    header .header-title {
+        padding-right: 50px; /* 햄버거 메뉴 공간 확보 */
+    }
+
+    /* 모바일에서는 축약 타이틀 표시 */
+    .title-desktop {
+        display: none;
+    }
+
+    .title-mobile {
+        display: inline;
     }
 
     /* 햄버거 메뉴 표시 */
@@ -678,9 +705,12 @@ ol li {
 /* 초소형 모바일 (400px 이하) */
 @media (max-width: 400px) {
     header {
-        font-size: 18px;
+        font-size: 16px;
         padding: 10px 12px;
-        padding-right: 55px;
+    }
+
+    header .header-title {
+        padding-right: 45px;
     }
 
     .content-title h3 {

@@ -67,7 +67,7 @@ nav {
     padding: 8px;
     position: absolute;
     top: -45px; /* 헤더 내부 상단으로 배치 */
-    right: 15px;
+    right: 0px;
     z-index: 1000;
     line-height: 1;
 }

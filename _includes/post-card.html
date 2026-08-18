@@ -1,0 +1,16 @@
+<article class="post-card post-card--cat-{{ include.post.categories | last | default: include.post.categories | first }}">
+  <a class="post-card__link" href="{{ include.post.url }}">
+    <div class="post-card__meta">
+      <time datetime="{{ include.post.date | date: '%Y-%m-%d' }}">{{ include.post.date | date: "%Y.%m.%d" }}</time>
+      {% if include.post.categories %}
+        {% for cat in include.post.categories %}
+          <span class="post-card__category post-card__category--{{ cat }}">{{ cat }}</span>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <h3 class="post-card__title">{{ include.post.title }}</h3>
+    {% if include.post.excerpt %}
+      <p class="post-card__excerpt">{{ include.post.excerpt | strip_html | truncate: 100 }}</p>
+    {% endif %}
+  </a>
+</article>

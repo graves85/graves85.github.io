@@ -1,7 +1,7 @@
 ---
 layout: content-layout
 title: "지킬(JERKLL) 프레임워크 구조 파악하기! 🤠"
-date: 2025-02-26
+date: 2026-03-22
 categories: [DEV, 블로그]
 tags: [Jekyll, Web, Blogging, Github]
 ---

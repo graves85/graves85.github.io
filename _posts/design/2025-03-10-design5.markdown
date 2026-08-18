@@ -1,7 +1,7 @@
 ---
 layout: content-layout
 title: "단순한 것 같지만 헤깔리는 싱글턴 패턴 알아보기! 👤"
-date: 2025-03-10
+date: 2026-04-26
 categories: [DEV, 디자인패턴]
 tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 싱글턴 패턴, Singleton Pattern]
 ---

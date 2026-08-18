@@ -1,32 +1,25 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>멍때리고 봐도 보이는 기술 블로그</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-</head>
-<body>
-    {% include header.html %}
+---
+layout: default
+---
 
-	<main>
-        <h2>{{ page.category }} 카테고리</h2>
+{% assign posts = site.categories[page.category] %}
+{% assign post_count = posts | size %}
 
-        <div>
-            {% if site.categories[page.category].size == null %}
-                <p>아직 작성된 포스트가 없습니다. 🥶</p>
-            {% endif %}
-            {% for post in site.categories[page.category] %}
-                <div class="post-item">
-                    <a href="{{ post.url }}">
-                        <h4>{{ post.title }}</h4>
-                        <p>{{ post.date | date: "%Y-%m-%d" }}</p>
-                    </a>
-                </div>
-            {% endfor %}
-        </div>
-	</main>
+<header class="page-header">
+  <p class="page-header__eyebrow">Category</p>
+  <h1 class="page-header__title">{{ page.category }}</h1>
+  <p class="page-header__desc">{{ post_count }}개의 글이 있습니다.</p>
+</header>
 
-    {% include footer.html %}
-</body>
-</html>
+{% if post_count == 0 %}
+  <div class="empty-state">
+    <p>아직 작성된 포스트가 없습니다.</p>
+    <a class="btn btn--primary" href="/">홈으로 돌아가기</a>
+  </div>
+{% else %}
+  <div class="post-grid">
+    {% for post in posts %}
+      {% include post-card.html post=post %}
+    {% endfor %}
+  </div>
+{% endif %}

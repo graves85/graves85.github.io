@@ -1,7 +1,7 @@
 ---
 layout: content-layout
 title: "GITHUB 블로그에 지킬(JERKLL) 프레임워크 얹어보기! 🥸"
-date: 2025-02-25
+date: 2026-03-15
 categories: [DEV, 블로그]
 tags: [Jekyll, Web, Blogging, Github]
 ---

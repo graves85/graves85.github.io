@@ -1,7 +1,7 @@
 ---
 layout: content-layout
 title: "클린 코드 작성하기 2탄!🤤"
-date: 2026-01-13
+date: 2026-08-16
 categories: [DEV]
 tags: [DEV, cleancode, 클린코드]
 ---

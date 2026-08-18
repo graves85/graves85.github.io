@@ -18,7 +18,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: IT & Development Blog
+title: Graves85 Tech Blog
 email: yunyun2833@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   이곳에서는 주로 웹 프로그래밍, IT 기술, 개발 팁 등을 다룹니다.
@@ -33,6 +33,13 @@ plugins:
   - jekyll-feed
 
 future: true
+
+# NEWS 카테고리 비노출: 목록/피드에서 제외. 원문 파일은 유지.
+defaults:
+  - scope:
+      path: "_posts/news"
+    values:
+      feed: false
 
 collections:
   pages:

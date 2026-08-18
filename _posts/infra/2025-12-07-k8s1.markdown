@@ -1,7 +1,7 @@
 ---
 layout: content-layout
 title: "쿠버네티스 간단하게 알아보기!🤤"
-date: 2025-12-07
+date: 2026-06-21
 categories: [INFRA]
 tags: [INFRA, Kubernetes, k8s, 쿠버네티스]
 ---

@@ -1,19 +1,27 @@
-<!-- _layouts/default.html -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>멍때리고 봐도 보이는 기술 블로그</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('theme');
+        if (!theme) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  {% include head.html %}
 </head>
 <body>
-	{% include header.html %}
+  {% include header.html %}
 
-	<main>
-		{{ content }}
-	</main>
+  <main class="site-main">
+    {{ content }}
+  </main>
 
-	{% include footer.html %}
+  {% include footer.html %}
+  <script src="/assets/js/main.js" defer></script>
 </body>
 </html>

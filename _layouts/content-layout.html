@@ -1,43 +1,59 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>멍때리고 봐도 보이는 기술 블로그</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-</head>
-<body>
-    {% include header.html %}
+---
+layout: default
+---
 
-    <main>
-    <div class="content-title">
-        <h3>{{ page.title }}</h3>
+<article class="article">
+  <header class="article-header">
+    <div class="article-header__meta">
+      <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%Y년 %m월 %d일" }}</time>
+      {% if page.categories %}
+        {% for category in page.categories %}
+          {% if category == "DEV" or category == "DB" or category == "INFRA" %}
+            <a class="article-header__category article-header__category--{{ category }}" href="/categories/{{ category }}/">{{ category }}</a>
+          {% elsif category == "블로그" or category == "디자인패턴" or category == "버전관리" %}
+            <a class="article-header__category article-header__category--{{ category }}" href="/categories/DEV/{{ category }}/">{{ category }}</a>
+          {% else %}
+            <span class="article-header__category article-header__category--{{ category }}">{{ category }}</span>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
     </div>
-    <div class="content-body">
-        {{ content }}
-    </div>
+    <h1 class="article-header__title">{{ page.title }}</h1>
+  </header>
 
-    {% if page.tags %}
-        <div class="tags">
-            {% for tag in page.tags %}
-            <span>#{{ tag }}</span>
-            {% endfor %}
-        </div>
-    {% endif %}
-    
-    <!-- 댓글 영역 -->
-    <div class="comments">
-        <script src="https://utteranc.es/client.js"
-            repo="graves85/graves85.github.io"
-            issue-term="pathname"
-            label="comment"
-            theme="github-light"
-            crossorigin="anonymous"
-            async>
-        </script>
+  <aside class="toc" id="tableOfContents" aria-label="글 목차" style="display: none;">
+    <div class="toc__header">
+      <span class="toc__title">목차 (Table of Contents)</span>
+      <button type="button" class="toc__toggle" id="tocToggle" aria-label="목차 접기/펼치기">접기</button>
     </div>
-    </main>
+    <nav class="toc__body" id="tocBody"></nav>
+  </aside>
 
-    {% include footer.html %}
-</body>
-</html>
+  <div class="content-body prose" id="contentBody">
+    {{ content }}
+  </div>
+
+  {% if page.tags %}
+    <div class="tags">
+      {% for tag in page.tags %}
+        <span class="tag">#{{ tag }}</span>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <nav class="article-nav">
+    <a class="article-nav__back" href="/">← 목록으로</a>
+  </nav>
+
+  <section class="comments" aria-label="댓글">
+    <h2 class="comments__title">댓글</h2>
+    <script src="https://utteranc.es/client.js"
+      repo="graves85/graves85.github.io"
+      issue-term="pathname"
+      label="comment"
+      theme="github-light"
+      crossorigin="anonymous"
+      async>
+    </script>
+  </section>
+</article>

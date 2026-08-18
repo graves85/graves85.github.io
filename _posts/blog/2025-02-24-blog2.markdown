@@ -2,7 +2,7 @@
 layout: content-layout
 title: "GITHUB 블로그 개설 어떻게 했더라... 🤨 껍데기 만들기편"
 date: 2026-03-08
-categories: [DEV, 블로그]
+categories: [LOG, 블로그]
 tags: [Jekyll, Web, Blogging, Github]
 ---
 

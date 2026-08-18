@@ -2,7 +2,7 @@
 layout: content-layout
 title: "템플릿을 만들어 캡슐화시켜버리는 템플릿 메소드 패턴 알아보기! 📔"
 date: 2026-05-17
-categories: [DEV, 디자인패턴]
+categories: [TECH, 디자인패턴]
 tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 템플릿 메소드 패턴, Template Method Pattern]
 ---
 

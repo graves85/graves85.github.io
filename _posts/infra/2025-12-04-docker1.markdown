@@ -2,7 +2,7 @@
 layout: content-layout
 title: "DOCKER 간단하게 알아보기!🤤"
 date: 2026-06-14
-categories: [INFRA]
+categories: [TECH, INFRA]
 tags: [INFRA, DOCKER, 도커]
 ---
 

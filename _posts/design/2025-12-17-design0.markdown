@@ -2,7 +2,7 @@
 layout: content-layout
 title: "기본 디자인 패턴 축약해서 살펴보기! 🧐"
 date: 2026-06-07
-categories: [DEV, 디자인패턴]
+categories: [TECH, 디자인패턴]
 tags: [디자인패턴, design pattern]
 ---
 

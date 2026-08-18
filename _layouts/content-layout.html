@@ -8,10 +8,12 @@ layout: default
       <time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%Y년 %m월 %d일" }}</time>
       {% if page.categories %}
         {% for category in page.categories %}
-          {% if category == "DEV" or category == "DB" or category == "INFRA" %}
+          {% if category == "TECH" or category == "LOG" %}
             <a class="article-header__category article-header__category--{{ category }}" href="/categories/{{ category }}/">{{ category }}</a>
-          {% elsif category == "블로그" or category == "디자인패턴" or category == "버전관리" %}
-            <a class="article-header__category article-header__category--{{ category }}" href="/categories/DEV/{{ category }}/">{{ category }}</a>
+          {% elsif category == "개발" or category == "디자인패턴" or category == "버전관리" or category == "DB" or category == "INFRA" %}
+            <a class="article-header__category article-header__category--{{ category }}" href="/categories/TECH/{{ category }}/">{{ category }}</a>
+          {% elsif category == "블로그" %}
+            <a class="article-header__category article-header__category--{{ category }}" href="/categories/LOG/{{ category }}/">{{ category }}</a>
           {% else %}
             <span class="article-header__category article-header__category--{{ category }}">{{ category }}</span>
           {% endif %}

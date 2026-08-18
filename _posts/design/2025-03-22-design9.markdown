@@ -2,7 +2,7 @@
 layout: content-layout
 title: "컬렉션 담당 반복자 패턴과 컴포지트 패턴 알아보기! 🔄"
 date: 2026-05-24
-categories: [DEV, 디자인패턴]
+categories: [TECH, 디자인패턴]
 tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 반복자 패턴, Iterator Pattern, 컴포지트 패턴, Composite Pattern]
 ---
 

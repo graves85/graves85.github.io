@@ -2,7 +2,7 @@
 layout: content-layout
 title: "디자인 패턴 익혀두기! 첫 번째는 머리 잘 써야하는 전략 패턴! 🧐"
 date: 2026-03-29
-categories: [DEV, 디자인패턴]
+categories: [TECH, 디자인패턴]
 tags: [디자인패턴, design pattern, 헤드퍼스트, GoF, 전략 패턴, Strategy Pattern]
 ---
 

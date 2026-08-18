@@ -3,18 +3,22 @@ menu:
   - name: "HOME"
     url: "/"
 
-  - name: "DEV"
-    url: "/categories/DEV/"
+  - name: "TECH"
+    url: "/categories/TECH/"
+    subcategories:
+      - name: "개발"
+        url: "/categories/TECH/개발/"
+      - name: "디자인패턴"
+        url: "/categories/TECH/디자인패턴/"
+      - name: "버전관리"
+        url: "/categories/TECH/버전관리/"
+      - name: "DB"
+        url: "/categories/TECH/DB/"
+      - name: "INFRA"
+        url: "/categories/TECH/INFRA/"
+
+  - name: "LOG"
+    url: "/categories/LOG/"
     subcategories:
       - name: "블로그"
-        url: "/categories/DEV/블로그/"
-      - name: "디자인패턴"
-        url: "/categories/DEV/디자인패턴/"
-      - name: "버전관리"
-        url: "/categories/DEV/버전관리/"
-
-  - name: "DB"
-    url: "/categories/DB/"
-
-  - name: "INFRA"
-    url: "/categories/INFRA/"
+        url: "/categories/LOG/블로그/"

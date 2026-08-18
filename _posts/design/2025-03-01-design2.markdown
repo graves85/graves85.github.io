@@ -2,7 +2,7 @@
 layout: content-layout
 title: "객체들에게 연락돌리는 옵저버 패턴! 📞"
 date: 2026-04-05
-categories: [DEV, 디자인패턴]
+categories: [TECH, 디자인패턴]
 tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 옵저버 패턴, Observer Pattern]
 ---
 

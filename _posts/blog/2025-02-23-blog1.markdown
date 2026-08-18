@@ -2,7 +2,7 @@
 layout: content-layout
 title: "GITHUB 블로그 도전! 😓 마크다운 작성법부터 확인하기 🥳"
 date: 2026-03-01
-categories: [DEV, 블로그]
+categories: [LOG, 블로그]
 tags: [Jekyll, Web, Blogging, Github, markdown]
 ---
 

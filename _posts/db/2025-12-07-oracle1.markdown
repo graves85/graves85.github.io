@@ -2,7 +2,7 @@
 layout: content-layout
 title: "ORACLE SQL 튜닝 사례 1🤤"
 date: 2026-07-19
-categories: [DB]
+categories: [TECH, DB]
 tags: [DB, 오라클, ORACLE, SQL 튜닝]
 ---
 

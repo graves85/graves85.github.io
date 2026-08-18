@@ -2,7 +2,7 @@
 layout: content-layout
 title: "컨버팅의 달인 어댑터 및 퍼사드 패턴 알아보기! 💑"
 date: 2026-05-10
-categories: [DEV, 디자인패턴]
+categories: [TECH, 디자인패턴]
 tags: [디자인패턴, Design pattern, 헤드퍼스트, GoF, 어댑터 패턴, Adapter Pattern, 퍼사드 패턴, Facade Pattern]
 ---
 

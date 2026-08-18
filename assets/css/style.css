@@ -24,7 +24,11 @@
   --color-inline-code-bg: #f1f5f9;
   --color-inline-code-text: #be123c;
 
-  /* DEV Subcategory Badges (Light) */
+  /* Category Badges (Light) */
+  --cat-tech-bg: #eff6ff;
+  --cat-tech-text: #1d4ed8;
+  --cat-log-bg: #fdf2f8;
+  --cat-log-text: #be185d;
   --cat-dev-bg: #eff6ff;
   --cat-dev-text: #1d4ed8;
   --cat-blog-bg: #ecfdf5;
@@ -75,7 +79,11 @@
   --color-inline-code-bg: #1e293b;
   --color-inline-code-text: #fb7185;
 
-  /* DEV Subcategory Badges (Dark) */
+  /* Category Badges (Dark) */
+  --cat-tech-bg: rgba(59, 130, 246, 0.2);
+  --cat-tech-text: #93c5fd;
+  --cat-log-bg: rgba(244, 114, 182, 0.2);
+  --cat-log-text: #f472b6;
   --cat-dev-bg: rgba(59, 130, 246, 0.2);
   --cat-dev-text: #93c5fd;
   --cat-blog-bg: rgba(16, 185, 129, 0.2);
@@ -488,6 +496,10 @@ a:focus-visible {
   gap: 16px;
 }
 
+.category-grid--2cols {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .category-card {
   display: flex;
   flex-direction: column;
@@ -498,6 +510,31 @@ a:focus-visible {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.category-card--tech:hover,
+.category-card--tech:focus-visible {
+  border-color: var(--color-primary);
+}
+
+.category-card--log:hover,
+.category-card--log:focus-visible {
+  border-color: #ec4899;
+}
+
+.category-card--log .category-card__label {
+  color: #db2777;
+}
+
+[data-theme="dark"] .category-card--log .category-card__label {
+  color: #f472b6;
 }
 
 .category-card:hover,
@@ -578,8 +615,22 @@ a:focus-visible {
 }
 
 /* Category Badge Colors */
+.post-card__category--TECH,
+.article-header__category--TECH {
+  background: var(--cat-tech-bg);
+  color: var(--cat-tech-text);
+}
+
+.post-card__category--LOG,
+.article-header__category--LOG {
+  background: var(--cat-log-bg);
+  color: var(--cat-log-text);
+}
+
 .post-card__category--DEV,
-.article-header__category--DEV {
+.post-card__category--개발,
+.article-header__category--DEV,
+.article-header__category--개발 {
   background: var(--cat-dev-bg);
   color: var(--cat-dev-text);
 }
@@ -1148,7 +1199,8 @@ a.article-header__category:focus-visible {
    Responsive
    ======================================== */
 @media (max-width: 900px) {
-  .category-grid {
+  .category-grid,
+  .category-grid--2cols {
     grid-template-columns: 1fr;
   }
 

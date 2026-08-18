@@ -2,7 +2,7 @@
 layout: content-layout
 title: "리눅스에 DOCKER 간단하게 설치해보기!🤤"
 date: 2026-06-28
-categories: [INFRA]
+categories: [TECH, INFRA]
 tags: [INFRA, DOCKER, 도커]
 ---
 

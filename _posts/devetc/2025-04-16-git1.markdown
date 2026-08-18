@@ -2,7 +2,7 @@
 layout: content-layout
 title: "GIT CLI 간단하게 알아보기!🤤"
 date: 2026-05-31
-categories: [DEV, 버전관리]
+categories: [TECH, 버전관리]
 tags: [DEV, GIT, GIT CLI, GITHUB]
 ---
 

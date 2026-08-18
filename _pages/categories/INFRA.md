@@ -2,5 +2,5 @@
 layout: list-layout
 title: INFRA
 category: INFRA
-permalink: /categories/INFRA/
+permalink: /categories/TECH/INFRA/
 ---

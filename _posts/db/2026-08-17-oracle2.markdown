@@ -2,7 +2,7 @@
 layout: content-layout
 title: "ORACLE 해시 파티셔닝(Hash Partitioning) 완벽 가이드 및 대용량 처리 부하 개선 사례 🚀"
 date: 2026-08-17
-categories: [DB]
+categories: [TECH, DB]
 tags: [DB, 오라클, ORACLE, 파티셔닝, 해시 파티셔닝, Hash Partitioning, 대용량 처리, SQL 튜닝, DB 성능 최적화]
 ---
 

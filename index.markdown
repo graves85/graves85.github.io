@@ -8,12 +8,12 @@ permalink: /
   <p class="hero__eyebrow">Graves85 Tech Blog</p>
   <h1 class="hero__title">프로그래밍, DB, 인프라를<br>경험 중심으로 정리하는 블로그</h1>
   <p class="hero__desc">
-    Java · Spring · Docker · Kubernetes · SQL 튜닝 등
-    실무에서 겪은 내용과 학습 기록을 공유합니다.
+    Java · Kotlin · Spring · Docker · Kubernetes · Oracle SQL 등
+    실무에서 겪은 내용과 개발 기록을 공유합니다.
   </p>
   <div class="hero__actions">
-    <a class="btn btn--primary" href="/categories/DEV/">DEV 글 보기</a>
-    <a class="btn btn--ghost" href="https://github.com/graves85/graves85.github.io" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a class="btn btn--primary" href="/categories/TECH/">TECH 글 보기</a>
+    <a class="btn btn--ghost" href="/categories/LOG/">LOG 글 보기</a>
   </div>
 </section>
 
@@ -22,24 +22,22 @@ permalink: /
     <h2 class="section-title">카테고리</h2>
     <p class="section-desc">관심 분야별로 글을 모아봤습니다.</p>
   </div>
-  <div class="category-grid">
-    {% assign dev_count = site.categories.DEV | size %}
-    {% assign db_count = site.categories.DB | size %}
-    {% assign infra_count = site.categories.INFRA | size %}
-    <a class="category-card" href="/categories/DEV/">
-      <span class="category-card__label">DEV</span>
-      <span class="category-card__count">{{ dev_count }} posts</span>
-      <span class="category-card__desc">Java, Kotlin, 클린코드, 디자인패턴</span>
+  <div class="category-grid category-grid--2cols">
+    {% assign tech_count = site.categories.TECH | size %}
+    {% assign log_count = site.categories.LOG | size %}
+    <a class="category-card category-card--tech" href="/categories/TECH/">
+      <div class="category-card__head">
+        <span class="category-card__label">TECH</span>
+        <span class="category-card__count">{{ tech_count }} posts</span>
+      </div>
+      <span class="category-card__desc">Java, Kotlin, 클린코드, 디자인패턴, Git, DB(Oracle), 인프라(Docker, K8s)</span>
     </a>
-    <a class="category-card" href="/categories/DB/">
-      <span class="category-card__label">DB</span>
-      <span class="category-card__count">{{ db_count }} posts</span>
-      <span class="category-card__desc">Oracle, MySQL, SQL 튜닝</span>
-    </a>
-    <a class="category-card" href="/categories/INFRA/">
-      <span class="category-card__label">INFRA</span>
-      <span class="category-card__count">{{ infra_count }} posts</span>
-      <span class="category-card__desc">Docker, Kubernetes, 인프라 구축</span>
+    <a class="category-card category-card--log" href="/categories/LOG/">
+      <div class="category-card__head">
+        <span class="category-card__label">LOG</span>
+        <span class="category-card__count">{{ log_count }} posts</span>
+      </div>
+      <span class="category-card__desc">GitHub 블로그 개설 및 운영기, 회고와 생각 기록</span>
     </a>
   </div>
 </section>

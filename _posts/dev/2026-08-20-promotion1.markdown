@@ -1,0 +1,396 @@
+---
+layout: content-layout
+title: "대용량 선착순 프로모션 시스템 아키텍처 설계 연습! (JDK 21, Redis, Kafka) 🏎️💨"
+date: 2026-08-20
+categories: [TECH, 개발]
+tags: [선착순이벤트, 대용량트래픽, 아키텍처설계, JDK21, SpringBoot, Redis, Kafka, 동시성제어, 백엔드]
+---
+
+## 안녕하십니까! 😀
+
+특정 시간(예: 낮 12시 00분)에 오픈되는 **선착순 100명 쿠폰 지급**, **타임세일 한정 수량 재고 차감**, **티켓팅/수강신청** 시스템은 백엔드 엔지니어에게 가장 매력적이면서도 까다로운 도전 과제입니다.
+
+수만~수십만 명의 사용자가 단 1~2초 사이에 동시에 버튼을 누를 때, 기존 RDBMS 중심의 단순 동기식 트랜잭션 방식으로 처리하면 **DB 커넥션 풀 고갈, 락(Lock) 경합으로 인한 타임아웃, 중복 발급(초과 차감)** 등 치명적인 장애를 겪게 됩니다.
+
+오늘은 **JDK 21 기반의 최신 기술 스택**을 활용하여 대용량 트래픽을 견디고 데이터 정합성을 완벽하게 보장하는 **선착순 프로모션 아키텍처 설계**를 단계별로 연습해보겠습니다! 🚀
+
+---
+
+## 1. 대용량 선착순 이벤트 맞춤형 기술 스택 선택 (JDK 21 기준)
+
+순간적인 대규모 I/O 및 동시성 요청을 효율적으로 처리하기 위해 다음과 같은 기술 스택을 구성합니다.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 선착순 이벤트 핵심 기술 스택                   │
+├───────────────────┬─────────────────────────────────────────┤
+│ Language & Runtime│ Java 21 (Virtual Threads - Project Loom)│
+│ Framework         │ Spring Boot 3.3.x                       │
+│ High-Speed Cache  │ Redis (Standalone / Redis Cluster)      │
+│ In-Memory Concurrency│ Redis Lua Script & Redisson           │
+│ Message Broker    │ Apache Kafka                            │
+│ RDBMS             │ MySQL 8.0+ / PostgreSQL                 │
+│ Infra & Traffic   │ AWS CloudFront(CDN), Nginx / AWS ALB    │
+└───────────────────┴─────────────────────────────────────────┘
+```
+
+### 💡 핵심 기술 선택 이유
+1. **Java 21 Virtual Threads (경량 가상 스레드)**:
+   - 기존 플랫폼 스레드(1:1 OS 매핑) 방식은 수천~수만 동시 요청 시 스레드 풀 고갈 및 메모리 낭비가 심했습니다.
+   - Java 21의 Virtual Thread를 활성화(`spring.threads.virtual.enabled=true`)하면 I/O 블로킹(Redis/Kafka/DB 통신) 시 OS 스레드를 점유하지 않고 처리량을 극대화할 수 있습니다.
+2. **Redis & Lua Script**:
+   - 디스크 DB에 직접 트래픽이 닿지 않도록 **재고 차감 및 중복 참여 검증을 Redis 인메모리에서 Lua Script(원자적 실행)**로 1ms 이내에 즉각 처리합니다.
+3. **Apache Kafka (비동기 처리 & 쓰기 버퍼링)**:
+   - Redis에서 선착순 검증을 통과한 성공 요청만을 Kafka 토픽으로 발행하고, 컨슈머가 백그라운드에서 완만한 속도로 RDBMS에 주문/발급 데이터를 영속화(Load Leveling)합니다.
+
+---
+
+## 2. RDBMS 테이블 설계 (회원, 프로모션, 상품, 주문, 재고)
+
+동시성 처리는 Redis와 Kafka가 앞단에서 흡수하더라도, 최종 데이터의 정합성과 이력 관리를 위해 RDBMS 정규화 테이블 구조가 탄탄해야 합니다.
+
+```
+┌─────────────────┐       ┌──────────────────────┐
+│     MEMBERS     │       │      PROMOTIONS      │
+├─────────────────┤       ├──────────────────────┤
+│ * member_id     │       │ * promotion_id       │
+│   email         │       │   title              │
+│   name          │       │   start_at / end_at  │
+└────────┬────────┘       │   status (ACTIVE..)  │
+         │                └──────────┬───────────┘
+         │ 1                         │ 1
+         │                           │
+         │ N                         │ N
+┌────────▼───────────────────────────▼───────────┐
+│              PROMOTION_PARTICIPATIONS          │ (유저별 참여 이력 & 중복 방지)
+├────────────────────────────────────────────────┤
+│ * participation_id                             │
+│   promotion_id  (FK)                           │
+│   member_id     (FK)                           │
+│   status        (WIN/FAIL)                     │
+│   participated_at                              │
+│   [UK: promotion_id + member_id]               │ ◄ 중복 참여 원천 방지 유니크 인덱스
+└────────────────────────────────────────────────┘
+
+┌─────────────────┐       ┌──────────────────────┐
+│    PRODUCTS     │ 1   1 │    PRODUCT_STOCKS    │ (비관적 락/낙관적 락 대비 분리)
+├─────────────────┤◄──────┤──────────────────────┤
+│ * product_id    │       │ * product_id (FK/PK) │
+│   name          │       │   stock_quantity     │
+│   original_price│       │   version (낙관적락) │
+└────────┬────────┘       └──────────────────────┘
+         │ 1
+         │
+         │ N
+┌────────▼────────┐ 1   N ┌──────────────────────┐
+│     ORDERS      │◄──────┤     ORDER_ITEMS      │
+├─────────────────┤       ├──────────────────────┤
+│ * order_id      │       │ * order_item_id      │
+│   order_no (UUID│       │   order_id (FK)      │
+│   member_id     │       │   product_id (FK)    │
+│   total_amount  │       │   order_price        │
+│   status        │       │   quantity           │
+│   created_at    │       └──────────────────────┘
+└─────────────────┘
+```
+
+### 📋 DDL 스크립트 예시
+
+```sql
+-- 1. 프로모션 정의 테이블
+CREATE TABLE PROMOTIONS (
+    promotion_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title           VARCHAR(100) NOT NULL,
+    total_quantity  INT NOT NULL,
+    start_at        DATETIME NOT NULL,
+    end_at          DATETIME NOT NULL,
+    status          VARCHAR(20) NOT NULL DEFAULT 'READY',
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. 프로모션 참여 이력 (중복 참여 방지 Unique Key 필수)
+CREATE TABLE PROMOTION_PARTICIPATIONS (
+    participation_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    promotion_id     BIGINT NOT NULL,
+    member_id        BIGINT NOT NULL,
+    status           VARCHAR(20) NOT NULL, -- WIN, FAIL
+    participated_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT UK_PROMOTION_MEMBER UNIQUE (promotion_id, member_id)
+);
+
+-- 3. 상품 재고 테이블
+CREATE TABLE PRODUCT_STOCKS (
+    product_id     BIGINT PRIMARY KEY,
+    stock_quantity INT NOT NULL,
+    version        BIGINT NOT NULL DEFAULT 0, -- 낙관적 락(Optimistic Lock) 대비
+    CONSTRAINT CK_STOCK_NON_NEGATIVE CHECK (stock_quantity >= 0)
+);
+
+-- 4. 주문 테이블
+CREATE TABLE ORDERS (
+    order_id        BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_no        VARCHAR(64) NOT NULL UNIQUE,
+    member_id       BIGINT NOT NULL,
+    total_amount    DECIMAL(12, 2) NOT NULL,
+    status          VARCHAR(20) NOT NULL, -- PENDING, COMPLETED, CANCELED
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 3. 서비스 플로우 (전체 프로세스 흐름도)
+
+선착순 요청이 들어왔을 때 메인 DB로 바로 접근하지 않고, **Fast-Path(Redis) $\rightarrow$ Event-Queue(Kafka) $\rightarrow$ Persistence(DB)** 순으로 흐르는 아키텍처입니다.
+
+```
+[1. 선착순 버튼 클릭]
+        │ (사용자 JWT 토큰 + promotionId)
+        ▼
+┌──────────────────┐
+│   API Gateway    │ (Rate Limiter: 1인당 초당 요청 제한 / 인증 검증)
+└────────┬─────────┘
+        │
+        ▼
+┌──────────────────┐
+│  Promotion WAS   │ (Java 21 Virtual Threads)
+└────────┬─────────┘
+        │
+        │ [2. Redis Lua Script 원자적 실행]
+        ▼
+┌────────────────────────────────────────────────────────┐
+│                   Redis In-Memory                      │
+│ 1) SISMEMBER promotion:{id}:members {userId} (중복체크) │
+│ 2) DECRBY promotion:{id}:stock 1 (재고 차감)           │
+│ 3) SADD promotion:{id}:members {userId} (참여 등록)    │
+└────────┬───────────────────────────────────────────────┘
+        │
+   ┌────┴────────────────────────┐
+   │ [성공 (재고 >= 0)]           │ [실패 (재고 소진 or 중복)]
+   ▼                             ▼
+┌──────────────────┐          ┌───────────────────────┐
+│ Kafka Producer   │          │ 즉시 "선착순 마감/실패"  │
+│ (Event 발행)     │          │ HTTP 응답 (1ms 반환)  │
+└────────┬─────────┘          └───────────────────────┘
+        │
+        │ [3. 비동기 이벤트: promotion-order-topic]
+        ▼
+┌──────────────────┐
+│ Kafka Consumer   │ (안정적인 속도로 소비)
+└────────┬─────────┘
+        │
+        │ [4. RDBMS 트랜잭션]
+        ▼
+┌──────────────────┐
+│ Main RDBMS       │ (주문 생성 + 참여 이력 적재 + 실제 재고 동기화)
+└──────────────────┘
+```
+
+---
+
+## 4. Frontend 구성 및 UX 최적화
+
+프론트엔드에서는 무분별한 요청 폭주를 1차적으로 방어하고 자연스러운 사용자 경험(UX)을 제공해야 합니다.
+
+```
+[ 이벤트 오픈 전 ]      [ 이벤트 오픈 시 ]           [ 클릭 직후 ]
+┌──────────────┐     ┌──────────────┐         ┌────────────────────┐
+│   00:05:21   │ ──► │  [응모하기]   │ ──────► │   대기열 팝업 표시 │
+│ 카운트다운   │     │ (활성화)     │ (1회클릭)│ "처리 중입니다..." │
+│ (버튼비활성) │     └──────────────┘         │ (버튼 Disabled)    │
+└──────────────┘                              └────────────────────┘
+```
+
+1. **서버 시간 기준 카운트다운 동기화**:
+   - 클라이언트 로컬 PC 시간 조작 방지를 위해, 최초 진입 시 서버 시간을 내려받아 타임오프셋을 계산한 카운트다운을 구현합니다.
+2. **클릭 연타(Throttling / Debounce) 방지**:
+   - 버튼 클릭 즉시 버튼을 `disabled` 처리하고 로딩 스피너를 노출하여 중복 클릭을 차단합니다.
+3. **정적 리소스 CDN 분리**:
+   - 이벤트 페이지의 이미지, CSS, JS는 AWS CloudFront/S3를 통해 서빙하여 WAS의 정적 파일 I/O 부하를 0으로 만듭니다.
+4. **결과 확인 방식 (Polling vs WebSocket/SSE)**:
+   - Kafka 비동기 처리 특성상, 클라이언트는 이벤트 제출 후 `orderToken`을 받아 1~2초 간격으로 짧게 Polling하거나 SSE(Server-Sent Events)로 최종 당첨 여부를 조회합니다.
+
+---
+
+## 5. Backend 구성 (Java 21 + Spring Boot + Redis Lua Script)
+
+### 1) Redis Lua Script (중복 방지 & 재고 차감 원자적 처리)
+
+Redis 명령어 여러 개를 개별 호출하면 네트워크 왕복 시간(RTT)과 동시성 경쟁이 발생합니다. **Lua Script를 사용하면 단 한 번의 네트워크 호출로 원자적(Atomic) 실행을 보장**합니다.
+
+```lua
+-- promotion_apply.lua
+-- KEYS[1]: promotion:{id}:stock (문자열 Key)
+-- KEYS[2]: promotion:{id}:applied_users (Set Key)
+-- ARGV[1]: userId
+
+-- 1. 중복 참여 여부 확인
+if redis.call('SISMEMBER', KEYS[2], ARGV[1]) == 1 then
+    return -1 -- 이미 참여한 유저 (DUPLICATE)
+end
+
+-- 2. 현재 재고 확인 및 차감
+local stock = tonumber(redis.call('GET', KEYS[1]) or "0")
+if stock <= 0 then
+    return -2 -- 재고 소진 (SOLD_OUT)
+end
+
+-- 3. 원자적 재고 감소 및 유저 등록
+redis.call('DECR', KEYS[1])
+redis.call('SADD', KEYS[2], ARGV[1])
+
+return 1 -- 선착순 성공 (SUCCESS)
+```
+
+---
+
+### 2) Spring Boot 선착순 처리 서비스 코드 (JDK 21 Virtual Threads)
+
+```java
+package com.example.promotion.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scripting.support.ResourceScriptSource;
+import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class PromotionService {
+
+    private final StringRedisTemplate redisTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private DefaultRedisScript<Long> promotionScript;
+
+    @PostConstruct
+    public void init() {
+        promotionScript = new DefaultRedisScript<>();
+        promotionScript.setResultType(Long.class);
+        promotionScript.setScriptSource(
+            new ResourceScriptSource(new ClassPathResource("scripts/promotion_apply.lua"))
+        );
+    }
+
+    public PromotionApplyResult applyPromotion(Long promotionId, Long userId) {
+        String stockKey = "promotion:" + promotionId + ":stock";
+        String userSetKey = "promotion:" + promotionId + ":applied_users";
+
+        // Redis Lua Script 단일 원자적 실행
+        Long result = redisTemplate.execute(
+            promotionScript,
+            List.of(stockKey, userSetKey),
+            String.valueOf(userId)
+        );
+
+        if (result == null) {
+            throw new IllegalStateException("Redis 응답 오류");
+        }
+
+        if (result == -1L) {
+            return PromotionApplyResult.DUPLICATE_APPLY;
+        } else if (result == -2L) {
+            return PromotionApplyResult.SOLD_OUT;
+        }
+
+        // 선착순 당첨 -> Kafka로 비동기 주문 생성 이벤트 발행
+        PromotionAppliedEvent event = new PromotionAppliedEvent(promotionId, userId, System.currentTimeMillis());
+        kafkaTemplate.send("promotion-applied-topic", String.valueOf(userId), event);
+
+        return PromotionApplyResult.SUCCESS;
+    }
+}
+```
+
+---
+
+### 3) Kafka Consumer (RDBMS 최종 영속화)
+
+```java
+package com.example.promotion.consumer;
+
+import com.example.promotion.domain.PromotionParticipation;
+import com.example.promotion.repository.ParticipationRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class PromotionOrderConsumer {
+
+    private final ParticipationRepository participationRepository;
+
+    @KafkaListener(topics = "promotion-applied-topic", groupId = "promotion-group")
+    @Transactional
+    public void consume(PromotionAppliedEvent event) {
+        try {
+            // DB에 영속화 및 주문 생성 로직 실행
+            participationRepository.save(
+                PromotionParticipation.builder()
+                    .promotionId(event.promotionId())
+                    .memberId(event.userId())
+                    .status("WIN")
+                    .build()
+            );
+            log.info("선착순 당첨 영속화 완료: user={}, promo={}", event.userId(), event.promotionId());
+        } catch (Exception e) {
+            // Unique Index 위반 등 예외 발생 시 Dead Letter Queue(DLQ) 발행 및 보상 트랜잭션
+            log.error("영속화 실패 처리: {}", e.getMessage());
+        }
+    }
+}
+```
+
+---
+
+## 6. 선착순 이벤트에서 가장 주의해야 할 핵심 포인트! ⚠️
+
+실제 운영 환경에서 시스템 장애와 사고를 유발하는 5가지 핵심 체크리스트입니다.
+
+### 🚨 1. Redis와 RDBMS 간의 재고 불일치 및 롤백 전략 (보상 트랜잭션)
+- Redis에서는 성공 처리되었으나, Kafka 장애나 DB 제약 조건 오류로 RDBMS 저장이 최종 실패할 수 있습니다.
+- 이 경우 Kafka Consumer의 실패 이벤트를 캐치하여 **Redis의 `INCR` (재고 복구) 및 `SREM` (참여 유저 제거)**을 수행하는 **보상 트랜잭션(Compensating Transaction)**을 반드시 구현해야 합니다.
+
+### 🚨 2. 비인가 스크립트 및 매크로 어뷰징 차단
+- 오픈 0.001초 전에 패킷을 전송하거나 수천 개의 IP로 요청을 쏘는 매크로 공격이 흔합니다.
+- **대응책**:
+  - 클라우드 WAF(AWS WAF / Cloudflare)를 통한 Rate Limiting
+  - CAPTCHA(reCAPTCHA / Turnstile) 도입
+  - 이벤트 오픈 정각에만 생성되는 **일회용 암호화 토큰(Promotion Token)**을 발급받아야만 응모 가능하도록 검증 로직 추가
+
+### 🚨 3. DB 쿼리 없이 "사전 워밍업(Warm-Up)" 필수
+- 이벤트 시작 직후 수만 명이 동시에 조회 쿼리를 날리면 DB 커넥션이 즉시 고갈됩니다.
+- 이벤트 시작 10분 전에 **프로모션 기본 정보와 재고 수량을 미리 Redis에 로딩(Cache Warming)**해두어야 합니다.
+
+### 🚨 4. Connection Pool 및 Virtual Threads 튜닝
+- `HikariCP` 커넥션 풀 크기를 무작정 늘리면 DB CPU가 100%를 치게 됩니다.
+- Redis 커넥션 풀(`Lettuce` Netty 쓰레드), Kafka Producer 버퍼 크기(`batch.size`, `linger.ms`), Virtual Thread의 논블로킹 특성을 사전에 부하 테스트(nGrinder, k6, JMeter)로 검증해야 합니다.
+
+### 🚨 5. Graceful Degradation (서킷 브레이커 & 정적 페이지 전환)
+- 만약 Redis나 핵심 백엔드 서버가 다운될 경우를 대비해 `Resilience4j` 서킷 브레이커를 구성하고, 장애 감지 시 즉시 CDN 레벨에서 "서비스 접속 대기 중입니다" 정적 에러 페이지를 띄우도록 페일오버(Failover) 정책을 수립해야 합니다.
+
+---
+
+## 7. 마치며 & 요약 정리
+
+대용량 선착순 이벤트 아키텍처의 핵심은 **"RDBMS를 보호하고, 가장 빠른 인메모리 계층에서 실패 요청을 99% 쳐내는 것"**입니다.
+
+- **기술 스택**: Java 21 Virtual Threads + Redis Lua Script + Kafka 비동기 파이프라인
+- **데이터 흐름**: Client $\rightarrow$ API Gateway $\rightarrow$ WAS $\rightarrow$ **Redis(원자적 차감 & 중복 체크)** $\rightarrow$ **Kafka(성공건만 발행)** $\rightarrow$ **RDBMS(안정적 배치/순차 영속화)**
+- **DB 설계**: `(promotion_id, member_id)` 복합 Unique 인덱스로 최후의 중복 방어
+- **핵심 주의점**: 보상 트랜잭션 구현, 매크로 차단, 캐시 사전 워밍업, 서킷 브레이커 구축
+
+탄탄한 아키텍처 설계를 통해 어떤 대규모 트래픽 폭증에도 끄떡없는 견고한 선착순 시스템을 구축해보시길 바랍니다!
+
+긴 글 읽어주셔서 감사합니다. 궁금한 점이 있으시다면 언제든 편하게 댓글 남겨주세요! 😊

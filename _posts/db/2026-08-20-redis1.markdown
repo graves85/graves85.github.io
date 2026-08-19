@@ -123,7 +123,157 @@ tags: [Redis, 레디스, In-Memory, NoSQL, 캐싱, 세션저장소, 분산락, �
 
 ---
 
-## 5. 마치며 & 요약 정리
+## 5. Java Spring 환경에서 Redis 사용하기 (코드 예시)
+
+Spring Boot 환경에서는 `spring-boot-starter-data-redis` 의존성을 통해 Redis를 손쉽게 연동할 수 있습니다. 가장 많이 사용되는 **StringRedisTemplate**을 활용한 기본 연동 및 활용 예시를 살펴보겠습니다.
+
+### 1) 의존성 추가 (build.gradle)
+
+```groovy
+dependencies {
+    // Spring Data Redis (Lettuce 클라이언트 기본 내장)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+}
+```
+
+### 2) 설정 (application.yml)
+
+```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # password: your_password (필요 시 설정)
+      timeout: 3000ms
+```
+
+### 3) RedisConfig 설정 클래스
+
+```java
+package com.example.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+@Configuration
+public class RedisConfig {
+
+    // 문자열 중심 Key-Value 처리에 최적화된 Template
+    @Bean
+    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+        return new StringRedisTemplate(connectionFactory);
+    }
+
+    // 객체(Object) 직렬화 저장을 위한 Generic Template
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        // Key는 String 직렬화, Value는 JSON 직렬화 적용
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        return template;
+    }
+}
+```
+
+### 4) RedisService 실무 활용 예시 (Service 구현)
+
+문자열 캐싱, 만료시간(TTL) 설정, 그리고 실시간 랭킹(ZSet)을 처리하는 서비스 코드입니다.
+
+```java
+package com.example.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Set;
+
+@Service
+@RequiredArgsConstructor
+public class RedisService {
+
+    private final StringRedisTemplate redisTemplate;
+
+    // 1. 단순 Key-Value 저장 (인증번호, 일회용 토큰 등 TTL 설정)
+    public void setDataWithExpire(String key, String value, long durationMinutes) {
+        redisTemplate.opsForValue().set(key, value, Duration.ofMinutes(durationMinutes));
+    }
+
+    // 2. Key로 데이터 조회
+    public String getData(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    // 3. 데이터 삭제
+    public void deleteData(String key) {
+        redisTemplate.delete(key);
+    }
+
+    // 4. 원자적 키 선점 (간단한 분산 락 / 중복 요청 방지)
+    public boolean setIfAbsent(String key, String value, long durationSeconds) {
+        Boolean isSuccess = redisTemplate.opsForValue()
+                .setIfAbsent(key, value, Duration.ofSeconds(durationSeconds));
+        return Boolean.TRUE.equals(isSuccess);
+    }
+
+    // 5. 실시간 랭킹 추가 (Sorted Set / ZSet 활용)
+    public void addScoreToLeaderboard(String leaderboardKey, String userId, double score) {
+        // 기존 점수에 score를 누적 가산
+        redisTemplate.opsForZSet().incrementScore(leaderboardKey, userId, score);
+    }
+
+    // 6. 실시간 랭킹 Top N 조회 (점수 높은 순)
+    public Set<ZSetOperations.TypedTuple<String>> getTopRankings(String leaderboardKey, int limit) {
+        // 0위부터 (limit - 1)위까지 역순(내림차순) 조회
+        return redisTemplate.opsForZSet().reverseRangeWithScores(leaderboardKey, 0, limit - 1);
+    }
+}
+```
+
+### 5) 선언적 캐시 어노테이션 (`@Cacheable`) 활용
+
+반복적인 DB 조회를 줄이기 위해 Spring의 캐시 추상화 어노테이션을 사용할 수도 있습니다.
+
+```java
+@Service
+@RequiredArgsConstructor
+public class ProductService {
+
+    private final ProductRepository productRepository;
+
+    // Cache-Aside 패턴: 캐시에 데이터가 있으면 반환하고, 없으면 DB 조회 후 Redis에 저장
+    @Cacheable(value = "products", key = "#productId", cacheManager = "redisCacheManager")
+    public ProductResponse getProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        return ProductResponse.from(product);
+    }
+
+    // 데이터 변경 시 캐시 갱신/삭제
+    @CacheEvict(value = "products", key = "#productId")
+    public void updateProduct(Long productId, ProductUpdateRequest request) {
+        // DB 상품 정보 업데이트 로직...
+    }
+}
+```
+
+---
+
+## 6. 마치며 & 요약 정리
 
 Redis는 단순한 캐시 서버를 넘어 현대 웹 아키텍처의 성능과 확장성을 책임지는 필수적인 인프라입니다.
 

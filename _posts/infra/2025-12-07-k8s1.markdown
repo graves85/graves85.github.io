@@ -1,74 +1,273 @@
 ---
 layout: content-layout
-title: "쿠버네티스 간단하게 알아보기!🤤"
+title: "쿠버네티스(Kubernetes) 간단하게 알아보기! 아키텍처부터 핵심 오브젝트까지 🚢"
 date: 2026-06-21
 categories: [TECH, INFRA]
-tags: [INFRA, Kubernetes, k8s, 쿠버네티스]
+tags: [INFRA, Kubernetes, k8s, 쿠버네티스, 컨테이너, 오케스트레이션, 인프라, 백엔드]
 ---
 
 ## 안녕하십니까! 😀
 
-인프런 강의를 통해 배운 쿠버네티스를 정리했습니다!
+컨테이너 기술이 대세가 되면서 Docker를 사용해 애플리케이션을 패키징하고 배포하는 것이 보편화되었습니다.
+
+하지만 수십 개, 수백 개의 컨테이너를 운영 환경에서 관리하다 보면 **"컨테이너가 다운되면 어떻게 자동으로 재시작하지?", "트래픽이 몰릴 때 자동으로 스케일 아웃할 수는 없을까?", "무중단 배포(Rolling Update)는 어떻게 구성하지?"**와 같은 복잡한 오케스트레이션 문제에 직면하게 됩니다.
+
+이러한 문제를 해결해주는 표준 오케스트레이션 플랫폼이 바로 **쿠버네티스(Kubernetes, k8s)**입니다.
+
+오늘은 쿠버네티스를 처음 접하거나 개념을 체계적으로 정리하고 싶은 분들을 위해 **쿠버네티스의 개념과 아키텍처, 핵심 오브젝트와 컨트롤러, 실무 주요 기능**들을 알기 쉽게 정리해보겠습니다! 🚀
 
 ---
 
-0. 왜 쿠버네티스를 사용하나?
-- Docker와 같이 클라우드 서비스 형태의 컨테이너를 오케스트레이션하여 부하를 제어하고 관리한다.
+## 1. 쿠버네티스(Kubernetes)란? 왜 사용하는가?
 
-1. 기본 오브젝트 이해하기
-- Pod : 가장 기본이 되는 배포 단위 (언제든지 소멸될 수 있음)
-- Service : Pod들의 집합에 대해 고정된 IP(ClusterIP)와 DNS 이름을 제공하는 로드밸런서
-  - ClusterIP 타입 : Service에 여러 개의 Pod를 연결함, 인가된 사용자용, Pod의 서비스상태 디버깅용으로 사용
-  - NodePort 타입 : Pod 별로 포트를 생성함, 내부망 안에서 접근해야 할 때, 데모나 임시 연결용으로 사용
-  - Load Balancer 타입 : 외부 시스템 노출용
-- Volumn : Pod 안의 컨테이너들이 공유하고 지속적으로 사용할 수 있는 저장 공간
-- ConfigMap, Secret : 운영 환경에 따른 분기 처리를 해야할 경우 사용되는 Object
-- Namespace, ResourceQuota, LimitRange : Pod의 자원사용량을 조절하기 위한 Object
+**쿠버네티스(Kubernetes, k8s)**는 컨테이너화된 애플리케이션의 자동 배포, 스케일링, 로드 밸런싱, 상태 관리 등을 자동화해주는 **오픈소스 컨테이너 오케스트레이션(Orchestration) 플랫폼**입니다.
 
-2. 컨트롤러
-- 클러스터 상태를 지속적으로 감시(watch)하고, 원하는 상태(Desired State)와 실제 상태(Actual State)가 일치하도록 자동으로 조정하는 자동화 관리자
-- ReplicaSet Controller : Pod 개수 유지
-- Deployment Controller : 원하는 수의 Pod 유지, 롤링 업데이트 가능
-- DaemonSet Controller : 모든 Node에 Pod 1개씩 배포
-- Job Controller : 일회성 작업 실행
-- CronJob Controller : 스케줄 기반 작업 실행
+```
+[쿠버네티스가 제공하는 핵심 가치]
+1. 자동화된 롤아웃 & 롤백 (Zero-Downtime Deployment)
+2. 자가 치유 (Self-Healing: 실패한 컨테이너 자동 재시작/교체)
+3. 자동 스케일링 (Horizontal Pod Autoscaler - HPA)
+4. 서비스 디스커버리 & 로드 밸런싱 (Service / Ingress)
+5. 선언적 구성 (Declarative Configuration: YAML 파일로 인프라 코드화)
+```
 
-3. Pod 상세
-- 생명주기 : Pending -> Running -> Successded -> Failed
-- readinessProbe : Pod가 생성되어도 App이 구동되는 시간동안 트래픽을 받지 않도록 해줌
-  - initialDelaySeconds : Pod 생성 후 해당 지연 시간이 지난 후에 헬스체크 시작
-  - periodSeconds : 10초 간격으로 헬스 체크
-  - successThreshold : 성공시 Service와 연결됨
-  - failureThreshold : 실패시 재시도
-- livenessProbe : App 장애시 헬스체크를 통해 Pod를 restart 시켜줌
-- QoS classes : 컨테이너의 리소스 설정에 따라 클래스가 결정된다.
-- Node Affinity : Node에 스케쥴링을 할 수 있는 다양한 기능들을 제공한다.
-  - matchExcpression : 규칙에 부합하는 Node에 pod를 배치한다.
-  - required : 해당 옵션 지정시 절대적으로 matchExcpression에 부합하는 Node에만 배치된다.
-  - preferred : 해당 옵션 지정시 matchExcpression에 부합하는 Node가 없으면, 자원이 많이 남아있는 Node에 배치된다.
-  - preferred.weight : 두 개 이상의 preferred 옵션을 설정시, 우선순위를 매길 수 있는 파라미터
-- Taint : Pod가 특정 Node에 배치되는 걸 제한하기 위해 사용
-- Toleration : Taint가 있는 Node에 Pod를 배치할 때 사용
+쿠버네티스는 관리자가 직접 명령을 내리는 방식(명령형) 대신, **"내가 원하는 상태(Desired State)"를 YAML로 정의하면 쿠버네티스 컨트롤러가 지속적으로 현재 상태(Actual State)를 감시(Watch)하며 원하는 상태와 일치하도록 자동 조정(Reconciliation Loop)**합니다.
 
-4. 기본 오브젝트 확장
-- pod가 다른 서비스로 접근하기 위한 방법은? ClusterIP 사용
-- Headless Service : Service의 IP는 할당되지 않음, Pod의 Doamin 이름으로 호출이 가능한 서비스
-- 별도 솔루션을 이용한 Volume 관리
-- Master 노드에서 설정하는 것들
-  - Authorization (권한)
-  - Authentication (인증)
+---
 
-5. 컨트롤러
-- StatefulSet : Pod별 각각의 Volume이 동적으로 생성
-- ReplicaSet : 수동으로 하나의 공유 Volumn 생성
-- Ingress : 도메인 기반 라우팅
-- HPA, VPA, CA
+## 2. 쿠버네티스 기본 아키텍처 (Master vs Worker)
 
-6. 아키텍처
-- Networking 아키텍처
-- 스토리지 아키텍처
-- 모니터링 아키텍처
+쿠버네티스 클러스터는 크게 전체 클러스터를 제어하는 **컨트롤 플레인(마스터 노드)**과 실제 애플리케이션 컨테이너가 실행되는 **워커 노드**로 나뉩니다.
 
-다음에는 다른 것으로 돌아오겠습니다!
+```
+┌────────────────────────────────────────────────────────┐
+│               Control Plane (Master Node)              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │ kube-api-    │◄─┤ kube-        │  │ kube-        │  │
+│  │ server       │  │ scheduler    │  │ controller-  │  │
+│  └──────┬───────┘  └──────────────┘  │ manager      │  │
+│         │                            └──────────────┘  │
+│  ┌──────▼───────┐                                      │
+│  │     etcd     │ (클러스터 상태/메타데이터 저장소)        │
+│  └──────────────┘                                      │
+└─────────┬──────────────────────────────────────────────┘
+          │ (통신)
+┌─────────▼──────────────┐      ┌────────────────────────┐
+│   Worker Node 1        │      │   Worker Node 2        │
+│  ┌──────────────────┐  │      │  ┌──────────────────┐  │
+│  │ kubelet          │  │      │  │ kubelet          │  │
+│  │ kube-proxy       │  │      │  │ kube-proxy       │  │
+│  │ Container Runtime│  │      │  │ Container Runtime│  │
+│  │  (Pod A, Pod B)  │  │      │  │  (Pod C, Pod D)  │  │
+│  └──────────────────┘  │      │  └──────────────────┘  │
+└────────────────────────┘      └────────────────────────┘
+```
 
-긴 글 봐주셔서 감사합니다! 😌
+### 🧠 컨트롤 플레인 (Control Plane / Master Node)
+- **kube-apiserver**: 모든 쿠버네티스 요청(kubectl 명령, 내부 컴포넌트 간 통신)의 중앙 통로이자 인증/인가를 담당하는 REST API 서버
+- **etcd**: 클러스터의 모든 상태, 설정값, 메타데이터가 Key-Value 형태로 안전하게 저장되는 분산 고가용성 DB
+- **kube-scheduler**: 새롭게 생성된 Pod를 감지하고, 노드의 리소스 여유 상태와 제약 조건을 분석하여 어느 워커 노드에 배치할지 결정
+- **kube-controller-manager**: Deployment, ReplicaSet, Node 상태 등을 지속적으로 감시하며 원하는 상태를 유지시키는 컨트롤러 모음
+
+### ⚙️ 워커 노드 (Worker Node)
+- **kubelet**: 마스터 노드의 명령을 받아 컨테이너가 Pod 안에서 정상적으로 구동되도록 관리하고 상태를 보고하는 에이전트
+- **kube-proxy**: 노드 내 네트워크 규칙(iptables/IPVS)을 관리하여 서비스 가상 IP로 들어오는 트래픽을 올바른 Pod로 포워딩/로드밸런싱
+- **Container Runtime**: 컨테이너를 실제로 실행시키는 런타임 엔진 (예: `containerd`, `CRI-O`)
+
+---
+
+## 3. 핵심 오브젝트(Object) 완벽 정리
+
+### 1) Pod (파드)
+- 쿠버네티스에서 생성하고 관리할 수 있는 **가장 작은 배포 단위**입니다.
+- 1개 이상의 밀접하게 연결된 컨테이너(메인 컨테이너 + 사이드카 컨테이너)를 포함하며, 동일 Pod 내 컨테이너들은 **네트워크(IP, Port)와 스토리지 볼륨을 공유**합니다.
+- 언제든지 삭제되고 재생성될 수 있는 임시적(Ephemeral)인 특성을 가집니다.
+
+```yaml
+# pod-example.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: web
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+```
+
+---
+
+### 2) Service (서비스) & Ingress (인그레스)
+Pod는 재생성될 때마다 IP가 계속 변경되기 때문에, 고정된 엔드포인트로 통신하기 위해 **Service**를 사용합니다.
+
+```
+                  ┌──────────────┐
+                  │   Ingress    │ (도메인/경로 기반 L7 라우팅)
+                  └──────┬───────┘
+                         │
+             ┌───────────▼───────────┐
+             │ Service (LoadBalancer) │ (L4 라우팅, 고정 IP/DNS)
+             └───────────┬───────────┘
+                         │
+        ┌────────────────┼────────────────┐
+        ▼                ▼                ▼
+   [ Pod 1 ]        [ Pod 2 ]        [ Pod 3 ]
+ (10.244.1.5)     (10.244.2.8)     (10.244.1.9)
+```
+
+#### 📌 Service의 4가지 타입
+1. **ClusterIP (기본값)**: 클러스터 내부에서만 접근 가능한 고정 가상 IP(VIP)를 할당받음 (내부 마이크로서비스 간 통신용)
+2. **NodePort**: 모든 워커 노드의 특정 포트(30000~32767)를 외부에 개방하여 `노드IP:NodePort`로 접근 가능
+3. **LoadBalancer**: 클라우드 프로바이더(AWS ALB/NLB, GCP, Azure 등)의 외부 로드밸런서를 프로비저닝하여 공인 IP를 통해 트래픽 수신
+4. **ExternalName**: CNAME 레코드를 반환하여 외부 도메인과 매핑
+
+#### 🌐 Ingress
+- 클러스터 외부의 HTTP/HTTPS 트래픽을 클러스터 내부 Service로 라우팅하는 **L7 로드밸런서/리버스 프록시**입니다.
+- 도메인 기반 가상 호스팅, URL 경로 기반 라우팅(`/api`, `/web`), SSL/TLS 인증서 종단 처리를 제공합니다.
+
+---
+
+### 3) Volume (볼륨) & Storage
+컨테이너 내부 데이터는 컨테이너 재시작 시 초기화되므로, 영속적인 데이터를 보관하기 위해 볼륨을 마운트합니다.
+- **emptyDir**: Pod가 생성될 때 생성되고 Pod 삭제 시 함께 삭제되는 임시 공유 공간 (컨테이너 간 데이터 공유용)
+- **hostPath**: 노드의 로컬 파일 시스템 경로를 Pod에 직접 마운트
+- **PV (PersistentVolume) & PVC (PersistentVolumeClaim)**: 스토리지 인프라(AWS EBS, NFS, Ceph 등)를 추상화하여 개발자가 필요한 용량과 접근 모드(`ReadWriteOnce`, `ReadOnlyMany` 등)를 선언하면 자동으로 스토리지를 바인딩해주는 표준 메커니즘
+
+---
+
+### 4) ConfigMap & Secret
+애플리케이션 코드와 환경 설정을 분리하기 위한 오브젝트입니다.
+- **ConfigMap**: DB 호스트 주소, 포트, 일반 환경설정 프로퍼티 등 평문 설정 저장
+- **Secret**: DB 비밀번호, API Key, 인증 토큰 등 Base64로 인코딩된 민감 정보 저장
+
+---
+
+## 4. 컨트롤러(Controller) 종류와 역할
+
+컨트롤러는 Pod를 직접 띄우지 않고 고가용성, 무중단 배포, 복제본 관리를 보장하기 위해 Pod를 감싸서 관리합니다.
+
+| 컨트롤러 | 주요 역할 및 특징 | 대표 유스케이스 |
+| :--- | :--- | :--- |
+| **Deployment** | Pod 복제본(ReplicaSet) 관리, **롤링 업데이트 및 롤백** 지원 | 상태 없는(Stateless) 웹/API 서버 |
+| **StatefulSet** | Pod마다 고유한 순서 번호와 고정된 영구 스토리지(PVC) 유지 | 상태 있는(Stateful) DB, Redis, Kafka |
+| **DaemonSet** | 클러스터 내 **모든(또는 지정된) 노드에 Pod를 정확히 1개씩** 배포 | 로그 수집기(Fluentd), 노드 모니터링 에이전트 |
+| **Job** | 일회성 작업이 성공적으로 종료(Completed)될 때까지 Pod 실행 | 데이터 마이그레이션, 일회성 배치 |
+| **CronJob** | 지정된 시간/주기(cron 표현식)에 따라 주기적으로 Job 실행 | 정기 백업, 일일 정산 작업 |
+
+```yaml
+# deployment-example.yaml (무중단 배포)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server-deploy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # 업데이트 중 최대 초과 생성 가능 Pod 수
+      maxUnavailable: 0  # 업데이트 중 이용 불가 허용 Pod 수 (0이면 무중단 보장)
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+      - name: api-server
+        image: myrepo/api-server:v2
+        ports:
+        - containerPort: 8080
+```
+
+---
+
+## 5. 실무 운영을 위해 꼭 알아야 할 핵심 기능
+
+### 1) 헬스 체크 프로브 (Health Probes)
+컨테이너가 정상적으로 준비되었는지, 살아서 잘 동작하는지 실시간 검사합니다.
+
+- **StartupProbe**: 애플리케이션 시작이 오래 걸릴 때 최초 구동 성공 여부를 확인 (구동 완료 전까지 liveness/readiness 비활성화)
+- **LivenessProbe**: 컨테이너가 교착상태(Deadlock) 등에 빠져 살아있지 않다고 판단되면 **컨테이너를 자동 재시작(Restart)**
+- **ReadinessProbe**: 애플리케이션이 트래픽을 처리할 준비가 되었는지 검사하여, 실패 시 **Service 로드밸런싱 대상 엔드포인트에서 즉시 제외**
+
+```yaml
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  failureThreshold: 3
+```
+
+---
+
+### 2) 리소스 관리 (Requests vs Limits) & QoS
+각 컨테이너의 CPU/Memory 사용 한도를 지정하여 노드 자원 고갈을 방지합니다.
+
+- **Requests**: Pod를 스케줄링할 때 노드에 요구하는 최소 보장 자원량
+- **Limits**: 컨테이너가 사용할 수 있는 최대 자원량 (메모리 초과 시 **OOMKilled(137)** 발생)
+- **QoS Class**: 설정값에 따라 우선순위 결정 (`Guaranteed` > `Burstable` > `BestEffort`)
+
+---
+
+### 3) 노드 스케줄링 제어 (NodeAffinity, Taint & Toleration)
+- **Node Affinity**: 특정 라벨을 가진 노드(예: GPU 노드, 고성능 SSD 노드)에 Pod를 우선 배치하거나 강제 배치
+- **Taint & Toleration**:
+  - **Taint(얼룩)**: 노드에 설정하여 허용되지 않은 일반 Pod의 배치를 배척함
+  - **Toleration(내성)**: Pod에 설정하여 Taint가 걸려있는 특정 노드에도 진입할 수 있도록 허용함
+
+---
+
+### 4) 자동 확장 (Autoscaling)
+- **HPA (Horizontal Pod Autoscaler)**: CPU/메모리 부하 또는 커스텀 메트릭에 따라 Pod의 개수(Replicas)를 동적으로 증감
+- **VPA (Vertical Pod Autoscaler)**: Pod의 리소스 Request/Limit 크기를 자동으로 조정
+- **CA (Cluster Autoscaler)**: 클러스터의 워커 노드가 부족할 때 클라우드 VM 노드를 자동으로 증설/축소
+
+---
+
+## 6. 자주 사용하는 핵심 kubectl 명령어 치트시트
+
+```bash
+# 1. 상태 조회
+kubectl get pods -n <namespace>
+kubectl get svc,deployment,ingress -o wide
+
+# 2. 상세 정보 및 이벤트 로그 확인 (트러블슈팅 필수)
+kubectl describe pod <pod-name>
+kubectl logs -f <pod-name> -c <container-name>
+
+# 3. Pod 내부 접속 및 디버깅
+kubectl exec -it <pod-name> -- /bin/bash
+
+# 4. 리소스 배포 및 삭제
+kubectl apply -f deployment.yaml
+kubectl delete -f deployment.yaml
+
+# 5. 실시간 리소스 사용량 확인 (Metrics Server 필요)
+kubectl top nodes
+kubectl top pods
+```
+
+---
+
+## 7. 마치며 & 요약 정리
+
+쿠버네티스는 학습 곡선(Learning Curve)이 다소 높지만, MSA 환경과 클라우드 네이티브 인프라에서 안정적인 대규모 서비스를 운영하기 위한 필수 역량입니다.
+
+- **쿠버네티스 본질**: 원하는 상태(Desired State)를 선언하고 자동으로 수렴시키는 컨테이너 오케스트레이션 엔진
+- **마스터/워커 구조**: API서버, etcd, 스케줄러, 컨트롤러의 제어 플레인과 kubelet, kube-proxy 기반 워커 노드
+- **핵심 오브젝트**: Pod, Service(ClusterIP/NodePort/LB), Ingress, PV/PVC, ConfigMap/Secret
+- **컨트롤러**: 무중단 배포의 Deployment, 영속적 상태의 StatefulSet, 노드 에이전트의 DaemonSet
+- **실무 필수**: 무중단 전환을 위한 Probes(Readiness/Liveness), 자원 경합 방지를 위한 Resource Requests/Limits
+
+기본적인 오브젝트와 아키텍처 흐름을 이해하고 직접 YAML을 작성하여 배포해보면서 점진적으로 학습 범위를 넓혀가시길 추천합니다!
+
+긴 글 읽어주셔서 감사합니다. 궁금한 점이 있으시다면 언제든 편하게 댓글 남겨주세요! 😊

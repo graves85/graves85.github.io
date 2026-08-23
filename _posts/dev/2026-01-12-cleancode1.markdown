@@ -1,86 +1,281 @@
 ---
 layout: content-layout
-title: "클린 코드 작성하기 1탄!🤤"
+title: "클린 코드(Clean Code) 작성하기 1탄! 핵심 원칙과 실전 Java 코드 예제 🧼"
 date: 2026-08-09
 categories: [TECH, 개발]
-tags: [DEV, cleancode, 클린코드]
+tags: [DEV, cleancode, 클린코드, Java, 리팩토링, 프로그래밍, 개발]
 ---
 
 ## 안녕하십니까! 😀
 
-클린 코드 서적을 통해 작성한 정리본입니다!
+로버트 C. 마틴(Uncle Bob)의 명저 **《Clean Code(클린 코드)》**의 핵심 내용을 실무에서 바로 적용할 수 있도록 **Before & After 코드 예제**와 함께 정리했습니다!
+
+1탄에서는 가장 기본이자 중요한 **의미 있는 이름 짓기**, **함수 작성법**, **주석의 올바른 사용**, **형식 맞추기**, **객체와 자료 구조**를 다룹니다.
 
 ---
 
-### 클린 코드의 시작! 의미 있는 이름을 사용하라!
-- 의도를 분명히 밝혀라
-- 그릇된 정보를 피하라
-- 의미 있게 구분하라
-- 발음하기 쉬운 이름을 사용하라
-- 검색하기 쉬운 이름을 사용하라
-- 인코딩을 피하라
-- 자신의 기억력을 자랑하지 마라
-- 클래스 이름은 명사나 명사구가 적합하다.
-- 메서드 이름은 동사나 동사구가 적합하다.
-- 기발한 이름은 피하라
-- 한 개념에 한 단어를 사용하라
-- 말장난을 하지 마라
-- 해법 영역에서 가져온 이름을 사용하라
-- 문제 영역에서 가져온 이름을 사용하라
-- 의미 있는 맥락을 추가하라
-- 불필요한 맥락을 없애라
+## 1. 의미 있는 이름(Meaningful Names)을 사용하라!
 
-### 함수 클린하게 작성하기!
-- 작게 만들어라!
-- 한 가지 기능만 넣어라!
-- 함수당 추상화 수준은 하나로!
-- Switch문은 생각보다 길다.
-- 서술적인 이름을 사용하라
-- 함수 인수가 없는게 테스트에 유리하다!
-- 부수 효과를 일으키지 마라!
-- 명령과 조회를 분리하자!
-- 오류 코드보다 예외를 사용하라!
-- 반복하지 마라!
-- 구조적 프로그래밍 (입구와 출구(return)는 하나인 게 좋다. 즉 break; continue; goto 자제)
+좋은 변수/함수/클래스 이름은 그 자체로 주석 역할을 하며 코드의 의도를 명확하게 전달합니다.
 
-### 주석 클린하게 작성하기!
-- 주석은 나쁜 코드를 보완하지 못한다
-- 코드로 의도를 표현하라
-- 좋은 주석은 다음과 같다.
-  - 법적인 주석
-  - 정보를 제공하는 주석
-  - 의도를 설명하는 주석
-  - 의미를 명료하게 밝히는 주석
-  - 결과를 경고하는 주석
-  - TODO 주석
-  - 중요성을 강조하는 주석
-- 나쁜 주석은 다음과 같다.
-  - 주절거리는 주석
-  - 같은 이야기를 중복하는 주석
-  - 오해할 여지가 있는 주석
-  - 의무적으로 다는 주석
-  - 있으나 마나 한 주석
-  - 함수나 변수로 표현할 수 있다면 주석을 달지 마라
-  - 닫는 괄호에 다는 주석
-  - 공로를 돌리거나 저자를 표시하는 주석
-  - HTML 주석
-  - 전역 정보
-  - 모호한 관계
-  - 함수 헤더
+### 📌 1) 의도를 분명히 밝혀라 (Bad vs Good)
 
-### 형식 맞추기!
-- 적절한 행 길이를 유지해라 (너무 길면 가독성이 떨어진다.)
-- 가로 형식 맞추기 (20자에서 최대 60자 사이로 작성한다.)
-- 들여쓰기를 이용한 가독성 증가시키기!
+```java
+// ❌ Bad: 변수명만 보고는 무엇을 의미하는지 알 수 없음
+int d; // 경과 시간 (단위: 일)
+List<int[]> theList;
 
-### 객체와 자료 구조
-- 자료 추상화
-- 자료/객체 비대칭
-- 디미터 법칙
-- 자료 전달 객체
+public List<int[]> getThem() {
+    List<int[]> list1 = new ArrayList<>();
+    for (int[] x : theList) {
+        if (x[0] == 4) {
+            list1.add(x);
+        }
+    }
+    return list1;
+}
+
+// ⭕ Good: 변수와 메서드의 의도가 명확히 드러남
+int elapsedTimeInDays;
+int daysSinceCreation;
+
+public List<Cell> getFlaggedCells() {
+    List<Cell> flaggedCells = new ArrayList<>();
+    for (Cell cell : gameBoard) {
+        if (cell.isFlagged()) {
+            flaggedCells.add(cell);
+        }
+    }
+    return flaggedCells;
+}
+```
+
+### 📌 2) 그릇된 정보를 피하고 검색하기 쉬운 이름을 써라
+
+```java
+// ❌ Bad: 실제 List 타입이 아닌데 List 접미사를 붙이거나 단문자/매직 넘버 사용
+Account[] accountList; // 실제로는 배열
+for (int j = 0; j < 34; j++) {
+    s += (t[j] * 4) / 5;
+}
+
+// ⭕ Good: 명확한 컬렉션 명명 및 검색 가능한 상수 정의
+Account[] accounts; // 또는 accountGroup
+static final int NUMBER_OF_TASKS = 34;
+static final int WORK_DAYS_PER_WEEK = 5;
+
+int realTaskDays = 0;
+for (int taskIndex = 0; taskIndex < NUMBER_OF_TASKS; taskIndex++) {
+    int realTaskDaysPerWeight = (taskEstimateDays[taskIndex] * 4) / WORK_DAYS_PER_WEEK;
+    realTaskDays += realTaskDaysPerWeight;
+}
+```
+
+### 📌 3) 클래스와 메서드 명명 규칙
+- **클래스명**: 명사 또는 명사구 (`Customer`, `WikiPage`, `Account`) - `Manager`, `Processor`, `Data`, `Info` 같은 모호한 단어는 피함
+- **메서드명**: 동사 또는 동사구 (`postPayment()`, `deletePage()`, `save()`)
+- **한 개념에 한 단어 사용**: 데이터를 가져오는 메서드에 `fetch`, `retrieve`, `get`을 혼용하지 않고 `get`으로 일관성 유지
 
 ---
 
-다음에는 다른 것으로 돌아오겠습니다!
+## 2. 함수(Functions) 클린하게 작성하기!
 
-긴 글 봐주셔서 감사합니다! 😌
+함수는 **"작게 만들어야 하고, 딱 한 가지 일만 해야 하며, 그 한 가지를 잘해야"** 합니다.
+
+### 📌 1) 작게 만들고 한 가지만 하라 (Single Responsibility)
+
+```java
+// ❌ Bad: 한 함수에서 인증, 토큰 생성, 메일 발송, 세션 저장을 모두 수행 (부수 효과 발생)
+public UserResponse loginUser(LoginRequest request) {
+    User user = userRepository.findByEmail(request.getEmail())
+            .orElseThrow(() -> new UserNotFoundException());
+
+    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        throw new BadCredentialsException("Invalid password");
+    }
+
+    String token = jwtTokenProvider.generateToken(user);
+    sessionRepository.saveSession(user.getId(), token);
+    emailService.sendLoginAlertMail(user.getEmail()); // 부수 효과(Side Effect)!
+
+    return new UserResponse(user.getName(), token);
+}
+
+// ⭕ Good: 각 함수가 단 하나의 책임만 갖도록 분리
+public UserResponse login(LoginRequest request) {
+    User user = authenticate(request.getEmail(), request.getPassword());
+    String token = issueTokenAndCreateSession(user);
+    return new UserResponse(user.getName(), token);
+}
+
+private User authenticate(String email, String rawPassword) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(UserNotFoundException::new);
+    validatePassword(rawPassword, user.getPassword());
+    return user;
+}
+```
+
+### 📌 2) 함수당 추상화 수준은 하나로! (위에서 아래로 이야기처럼 읽히게)
+
+```java
+// ⭕ Good: 고수준 정책부터 저수준 세부 로직까지 단계적으로 추상화 레벨 유지
+public void renderPageWithSetupAndTeardowns(PageData pageData, boolean isSuite) {
+    if (isTestPage(pageData)) {
+        includeSetupAndTeardownPages(pageData, isSuite);
+    }
+    pageData.setHtml(renderHtml(pageData));
+}
+```
+
+### 📌 3) 명령과 조회를 분리하라 (Command-Query Separation)
+- 함수는 뭔가를 수행하거나(명령) 뭔가를 답하거나(조회) 둘 중 하나만 해야 합니다.
+
+```java
+// ❌ Bad: 속성을 설정하면서 성공 여부를 boolean으로 반환 (혼란 야기)
+if (set("username", "unclebob")) { ... }
+
+// ⭕ Good: 조회와 명령을 명확히 분리
+if (attributeExists("username")) {
+    setAttribute("username", "unclebob");
+}
+```
+
+### 📌 4) 오류 코드보다 예외를 사용하고 반복을 없애라 (DRY - Don't Repeat Yourself)
+
+```java
+// ❌ Bad: 리턴받은 오류 코드를 매번 중복 if문으로 체크
+if (deletePage(page) == E_OK) {
+    if (registry.deleteReference(page.name) == E_OK) {
+        logger.log("page deleted");
+    } else {
+        logger.log("deleteReference failed");
+    }
+}
+
+// ⭕ Good: 예외를 던지고 오류 처리 블록을 별도로 분리
+try {
+    deletePageAndAllReferences(page);
+} catch (Exception e) {
+    logError(e);
+}
+```
+
+---
+
+## 3. 주석(Comments) 클린하게 작성하기!
+
+> **"나쁜 코드에 주석을 달지 마라. 새로 짜라."** - 브라이언 W. 커니핸
+
+주석은 오래될수록 코드의 변경을 따라가지 못해 거짓말을 하게 됩니다. **코드 자체로 의도를 표현**하는 것이 최선입니다.
+
+### 📌 1) 코드로 표현하기 (주석 불필요)
+
+```java
+// ❌ Bad: 코드가 불분명하여 주석으로 설명
+// 직원이 복지 혜택을 받을 자격이 있는지 확인한다.
+if ((employee.flags & HOURLY_FLAG) && (employee.age > 65))
+
+// ⭕ Good: 의미 있는 메서드 추출로 주석 제거
+if (employee.isEligibleForFullBenefits())
+```
+
+### 📌 2) 좋은 주석 vs 나쁜 주석
+
+```java
+// ⭕ 좋은 주석 예시: 의도 설명, 경고, TODO
+// 스레드 안전성을 위해 별도의 복사본을 생성하여 정렬 수행
+List<String> synchronizedList = new CopyOnWriteArrayList<>(originalList);
+
+// TODO: v2.0 마이그레이션 시 폐기 예정 (Deprecated API 대응 필요)
+@Deprecated
+public void legacyAuth() { ... }
+
+// ❌ 나쁜 주석 예시: 당연한 사실 반복, 주절거리는 주석, 닫는 괄호 주석
+// 기본 생성자
+public Employee() {
+} // Employee
+```
+
+---
+
+## 4. 형식 맞추기 (Formatting)
+
+코드의 형식과 레이아웃은 개발자 간의 원활한 소통을 위한 기초 규약입니다.
+
+1. **신문 기사처럼 작성하라**:
+   - 상단에는 고수준 개념과 알고리즘을, 아래로 내려갈수록 세부 구현 사항을 배치합니다.
+2. **개념은 빈 행으로 분리하라**:
+   - 패키지 선언, import 문, 각 메서드 사이에는 빈 줄을 넣어 시각적 구분을 둡니다.
+3. **서로 밀접한 개념은 가까이 배치하라**:
+   - 연관성이 높은 변수는 사용하는 위치 바로 위에 선언하고, 호출하는 함수와 피호출 함수는 세로로 가깝게 둡니다.
+
+```java
+public class MoneyCalculator {
+    private double balance; // 관련 인스턴스 변수
+
+    // 1. 고수준 호출 메서드
+    public double calculateTotalPayment(double rate, int hours) {
+        double basePay = calculateBasePay(rate, hours);
+        double overtimePay = calculateOvertimePay(rate, hours);
+        return basePay + overtimePay;
+    }
+
+    // 2. 바로 아래에 피호출 하위 메서드 배치
+    private double calculateBasePay(double rate, int hours) {
+        return rate * Math.min(hours, 40);
+    }
+
+    private double calculateOvertimePay(double rate, int hours) {
+        if (hours <= 40) return 0;
+        return (hours - 40) * (rate * 1.5);
+    }
+}
+```
+
+---
+
+## 5. 객체와 자료 구조 (Objects and Data Structures)
+
+- **자료 구조(Data Structure)**: 데이터를 그대로 노출하며 별다른 동작 함수를 제공하지 않음 (DTO, Entity State 등)
+- **객체(Object)**: 내부 데이터를 숨기고(캡슐화), 데이터를 다루는 공개 함수만 노출함
+
+### 📌 디미터 법칙 (Law of Demeter)
+모듈은 자신이 조작하는 객체의 속사정을 몰라야 합니다. (낯선 사람은 경계하고 친구하고만 대화하라!)
+
+```java
+// ❌ Bad: 기차 충돌(Train Wreck) - 객체의 내부 구조를 훤히 들여다봄
+final String outputDir = ctxt.getOptions().getScratchDir().getAbsolutePath();
+
+// ⭕ Good: 객체에게 원하는 행위를 직접 시킴 (Tell, Don't Ask)
+BufferedOutputStream outputStream = ctxt.createScratchFileStream(classFileName);
+```
+
+### 📌 DTO(Data Transfer Object)와 Bean 규약
+
+```java
+// 단순한 자료 전달을 위한 순수 자료 구조 (Java 16+ Record 활용 권장)
+public record UserDto(
+    Long id,
+    String name,
+    String email
+) {
+    // 순수 데이터 전달용 자료 구조
+}
+```
+
+---
+
+## 6. 1탄 요약 정리
+
+| 항목 | 핵심 클린 코드 수칙 |
+| :--- | :--- |
+| **이름 짓기** | 의도를 명확히 밝히고, 검색 가능하며, 한 개념에는 한 단어만 사용 |
+| **함수 작성** | 작게 만들고, **한 가지 일만 완벽히 수행**하며, 부수 효과를 없앰 |
+| **주석 관리** | 주석 대신 **코드로 의도를 표현**하고 나쁜 주석은 즉시 삭제 |
+| **형식 맞추기** | 신문 기사처럼 위에서 아래로 흐르게 하고, 연관 코드는 가까이 배치 |
+| **객체와 자료 구조** | 디미터 법칙을 준수하고 **객체에는 행동을 요청(Tell, Don't Ask)** |
+
+이어지는 **[클린 코드 작성하기 2탄!](2026-08-16-cleancode2.html)**에서는 **오류 처리, 단위 테스트(TDD), 클래스 설계, 동시성 클린 코드**를 다룹니다!
+
+긴 글 읽어주셔서 감사합니다. 궁금한 점은 언제든 댓글로 남겨주세요! 😊

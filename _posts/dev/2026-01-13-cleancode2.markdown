@@ -1,90 +1,249 @@
 ---
 layout: content-layout
-title: "클린 코드 작성하기 2탄!🤤"
+title: "클린 코드(Clean Code) 작성하기 2탄! 오류 처리부터 단위 테스트, 동시성까지 🧼"
 date: 2026-08-16
 categories: [TECH, 개발]
-tags: [DEV, cleancode, 클린코드]
+tags: [DEV, cleancode, 클린코드, TDD, 단위테스트, 예외처리, 동시성, Java, 백엔드]
 ---
 
 ## 안녕하십니까! 😀
 
-클린 코드 서적을 통해 작성한 정리본 2탄입니다!
+**《Clean Code(클린 코드)》** 정리 2탄입니다!
+
+1탄(이름 짓기, 함수, 주석, 객체 구조)에 이어, 2탄에서는 실제 유지보수성과 아키텍처의 견고함을 결정짓는 **오류 처리**, **경계(외부 코드 연동)**, **단위 테스트(TDD/F.I.R.S.T)**, **클래스 설계(SOLID)**, **동시성(Concurrency) 제어**를 실전 Java 코드 예제와 함께 정리해보겠습니다! 🚀
 
 ---
 
-### 오류 처리 클린하게 작성하기!
-- 오류 코드보다 예외를 사용하라!
-- Try-Catch-Finally 문부터 작성하라!
-- 미확인 예외를 사용하라
-- 예외에 의미를 제공하라
-- 호출자를 고려해 예외 클래스를 정의하라
-- 정상 흐름을 정의하라
-- null을 반환하지 마라
-- null을 전달하지 마라
+## 1. 오류 처리(Error Handling) 클린하게 작성하기!
 
-### 경계 (외부코드) 클린하게 작성하기!
-- 학습 테스트를 통해 외부 코드의 필요한 지식을 얻자!
-- 새로운 클래스로 외부 코드를 감싸거나 어댑터 패턴을 사용하자.
+오류 처리는 프로그램의 중요한 관심사이지만, 비즈니스 로직을 흐리게 만들어서는 안 됩니다.
 
-### 단위 테스트의 중요성!
-- 첫째, 실패하는 단위 테스트를 작성할 때까지 실제 코드를 작성하지 않는다.
-- 둘째, 컴파일은 실패하지 않으면서 실행이 실패하는 정도로만 단위 테스트를 작성한다.
-- 셋째, 현재 실패하는 테스트를 통과할 정도로만 실제 코드를 작성한다.
-- 테스트 코드는 유연성, 유지보수성, 재사용성을 제공한다.
-- 테스트 코드의 가장 중요한 것은 가독성이다.
-- JUnit으로 테스트 코드를 짤 때는 함수마다 assert 문을 단 하나만 사용해야 한다.
-- 테스트당 개념 하나가 들어가는 게 좋다.
-- F.I.R.S.T 규칙!
-  - 빠르게 (Fast)
-  - 독립적으로 (Independent)
-  - 반복가능하게 (Repeatable)
-  - 자가검증하는 (Self-Validating)
-  - 적시에 (Timely)
+### 📌 1) 오류 코드 대신 Unchecked(미확인) 예외를 사용하라
 
-### 클래스 클린하게 작성하기!
-- 캡슐화가 기본 원칙!
-- 클래스는 작아야 한다! (단일 책임 원칙, 응집도)
-- 변경될 소지를 가늠하여 결합도를 최소한으로 줄여야 한다!
+```java
+// ❌ Bad: 호출자마다 오류 코드를 검사하여 정상 흐름이 파편화됨
+public class DeviceService {
+    public void sendShutDown() {
+        DeviceHandle handle = getHandle(DEV1);
+        if (handle != DeviceHandle.INVALID) {
+            retrieveDeviceRecord(handle);
+            if (record.getStatus() != DEVICE_SUSPENDED) {
+                pauseDevice(handle);
+                clearDeviceWorkQueue(handle);
+                closeDevice(handle);
+            } else {
+                logger.log("Device suspended. Unable to shut down");
+            }
+        } else {
+            logger.log("Invalid handle for: " + DEV1.toString());
+        }
+    }
+}
 
-### 시스템 클린하게 작성하기!
-- 시스템 제작과 시스템 사용을 분리하라
-  - Main 분리하기
-  - 팩토리 패턴 사용하기
-  - 의존성 주입하기
-- 테스트 주도 시스템 아키텍처를 구축하라!
-- 의사 결정을 최적화하라!
-- 명백한 가치가 있을 때 표준을 현명하게 사용하라!
-- 시스템은 도메인 특화 언어가 필요하다!
+// ⭕ Good: 비즈니스 로직과 오류 처리 분리 (호출자 책임 명확화)
+public class DeviceService {
+    public void sendShutDown() {
+        try {
+            tryToShutDown();
+        } catch (DeviceShutDownException e) {
+            logger.error("디바이스 종료 실패", e);
+        }
+    }
 
-### 단순한 설계 규칙 4가지
-- 모든 테스트를 실행한다.
-- 중복을 없앤다.
-- 프로그래머 의도를 표현한다.
-- 클래스와 메서드 수를 최소로 줄인다.
+    private void tryToShutDown() {
+        DeviceHandle handle = getHandle(DEV1);
+        DeviceRecord record = retrieveDeviceRecord(handle);
+        pauseDevice(handle);
+        clearDeviceWorkQueue(handle);
+        closeDevice(handle);
+    }
+}
+```
 
-### 동시성 클린하게 작성하기!
-- 동시성은 결합을 없애는 전략이다.
-- 동시성은 항상 성능을 높여준다.
-- 동시성을 구현해도 설계는 변하지 않는다.
-- 웹을 사용하면 동시성을 이해할 필요가 없다.
-- 동시성은 다소 부하를 유발한다.
-- 동시성은 복잡하다.
-- 일반적으로 동시성 버그는 재현하기 어렵다.
-- 동시성을 구현하려면 흔히 근본적인 설계 전략을 재고해야 한다.
-- 동시성 코드는 다른 코드와 분리하라!
-- 자료를 캡슐화하라. 공유 자료를 최대한 줄여라.
-- 공유 객체 하나에는 메서드 하나만 사용하라.
-- 동기화 하는 부분을 작게 만들어라.
-- 올바른 종료 코드는 구현하기 어렵다.
-- 스레드 코드 테스트하기는 어렵다.
+### 📌 2) 특수 사례 패턴 (Special Case Pattern: Null 반환/전달 금지)
+- `null`을 반환하거나 인자로 넘기면 코드 전역에 `if (obj != null)` 체크가 도배되고 `NullPointerException`에 취약해집니다.
+- `Collections.emptyList()`나 `Null Object Pattern`을 활용하세요.
 
-### 점진적으로 개선하라! (TDD)
-- 테스트 주도 개발이라는 기법을 사용해 어느 때라도시스템이 돌아가야 한다.
-- 변경을 가한 후에도 똑같이 돌아가야 한다.
-- 테스트 케이스가 하나라도 실패하면 다음 변경으로 넘어가기 전에 오류를 수정한다.
+```java
+// ❌ Bad: null을 반환하여 호출자가 매번 null 체크를 강제당함
+public List<Employee> getEmployees() {
+    if (employees.isEmpty()) {
+        return null; // ⚠️ 호출하는 쪽에서 NPE 위험
+    }
+    return employees;
+}
+
+// ⭕ Good: 빈 컬렉션 또는 Optional 반환
+public List<Employee> getEmployees() {
+    if (employees.isEmpty()) {
+        return Collections.emptyList(); // null 체크 불필요 (안전한 for-each 가능)
+    }
+    return Collections.unmodifiableList(employees);
+}
+```
 
 ---
 
-다음에는 다른 것으로 돌아오겠습니다!
+## 2. 경계(Boundaries: 외부 코드) 클린하게 감싸기!
 
-긴 글 봐주셔서 감사합니다! 😌
+외부 라이브러리(타사 API, 결제 모듈, Map 등)를 사용할 때는 우리 코드와 외부 코드 사이에 **경계 인터페이스(어댑터 패턴)**를 두어야 라이브러리 변경에 휘둘리지 않습니다.
+
+```java
+// ❌ Bad: Map 인터페이스를 그대로 외부에 노출하여 누구나 clear()나 임의 타입 put 가능
+public class SensorService {
+    private Map<String, Sensor> sensors = new HashMap<>();
+
+    public Map<String, Sensor> getSensors() {
+        return sensors; // 외부에서 sensors.clear() 위험
+    }
+}
+
+// ⭕ Good: 경계 클래스로 캡슐화하여 필요한 행위만 제공
+public class Sensors {
+    private final Map<String, Sensor> sensors = new HashMap<>();
+
+    public Sensor getById(String id) {
+        return sensors.get(id);
+    }
+
+    public void register(String id, Sensor sensor) {
+        sensors.put(id, sensor);
+    }
+}
+```
+
+---
+
+## 3. 깨끗한 단위 테스트(Unit Tests)와 TDD
+
+> **"테스트 코드는 실제 코드 못지않게 중요하다. 테스트 코드는 유연성, 유지보수성, 재사용성을 보존하고 강화한다."**
+
+### 📌 1) 테스트당 개념 하나 & 1 Assert 원칙 (Given-When-Then 패턴)
+
+```java
+// ⭕ Good: 가독성이 뛰어나고 의도가 명확한 단위 테스트
+@Test
+@DisplayName("유효한 회원 정보가 주어지면 회원 가입에 성공한다")
+void should_register_member_successfully() {
+    // Given (준비)
+    SignUpRequest request = new SignUpRequest("user@test.com", "password123!", "홍길동");
+    given(memberRepository.existsByEmail(request.email())).willReturn(false);
+
+    // When (실행)
+    MemberResponse response = memberService.signUp(request);
+
+    // Then (검증)
+    assertThat(response.email()).isEqualTo("user@test.com");
+    verify(memberRepository, times(1)).save(any(Member.class));
+}
+```
+
+### 📌 2) 깨끗한 테스트의 5가지 F.I.R.S.T 규칙
+
+1. **Fast (빠르게)**: 테스트는 빨라야 자주 돌릴 수 있습니다. (외부 I/O는 Mocking)
+2. **Independent (독립적으로)**: 각 테스트는 서로 의존해서는 안 되며 어떤 순서로 실행되어도 성공해야 합니다.
+3. **Repeatable (반복가능하게)**: 실제 운영 환경, 로컬 PC, 비행기 안 등 네트워크가 없어도 동일한 결과가 나와야 합니다.
+4. **Self-Validating (자가검증하는)**: 성공/실패는 `boolean` 또는 Assert로 스스로 판단해야 하며, 로그를 눈으로 확인하게 만들면 안 됩니다.
+5. **Timely (적시에)**: 단위 테스트는 실제 코드를 구현하기 직전(TDD)에 작성합니다.
+
+---
+
+## 4. 클래스(Classes) 클린하게 설계하기!
+
+클래스는 **작아야(Small) 하며, 단 하나의 책임(Single Responsibility Principle)**을 가져야 합니다.
+
+```java
+// ❌ Bad: 유저 생성, 비밀번호 암호화, 메일 전송까지 여러 책임을 가진 거대한 클래스
+public class UserService {
+    public void register(String email, String password) {
+        // 1. 유효성 검사 로직
+        // 2. SHA-256 해시 암호화 로직 (10줄)
+        // 3. DB Insert SQL 로직 (15줄)
+        // 4. SMTP JavaMailSender 메일 전송 로직 (20줄)
+    }
+}
+
+// ⭕ Good: 단일 책임 원칙(SRP)과 의존성 주입(DI)을 통해 분리
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
+    private final EmailService emailService;
+
+    @Transactional
+    public void register(SignUpRequest request) {
+        String encodedPassword = passwordEncoder.encode(request.password());
+        Member member = memberRepository.save(Member.create(request.email(), encodedPassword));
+        emailService.sendWelcomeEmail(member.getEmail());
+    }
+}
+```
+
+---
+
+## 5. 동시성(Concurrency) 클린하게 작성하기!
+
+동시성 프로그래밍은 결합(Coupling)을 없애는 전략이지만, 스레드 간 경합(Race Condition)과 교착상태(Deadlock)를 유발할 수 있습니다.
+
+### 📌 동시성 방어 원칙
+1. **자료를 캡슐화하고 공유 데이터를 최대한 줄여라 (불변 객체 활용)**
+2. **동기화(`synchronized`) 영역은 가능한 작게 만들어라**
+3. **스레드 안전한 컬렉션(`java.util.concurrent.*`)을 사용하라**
+
+```java
+// ❌ Bad: 멀티스레드 환경에서 안전하지 않은 HashMap과 복합 연산
+public class UnsafeHitCounter {
+    private int count = 0;
+
+    public void increment() {
+        count++; // ⚠️ 원자적이지 않은 연산 (Lost Update 발생)
+    }
+}
+
+// ⭕ Good: Concurrent 패키지의 원자적 클래스(AtomicInteger) 활용
+public class SafeHitCounter {
+    private final AtomicInteger count = new AtomicInteger(0);
+
+    public void increment() {
+        count.incrementAndGet(); // 원자적 연산 보장 (Lock-Free)
+    }
+
+    public int getCount() {
+        return count.get();
+    }
+}
+```
+
+---
+
+## 6. 단순한 설계 규칙 4가지 (Kent Beck)
+
+소프트웨어 설계를 단순하고 훌륭하게 유지하기 위한 우선순위 규칙입니다.
+
+```
+1. 모든 테스트를 실행한다. (테스트가 가능한 시스템이 곧 훌륭한 설계다)
+          ↓
+2. 중복을 없앤다. (DRY 원칙)
+          ↓
+3. 프로그래머의 의도를 표현한다. (명확한 명명과 작은 함수)
+          ↓
+4. 클래스와 메서드 수를 최소로 줄인다. (과도한 패턴 남용 방지)
+```
+
+---
+
+## 7. 2탄 요약 정리
+
+| 구분 | 클린 코드 핵심 수칙 |
+| :--- | :--- |
+| **오류 처리** | 오류 코드 대신 **Unchecked 예외**를 던지고, `null`을 반환/전달하지 않음 |
+| **경계 관리** | 외부 API나 Map 등은 **별도 클래스로 캡슐화(Adapter)**하여 우리 코드를 보호 |
+| **단위 테스트** | **F.I.R.S.T 원칙** 준수, Given-When-Then 구조로 가독성 극대화 |
+| **클래스 설계** | **단일 책임 원칙(SRP)**을 지키고 높은 응집도와 낮은 결합도를 유지 |
+| **동시성 제어** | 공유 가변 상태를 최소화하고 **`java.util.concurrent` 원자적 도구** 활용 |
+
+클린 코드는 한 번에 완성되는 것이 아니라, **"보이스카우트 규칙(캠프장은 처음 왔을 때보다 더 깨끗하게 떠나라)"**처럼 지속적인 리팩토링을 통해 유지됩니다.
+
+긴 글 읽어주셔서 감사합니다. 궁금한 점이 있으시다면 언제든 편하게 댓글 남겨주세요! 😊

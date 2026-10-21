@@ -1,0 +1,737 @@
+---
+layout: content-layout
+title: "LangChain·LangGraph에 대해 알아보기! (개념, 활용, 실무 아키텍처) 🔗"
+date: 2026-10-21
+categories: [TECH, 개발]
+tags: [LangChain, LangGraph, LLM, 에이전트, RAG, LangSmith, 미들웨어, 체크포인터, 아키텍처]
+---
+
+## 안녕하십니까! 😀
+
+LLM으로 제품을 만들기 시작하면, 프롬프트 한 장으로는 금방 부족해집니다. 문서를 찾고, 사내 API를 호출하고, 위험한 요청은 사람에게 넘기고, 서버가 재시작돼도 대화를 이어가야 합니다.
+
+오늘은 그 일을 나누어 맡기는 두 도구를 정리합니다.
+
+- **LangChain**은 무엇인가?
+- **LangGraph**는 무엇인가?
+- 두 도구는 어떻게 활용되는가?
+- 실무에 적용하기 위한 아키텍처 구성 실습
+
+이 글의 코드는 **LangChain v1**과 **LangGraph v1**의 Graph API를 기준으로 합니다. 모델 이름(`openai:gpt-5.5` 등)은 예시이며, `공급자:모델명` 형식만 지키면 팀에서 쓰는 모델로 바꾸면 됩니다.
+
+---
+
+## 1. LangChain은 무엇인가?
+
+### 📌 한 줄로
+
+LangChain은 **모델을 감싸는 하네스(harness)** 를 조립하는 프레임워크입니다.
+
+공식 문서의 식은 이렇습니다.
+
+> **Agent = Model + Harness**  
+> 하네스는 모델 루프 주변의 전부입니다. 프롬프트, 도구, 그리고 동작을 다듬는 미들웨어.
+
+모델은 "다음에 무슨 말을 할지, 어떤 도구를 부를지"를 고릅니다. LangChain은 그 모델이 **제때 올바른 맥락**을 받도록 주변 장치를 붙여 줍니다.
+
+이름은 Chain이지만, v1의 중심은 옛날식 체인 연결보다 **`create_agent`로 만드는 에이전트**입니다. 예전 체인·레거시 API의 상당수는 `langchain-classic`으로 옮겨 갔고, `langchain` 패키지는 에이전트에 필요한 구성 요소에 집중합니다.
+
+### 💡 왜 따로 두는가
+
+모델 API를 직접 호출해도 데모는 됩니다. 제품이 되면 아래가 반복됩니다.
+
+| 반복되는 일 | LangChain이 맡아 주는 것 |
+|-------------|--------------------------|
+| 공급자마다 다른 호출 형식 | `init_chat_model("openai:...")`, `anthropic:...`처럼 **같은 인터페이스** |
+| 함수를 모델이 고르게 하기 | `@tool`로 스키마·설명을 붙인 **도구** |
+| 문서에서 근거 찾기 | 벡터 스토어·검색 엔진을 감싼 **Retriever** |
+| 입력 검사, 재시도, 사람 승인 | 에이전트 루프에 끼우는 **미들웨어** |
+| 긴 대화의 메시지 규격 | `Human` / `AI` / `Tool` / `System` **메시지** |
+
+공급자를 바꿀 때 애플리케이션 코드를 통째로 갈아엎지 않게 하는 것이 실무에서의 첫 번째 가치입니다.
+
+### 🧱 알아 둘 구성 요소
+
+| 구성 요소 | 하는 일 |
+|-----------|---------|
+| **Chat model** | 대화 턴을 받아 다음 메시지를 만듭니다. 도구 호출·구조화 출력·멀티모달의 출발점입니다. |
+| **Tool** | 인자 스키마가 있는 함수입니다. 모델이 호출 여부를 고르고, 하네스가 실행합니다. |
+| **Prompt** | 시스템 지침과 대화 이력을 모델 입력으로 고정합니다. |
+| **Retriever** | 질의 문자열을 받아 `Document` 목록을 돌려줍니다. RAG의 검색 쪽입니다. |
+| **Middleware** | 모델 호출 전후, 도구 실행 전후에 검사·수정·중단을 넣습니다. |
+| **`create_agent`** | 위 요소로 "모델이 도구를 부르다 답이 나오면 멈춘다" 루프를 만듭니다. 반환값은 LangGraph로 컴파일된 그래프입니다. |
+
+### 💻 가장 짧은 사용: 모델 한 번 호출
+
+분류, 추출, 한 줄 요약처럼 **한 번의 호출로 끝나는 일**은 에이전트까지 필요 없습니다.
+
+```python
+import os
+from langchain.chat_models import init_chat_model
+
+# OPENAI_API_KEY 는 환경 변수로 둡니다. 코드에 키를 적지 않습니다.
+model = init_chat_model(os.environ.get("CHAT_MODEL", "openai:gpt-5.5"))
+
+answer = model.invoke("VPN이 안 붙을 때 사용자가 먼저 확인할 항목을 세 줄로.")
+print(answer.content)
+```
+
+`langchain[openai]`처럼 공급자 엑스트라를 함께 설치합니다. 같은 `init_chat_model`로 공급자 문자열만 갈아 끼우면 됩니다.
+
+### 💻 에이전트의 기본 단위: `create_agent`
+
+도구를 써야 하면 루프가 생깁니다. 모델이 도구를 호출하면 실행 결과를 다시 넣고, 도구 호출이 없을 때 답이 끝난 것으로 봅니다.
+
+```python
+from langchain.agents import create_agent
+from langchain.tools import tool
+
+
+@tool
+def search_runbook(query: str) -> str:
+    """사내 런북에서 증상과 관련된 조치 절차를 찾는다.
+
+    Args:
+        query: 사용자가 호소한 증상
+    """
+    return "VPN: 1) 클라이언트 재시작 2) 인증서 만료 3) 사내 DNS"
+
+
+agent = create_agent(
+    model="openai:gpt-5.5",
+    tools=[search_runbook],
+    system_prompt=(
+        "당신은 사내 IT 헬프데스크입니다. "
+        "절차는 짧게 말하고, 런북에 없는 원인은 단정하지 않습니다."
+    ),
+)
+
+result = agent.invoke(
+    {"messages": [{"role": "user", "content": "재택에서 VPN이 안 붙어요."}]}
+)
+print(result["messages"][-1].content)
+```
+
+`@tool`의 **타입 힌트는 인자 스키마**가 되고, **독스트링은 모델이 도구를 고를 때 읽는 설명**이 됩니다. 설명이 모호하면 모델은 엉뚱한 도구를 자신 있게 고릅니다.
+
+이 에이전트는 이미 LangGraph 위에서 돕니다. 그래서 체크포인터를 넘기면 대화가 이어지고, 스트리밍·사람 개입·시간 여행(이전 시점으로 되감기)도 같은 런타임 기능을 탑니다. LangGraph를 먼저 공부하지 않아도 `create_agent`만으로 이 기능의 입구에 설 수 있습니다.
+
+### 💡 미들웨어는 "루프에 끼우는 정책"이다
+
+가드레일, 재시도, 특정 도구 실행 전 승인, 동적 프롬프트는 에이전트 함수 안에 덕지덕지 붙이기보다 **미들웨어**로 빼는 쪽이 v1의 확장 방식입니다. 각 미들웨어는 한 가지 관심사만 갖고, 필요한 것만 리스트에 올립니다.
+
+커스텀 상태가 필요하면 `AgentState`를 상속해 `state_schema`로 넘깁니다. `user_id`나 호출 횟수처럼 메시지 목록 밖에 두고 싶은 값이 여기 들어갑니다.
+
+---
+
+## 2. LangGraph는 무엇인가?
+
+### 📌 한 줄로
+
+LangGraph는 **오래 실행되고 상태가 있는 에이전트**를 위한 저수준 오케스트레이션 프레임워크입니다.
+
+그래프라는 말 그대로, 프로그램을 **상태 + 노드 + 엣지**로 적습니다.
+
+| 요소 | 정체 | 비유 |
+|------|------|------|
+| **State** | 지금 이 순간의 공유 데이터 | 주문서. 대화, 의도, 검색 결과, 승인 여부가 한 장에 있다 |
+| **Node** | 상태를 읽어 일부 필드를 고치는 함수 | 조리 스테이션. LLM일 수도 있고, 그냥 파이썬일 수도 있다 |
+| **Edge** | 다음에 어느 노드로 갈지 | 동선. 고정일 수도 있고, 상태 값에 따라 갈릴 수도 있다 |
+
+노드는 일을 하고, 엣지는 다음 일을 고릅니다. 한 노드가 끝나면 그 결과가 다음 노드의 입력이 됩니다. 실행 모델은 Google Pregel처럼 **단계마다 메시지를 전달하는 방식**입니다.
+
+LangChain 없이도 LangGraph를 쓸 수 있습니다. 다만 모델·도구·메시지 규격은 LangChain 구성 요소를 노드 안에 넣는 조합이 문서에서도 가장 흔합니다.
+
+### 💡 그래프가 필요한 순간
+
+`create_agent`의 기본 루프는 "모델 ↔ 도구" 한 종류입니다. 제품 요구가 아래처럼 갈라지면, 루프 하나를 늘리기보다 **그래프에 단계를 그리는 편**이 읽기 쉽습니다.
+
+- 의도에 따라 **검색 / 티켓 조회 / 사람 승인**으로 길이 갈린다
+- 검색은 항상 하고, 티켓 조회는 번호가 있을 때만 한다
+- 계정 권한 변경은 모델이 초안만 쓰고, **사람이 승인하기 전에는 실행하지 않는다**
+- 프로세스가 죽어도 `thread_id`로 **같은 주문서를 다시 편다**
+- 결정적인 코드(권한 검사, 금액 한도)와 모델 호출을 **한 흐름 안에 섞되, 순서는 코드가 소유**한다
+
+LangGraph의 강점은 이 혼합입니다. 어떤 노드는 `if`로 고정되고, 어떤 노드만 모델이 고릅니다.
+
+### 🍳 비유: 헬프데스크 주방
+
+- **LangChain 도구·모델** = 레시피 카드와 조리 기구
+- **`create_agent`** = "주문 보고 필요한 기구를 쓰다 접시가 나오면 정지"하는 기본 라인
+- **LangGraph** = 홀 주문서, 스테이션 사이 동선, 매니저 확인 도장, 정전 후에도 남는 주문서 철
+
+기구가 좋아도 동선이 없으면, 디저트 담당이 수프를 다시 끓이기 시작합니다. 그래프는 그 동선을 코드로 고정합니다.
+
+### 💻 최소 그래프
+
+```python
+from langgraph.graph import END, START, MessagesState, StateGraph
+
+
+def echo(state: MessagesState):
+    text = state["messages"][-1].content
+    return {"messages": [{"role": "ai", "content": f"접수했습니다: {text}"}]}
+
+
+builder = StateGraph(MessagesState)
+builder.add_node("echo", echo)
+builder.add_edge(START, "echo")
+builder.add_edge("echo", END)
+
+graph = builder.compile()
+print(graph.invoke({"messages": [{"role": "user", "content": "VPN 문의"}]}))
+```
+
+`MessagesState`는 `messages` 리스트 하나에 `add_messages` 리듀서를 붙여 둔 기본 상태입니다. 노드는 **전체 상태를 바꿔치기하지 않고**, 갱신할 키만 돌려줍니다. `add_messages`는 새 메시지를 이어 붙이면서, 같은 id는 교체할 수 있게 해 줍니다. 리듀서 없이 리스트를 두면 노드가 돌려준 리스트가 통째로 덮어씁니다.
+
+필드가 더 필요하면 상속합니다.
+
+```python
+from langgraph.graph import MessagesState
+
+
+class State(MessagesState):
+    intent: str
+    citations: list[str]
+```
+
+### 💡 체크포인트, interrupt, 단계 제한
+
+그래프를 `compile`할 때 **체크포인터**를 붙이면, 슈퍼스텝마다 상태가 저장됩니다.
+
+| 체크포인터 | 성격 |
+|------------|------|
+| `InMemorySaver` | 프로세스 메모리. 실습·테스트용. 재시작되면 대화가 사라집니다. |
+| `SqliteSaver` | 파일 하나. 개인 로컬 실험에 적합합니다. |
+| `PostgresSaver` | 운영에 흔히 쓰는 내구성 있는 저장소. 패키지는 `langgraph-checkpoint-postgres`. |
+
+저장의 열쇠는 `config["configurable"]["thread_id"]` 입니다. 같은 id로 다시 `invoke`하면 이어서 실행하고, 새 id는 빈 주문서입니다.
+
+**`interrupt(value)`** 는 노드 안에서 실행을 멈추고, `value`를 호출자에게 보여 줍니다. 재개할 때는 `Command(resume=...)` 를 넣고, 그 값이 `interrupt()`의 반환값이 됩니다. 체크포인터가 있어야 멈춘 자리를 기억합니다.
+
+한 가지 운영 규칙을 같이 기억하면 좋습니다. 재개 시 해당 노드는 **처음부터 다시** 실행됩니다. 그래서 티켓 생성·메일 발송처럼 바깥 세계에 쓰는 일은 `interrupt()` **뒤**에 둡니다.
+
+루프가 있는 그래프는 `recursion_limit`으로 최대 슈퍼스텝을 막습니다. `RemainingSteps`를 상태에 두면, 한도에 닿기 전에 노드가 스스로 마무리 경로로 빠질 수 있습니다.
+
+---
+
+## 3. 두 도구는 어떻게 활용되는가?
+
+### 📌 앉는 자리가 다르다
+
+둘은 경쟁 제품이라기보다 **층**이 다릅니다.
+
+| 층 | 도구 | 질문 |
+|----|------|------|
+| 관측 | **LangSmith** | 어떤 프롬프트·도구·지연으로 이 답이 나왔는가? 평가는 통과했는가? |
+| 바로 쓰는 에이전트 | **Deep Agents** | 파일시스템, 서브에이전트, 컨텍스트 압축까지 기본으로 얹을 것인가? |
+| 하네스 | **LangChain `create_agent`** | 모델·도구·프롬프트·미들웨어로 표준 루프를 어떻게 맞출 것인가? |
+| 오케스트레이션 | **LangGraph** | 분기, 반복, 사람 승인, 장애 후 재개를 어떤 그래프로 고정할 것인가? |
+| 능력 | **모델 / `@tool` / Retriever** | 각 노드 안에서 실제로 무엇을 호출할 것인가? |
+
+Deep Agents는 LangChain 에이전트 위에 올라간 "배터리가 들어 있는" 에이전트입니다. 이번 글의 실습은 그 아래층, 즉 **LangChain 구성 요소를 LangGraph 노드에 심는 구성**을 직접 조립합니다. 표준 도구 루프만 필요하면 `create_agent`에서 멈추면 됩니다.
+
+### 💡 함께 쓰는 전형적인 모양
+
+```
+사용자 메시지
+    │
+    ▼
+LangGraph  (의도 분기, 재시도, 승인, thread_id)
+    │
+    ├── 분류 노드      … Chat model + 구조화 출력
+    ├── 검색 노드      … Retriever 또는 @tool
+    ├── 도구 루프      … bind_tools + ToolMessage
+    └── 답변 노드      … Chat model + 시스템 프롬프트
+```
+
+LangChain은 **능력**을 만들고, LangGraph는 **그 능력을 어떤 순서로, 어떤 조건에서, 어디까지 기억한 채** 실행할지 결정합니다.
+
+### 🧭 고르는 기준
+
+```
+한 번의 호출로 분류·추출·요약이 끝난다     → init_chat_model
+문서 검색 후 답이 한 줄로 이어진다         → Retriever + 모델 한 번
+모델이 도구를 고르다 끝나면 된다           → create_agent
+의도별 분기, 승인, 장기 실행, 재개가 있다   → StateGraph 안에 위 구성 요소를 배치
+추적·평가·회귀 테스트를 운영 지표로 둔다    → 어떤 층이든 LangSmith를 켠다
+```
+
+개인 프로젝트에서 처음부터 그래프를 그리면 노드 이름이 요구사항보다 먼저 늘어납니다. **`create_agent`로 도구 루프를 증명**한 뒤, 분기와 승인이 코드에 보이기 시작할 때 그래프로 내리는 순서가 안전합니다.
+
+### 💻 결합의 최소 단위
+
+도구 정의는 LangChain, 호출 여부는 LangGraph 노드가 소유하는 식입니다.
+
+```python
+from langchain.chat_models import init_chat_model
+from langchain.messages import SystemMessage, ToolMessage
+
+model = init_chat_model("openai:gpt-5.5")
+model_with_tools = model.bind_tools([search_runbook, lookup_ticket])
+
+
+def agent_node(state):
+    response = model_with_tools.invoke(
+        [SystemMessage(content="티켓 번호가 있으면 lookup_ticket을 쓰세요."), *state["messages"]]
+    )
+    return {"messages": [response]}
+
+
+def tools_node(state):
+    last = state["messages"][-1]
+    out = []
+    for call in last.tool_calls:
+        observation = tools_by_name[call["name"]].invoke(call["args"])
+        out.append(ToolMessage(content=str(observation), tool_call_id=call["id"]))
+    return {"messages": out}
+```
+
+모델은 `tool_calls`만 제안합니다. **실제로 함수를 실행하는 쪽은 우리 노드**입니다. 이 경계가 있어야 권한 검사, 타임아웃, 멱등 키를 모델 밖(코드)에 둘 수 있습니다.
+
+---
+
+## 4. 실무 아키텍처 구성 실습
+
+시나리오는 **사내 IT 헬프데스크**입니다. 직원이 증상을 말하면 런북을 찾거나, 티켓을 조회하거나, 권한·공지처럼 민감한 문의는 상담원 확인 뒤에 답합니다.
+
+### 📌 요구사항
+
+| 항목 | 내용 |
+|------|------|
+| 입력 | 한국어 문의 한 건. 대화는 `thread_id`로 이어진다 |
+| 지식 | 런북 검색. 실습은 메모리 목록, 운영은 같은 함수 자리에 Retriever |
+| 행동 | 티켓 번호 조회. 읽기 전용 |
+| 사람 개입 | 권한 변경·전사 공지·개인정보 문의는 승인 전에는 최종 답을 내지 않는다 |
+| 상태 | 의도, 메시지, 근거 문서를 체크포인트에 남긴다 |
+| 관측 | LangSmith로 노드·도구·지연을 남긴다 |
+
+### 🗺️ 목표 아키텍처
+
+```
+[채널]  사내 포털 / 슬랙 / 메일 봇
+           │  HTTPS, 사번으로 발급한 thread_id
+           ▼
+[진입점] FastAPI
+           │  invoke / resume, recursion_limit
+           ▼
+[오케스트레이션] LangGraph StateGraph
+           │
+           ├─ classify ─ knowledge → retrieve ─────────────┐
+           │            ├ chitchat  → draft → END          │
+           │            ├ escalate  → approve(interrupt) → draft → END
+           │            └ ticket    → agent ⇄ tools → END
+           │
+           ├── [능력]  Chat model, @tool, (운영) Retriever
+           ├── [지식]  런북. 실습=리스트, 운영=pgvector 등
+           ├── [상태]  InMemorySaver → 운영은 PostgresSaver
+           └── [관측]  LangSmith  (환경 변수만으로 트레이스)
+```
+
+분류와 권한 분기는 **코드가 고정**합니다. 티켓 경로에서만 모델이 도구를 고릅니다. "항상 검색해야 하는 길"과 "모델이 판단해도 되는 길"을 그래프에서 갈라 둔 것이 이 구조의 핵심입니다.
+
+### 📁 디렉터리
+
+```
+helpdesk/
+  state.py     # 그래프 상태
+  tools.py     # LangChain 도구, 런북
+  graph.py     # 노드와 StateGraph
+  app.py       # FastAPI 진입점
+```
+
+운영에서는 `tools.py`의 조회 함수만 ITSM·검색 엔진 클라이언트로 바꿉니다. 그래프 형태는 유지합니다.
+
+### 💻 상태 — `state.py`
+
+```python
+from typing import Annotated
+
+from langchain.messages import AnyMessage
+from langgraph.graph.message import add_messages
+from typing_extensions import TypedDict
+
+
+class HelpdeskState(TypedDict, total=False):
+    messages: Annotated[list[AnyMessage], add_messages]
+    intent: str
+    citations: list[str]
+```
+
+`total=False`라서 첫 호출 때는 `messages`만 있어도 됩니다. 여러 노드가 `citations`를 **이어 붙여야** 하면 리듀서(`operator.add` 등)를 붙입니다. 이번 실습의 검색은 한 번이라 덮어써도 됩니다.
+
+### 💻 도구와 지식 — `tools.py`
+
+```python
+from langchain.tools import tool
+
+# 실습용 런북. 운영에서는 이 리스트 대신 Retriever.invoke(query)를 넣는다.
+RUNBOOKS = [
+    {
+        "id": "vpn-01",
+        "title": "VPN 접속 실패",
+        "body": "1) 클라이언트 재시작 2) 기기 인증서 만료일 확인 3) 사내 DNS로 포털 조회",
+    },
+    {
+        "id": "mail-02",
+        "title": "메일 지연",
+        "body": "1) 발송 대기열 확인 2) 외부 도메인 발송 한도 3) 격리함(스팸) 확인",
+    },
+]
+
+TICKETS = {
+    "INC-1042": "상태=진행중, 담당=네트워크팀, 최근=방화벽 정책 반영 대기",
+}
+
+
+def _search(query: str) -> str:
+    tokens = [tok for tok in query.lower().split() if tok]
+    hits = []
+    for doc in RUNBOOKS:
+        hay = f"{doc['title']} {doc['body']}".lower()
+        if any(tok in hay for tok in tokens):
+            hits.append(f"[{doc['id']}] {doc['title']}: {doc['body']}")
+    return "\n".join(hits) if hits else "관련 런북이 없습니다. 절차를 지어내지 마세요."
+
+
+@tool
+def search_runbook(query: str) -> str:
+    """사내 장애 대응 런북에서 증상과 관련된 절차를 찾는다.
+
+    Args:
+        query: 사용자가 호소한 증상이나 키워드
+    """
+    return _search(query)
+
+
+@tool
+def lookup_ticket(ticket_id: str) -> str:
+    """티켓 번호로 상태와 담당 조직을 조회한다. 없는 번호는 없다고 답한다.
+
+    Args:
+        ticket_id: 티켓 번호. 예: INC-1042
+    """
+    found = TICKETS.get(ticket_id.strip().upper())
+    return found or f"{ticket_id} 티켓이 없습니다."
+
+
+TOOLS = [search_runbook, lookup_ticket]
+```
+
+키워드 검색은 일부러 단순하게 두었습니다. 인터페이스(`query -> str`)를 지켜 두면, 운영에서 본문만 이렇게 바꿉니다.
+
+```python
+docs = retriever.invoke(query)
+return "\n\n".join(
+    f"[{d.metadata.get('id', 'doc')}] {d.page_content}" for d in docs
+) or "관련 런북이 없습니다. 절차를 지어내지 마세요."
+```
+
+읽기 도구는 재시도되어도 안전합니다. 나중에 티켓 **생성**을 넣으면 멱등 키를 도구 인자로 받고, 같은 키의 재호출은 같은 티켓을 반환하게 합니다. `interrupt()` 재실행과 그래프 재시도가 쓰기 도구를 두 번 호출할 수 있기 때문입니다.
+
+### 💻 그래프 — `graph.py`
+
+```python
+import os
+from typing import Literal
+
+from langchain.chat_models import init_chat_model
+from langchain.messages import SystemMessage, ToolMessage
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.types import interrupt
+from pydantic import BaseModel, Field
+
+from state import HelpdeskState
+from tools import TOOLS, _search
+
+MODEL = os.environ.get("CHAT_MODEL", "openai:gpt-5.5")
+
+
+class Route(BaseModel):
+    intent: Literal["knowledge", "ticket", "chitchat", "escalate"] = Field(
+        description=(
+            "knowledge=절차 안내, ticket=티켓 조회, "
+            "chitchat=잡담, escalate=권한·공지·개인정보처럼 사람 확인이 필요"
+        )
+    )
+
+
+def build_graph(checkpointer):
+    model = init_chat_model(MODEL)
+    router = model.with_structured_output(Route)
+    model_with_tools = model.bind_tools(TOOLS)
+    tools_by_name = {item.name: item for item in TOOLS}
+
+    def classify(state: HelpdeskState) -> dict:
+        decision = router.invoke(
+            [
+                SystemMessage(
+                    content=(
+                        "사내 IT 헬프데스크 문의의 의도를 하나만 고르세요. "
+                        "계정 권한 변경, 전사 공지, 개인정보 관련이면 escalate. "
+                        "INC- 로 시작하는 번호가 있으면 ticket."
+                    )
+                ),
+                state["messages"][-1],
+            ]
+        )
+        return {"intent": decision.intent}
+
+    def route_after_classify(
+        state: HelpdeskState,
+    ) -> Literal["retrieve", "agent", "draft", "approve"]:
+        return {
+            "knowledge": "retrieve",
+            "ticket": "agent",
+            "chitchat": "draft",
+            "escalate": "approve",
+        }[state["intent"]]
+
+    def retrieve(state: HelpdeskState) -> dict:
+        question = state["messages"][-1].content
+        found = _search(question if isinstance(question, str) else str(question))
+        return {
+            "citations": [found],
+            "messages": [{"role": "system", "content": f"참고 런북:\n{found}"}],
+        }
+
+    def agent(state: HelpdeskState) -> dict:
+        response = model_with_tools.invoke(
+            [
+                SystemMessage(
+                    content=(
+                        "당신은 IT 헬프데스크 에이전트입니다. "
+                        "티켓 번호가 있으면 lookup_ticket만 호출하세요. "
+                        "절차가 필요하면 search_runbook을 호출하세요. "
+                        "도구 결과에 없는 상태는 말하지 마세요."
+                    )
+                ),
+                *state["messages"],
+            ]
+        )
+        return {"messages": [response]}
+
+    def route_after_agent(state: HelpdeskState) -> Literal["tools", "__end__"]:
+        last = state["messages"][-1]
+        if getattr(last, "tool_calls", None):
+            return "tools"
+        return END
+
+    def run_tools(state: HelpdeskState) -> dict:
+        last = state["messages"][-1]
+        messages = []
+        for call in last.tool_calls:
+            observation = tools_by_name[call["name"]].invoke(call["args"])
+            messages.append(
+                ToolMessage(content=str(observation), tool_call_id=call["id"])
+            )
+        return {"messages": messages}
+
+    def approve(state: HelpdeskState) -> dict:
+        # interrupt() 이전에는 외부 쓰기를 두지 않는다. 재개 시 노드가 다시 실행된다.
+        question = state["messages"][-1].content
+        decision = interrupt(
+            {
+                "reason": "상담원 확인이 필요한 문의입니다.",
+                "question": question if isinstance(question, str) else str(question),
+            }
+        )
+        status = "승인" if decision.get("approved") else "수정 요청"
+        comment = decision.get("comment", "")
+        return {"messages": [{"role": "system", "content": f"상담원 {status}. {comment}"}]}
+
+    def draft(state: HelpdeskState) -> dict:
+        response = model.invoke(
+            [
+                SystemMessage(
+                    content=(
+                        "사내 IT 헬프데스크 답변을 한국어로 작성하세요. "
+                        "절차는 번호 목록으로 씁니다. "
+                        "시스템 메시지의 런북·상담원 메모에 없는 원인은 추측하지 말고 "
+                        "상담원 연결을 안내하세요."
+                    )
+                ),
+                *state["messages"],
+            ]
+        )
+        return {"messages": [response]}
+
+    builder = StateGraph(HelpdeskState)
+    builder.add_node("classify", classify)
+    builder.add_node("retrieve", retrieve)
+    builder.add_node("agent", agent)
+    builder.add_node("tools", run_tools)
+    builder.add_node("approve", approve)
+    builder.add_node("draft", draft)
+
+    builder.add_edge(START, "classify")
+    builder.add_conditional_edges("classify", route_after_classify)
+    builder.add_edge("retrieve", "draft")
+    builder.add_conditional_edges("agent", route_after_agent)
+    builder.add_edge("tools", "agent")
+    builder.add_edge("approve", "draft")
+    builder.add_edge("draft", END)
+
+    return builder.compile(checkpointer=checkpointer)
+
+
+def build_local_graph():
+    return build_graph(InMemorySaver())
+```
+
+티켓 경로는 에이전트의 마지막 메시지가 곧 사용자 답변입니다. 지식·잡담·승인 경로는 `draft`가 문체를 맞춥니다. 답변 정책을 한곳에 모으고 싶을 때는 티켓 경로의 끝도 `draft`로 보내면 됩니다. 이번 실습은 **도구 루프와 고정 분기**가 한 그래프에 같이 있다는 점을 보여 주려고 끝을 갈라 두었습니다.
+
+분류 모델을 본답변 모델과 분리하는 것도 흔한 운영 선택입니다. 분류는 작고 빠른 모델, 답변은 본 모델. `init_chat_model`을 두 번 호출해 노드에 각각 넘기면 됩니다.
+
+### 💻 진입점 — `app.py`
+
+```python
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from langgraph.types import Command
+from pydantic import BaseModel, Field
+
+from graph import build_local_graph
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 실습은 메모리. 운영은 PostgresSaver.from_conn_string(...) 으로 바꾼다.
+    app.state.graph = build_local_graph()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+
+class ChatIn(BaseModel):
+    thread_id: str = Field(min_length=1, max_length=128)
+    message: str = Field(min_length=1, max_length=4000)
+
+
+class ResumeIn(BaseModel):
+    thread_id: str
+    approved: bool
+    comment: str = ""
+
+
+def _config(thread_id: str) -> dict:
+    return {
+        "configurable": {"thread_id": thread_id},
+        "recursion_limit": 12,
+    }
+
+
+@app.post("/helpdesk/chat")
+def chat(body: ChatIn):
+    result = app.state.graph.invoke(
+        {"messages": [{"role": "user", "content": body.message}]},
+        _config(body.thread_id),
+    )
+    interrupted = result.get("__interrupt__")
+    if interrupted:
+        return {
+            "status": "needs_approval",
+            "intent": result.get("intent"),
+            "prompt": interrupted[0].value,
+        }
+    return {
+        "status": "ok",
+        "intent": result.get("intent"),
+        "answer": result["messages"][-1].content,
+    }
+
+
+@app.post("/helpdesk/resume")
+def resume(body: ResumeIn):
+    result = app.state.graph.invoke(
+        Command(resume={"approved": body.approved, "comment": body.comment}),
+        _config(body.thread_id),
+    )
+    return {"status": "ok", "answer": result["messages"][-1].content}
+```
+
+`thread_id`는 클라이언트 임의 문자열이 아니라 **인증된 사용자와 대화 세션에서 서버가 발급**하는 편이 안전합니다. 다른 사람의 id를 넣으면 체크포인트에 쌓인 사내 문의가 그대로 보이기 때문입니다.
+
+일시정지된 실행은 같은 `thread_id`로 `Command(resume=...)` 를 넣어야 `approve` 노드의 `interrupt()`가 값을 돌려받습니다.
+
+### 💻 실행
+
+```powershell
+pip install -U "langchain[openai]" langgraph fastapi uvicorn pydantic
+$env:OPENAI_API_KEY = "<팀 비밀 저장소에서 주입>"
+$env:CHAT_MODEL = "openai:gpt-5.5"
+$env:LANGSMITH_TRACING = "true"
+$env:LANGSMITH_API_KEY = "<팀 비밀 저장소에서 주입>"
+$env:LANGSMITH_PROJECT = "helpdesk"
+uvicorn app:app --reload
+```
+
+```powershell
+curl -X POST http://127.0.0.1:8000/helpdesk/chat `
+  -H "Content-Type: application/json" `
+  -d '{"thread_id":"demo-vpn","message":"재택에서 VPN이 안 붙습니다"}'
+```
+
+같은 `thread_id`로 "방금 2번 항목을 다시 알려주세요"를 보내면, 체크포인터가 이전 메시지를 복원한 뒤 `classify`부터 다시 탑니다.
+
+승인이 필요한 문의는 `status=needs_approval` 가 돌아옵니다. 상담원 화면에서 확인한 뒤:
+
+```powershell
+curl -X POST http://127.0.0.1:8000/helpdesk/resume `
+  -H "Content-Type: application/json" `
+  -d '{"thread_id":"demo-vpn","approved":true,"comment":"권한은 내일 반영"}'
+```
+
+### 🏗️ 운영으로 올릴 때 바꾸는 것
+
+실습 그래프는 그대로 두고, 주변만 교체합니다.
+
+**1) 체크포인터를 Postgres로**
+
+```python
+from langgraph.checkpoint.postgres import PostgresSaver
+
+# 패키지: langgraph-checkpoint-postgres
+# 연결 문자열은 환경 변수. 프로세스 수명 동안 saver를 유지한다.
+with PostgresSaver.from_conn_string(os.environ["CHECKPOINT_DATABASE_URL"]) as saver:
+    saver.setup()  # 테이블 생성은 배포당 한 번
+    graph = build_graph(saver)
+```
+
+API 서버는 `async def`와 `AsyncPostgresSaver`, `ainvoke`로 올리는 경우가 많습니다. 동기 `invoke`는 실습에는 충분하고, 워커를 블로킹한다는 점만 알고 가면 됩니다.
+
+**2) 트레이스는 코드보다 환경 변수**
+
+`LANGSMITH_TRACING=true` 이면 모델 호출, 도구 인자, 노드 전이가 프로젝트에 쌓입니다. 장애 분석은 "모델이 이상하다"에서 시작하기보다 **어느 노드에서 어떤 도구 인자로 빗나갔는지**에서 시작하는 편이 빠릅니다.
+
+**3) 평가 셋을 그래프와 같이 둔다**
+
+의도 10건, 런북 적중 10건, "없는 티켓을 있다고 말하면 실패" 5건 정도면 회귀의 뼈대가 됩니다. LangSmith 데이터셋에 기대 의도·기대 도구 이름을 적어 두고, 프롬프트나 모델을 바꿀 때마다 같은 셋을 돌립니다.
+
+**4) 권한은 도구 안에서 한 번 더**
+
+분류 노드의 `escalate`는 1차 필터입니다. `lookup_ticket`은 모델이 고른 번호만 믿지 말고, 요청자 `user_id`가 그 티켓의 당사자인지 도구 안에서 확인합니다. 번호는 모델이 대화에서 집어 올린 값이므로, 소유권 검사는 코드의 몫입니다.
+
+**5) 단계 상한과 타임아웃**
+
+`recursion_limit`은 도구 루프가 같은 호출을 반복할 때의 안전망입니다. 도구 HTTP 호출에는 클라이언트 타임아웃을 두고, 런북 검색이 비면 답변 프롬프트가 "없다"고 말하게 둡니다. 빈 검색 결과를 긴 일반론으로 메우는 답이 헬프데스크에서 가장 흔한 사고입니다.
+
+---
+
+## 마무리
+
+둘을 이렇게 기억하면 설계가 흔들리지 않습니다.
+
+- **LangChain**은 모델, 도구, 검색, 미들웨어로 **할 수 있는 일**을 만듭니다. 표준 루프는 `create_agent` 한 줄로 충분합니다.
+- **LangGraph**는 상태, 분기, 반복, 승인, 재개로 **그 일의 순서와 기억**을 소유합니다.
+- 실무 아키텍처는 그래프를 두껍게 만들기보다, **고정해야 할 분기(분류·승인·권한)** 와 **모델에게 맡겨도 되는 구간(도구 선택)** 을 노드로 나누는 일입니다.
+- 운영의 차이는 알고리즘보다 **Postgres 체크포인터, LangSmith 트레이스, 작은 평가 셋, 쓰기 도구의 멱등성**에서 납니다.
+
+헬프데스크로 다시 말하면, LangChain은 상담원이 손에 든 매뉴얼과 조회 단말이고, LangGraph는 "어떤 문의는 매뉴얼로, 어떤 문의는 단말로, 어떤 문의는 팀장 도장 뒤에"를 적는 업무 분장표입니다.
+
+다음엔 이 그래프에 **LangSmith 평가 셋**을 붙이거나, 티켓 생성 같은 쓰기 도구에 승인 노드를 어떻게 끼우는지 이어서 정리해 보겠습니다. 🙌
+
+긴 글 읽어주셔서 감사합니다. 궁금한 점이나 의견은 편하게 댓글 남겨 주세요! 😊

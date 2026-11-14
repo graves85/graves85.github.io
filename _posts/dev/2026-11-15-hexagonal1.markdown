@@ -1,0 +1,426 @@
+---
+layout: content-layout
+title: "헥사고날 아키텍처(Hexagonal Architecture) 알아보기! 포트와 어댑터로 핵심을 지키기 ⬡"
+date: 2026-11-15
+categories: [TECH, 개발]
+tags: [헥사고날 아키텍처, Hexagonal Architecture, Ports and Adapters, 포트와 어댑터, 클린 아키텍처, DDD, Java, Spring, 아키텍처]
+---
+
+## 안녕하십니까! 😀
+
+주문을 저장하는 코드를 짜다 보면, 서비스 클래스가 JPA 엔티티와 `@Transactional`, HTTP 상태 코드를 한꺼번에 알게 되는 일이 많습니다. 화면이 바뀌거나 DB가 바뀌면 비즈니스 규칙까지 같이 흔들립니다.
+
+오늘은 그 결합을 끊는 그림인 **헥사고날 아키텍처(Hexagonal Architecture)** 를 정리합니다. 다른 이름은 **포트와 어댑터(Ports and Adapters)** 입니다. Alistair Cockburn이 2005년에 제안한 구조이고, 이후 클린 아키텍처·어니언 아키텍처와 같은 의존성 방향을 공유합니다.
+
+이 글에서 볼 내용은 다음과 같습니다.
+
+- 헥사고날이 해결하려는 문제
+- 포트와 어댑터의 역할
+- 안쪽으로만 향하는 의존성
+- Java 주문 예시로 따라 가는 패키지와 코드
+- 레이어드·클린·어니언과의 관계
+- 도입이 맞는 경우와 자주 무너지는 지점
+
+---
+
+## 1. 한 줄로 보면
+
+> **애플리케이션 핵심은 기술에 의존하지 않고, 바깥 기술은 포트(인터페이스)를 통해 붙는다.**
+
+안쪽에는 주문, 결제 승인, 재고 차감 같은 **업무 규칙**이 있습니다.  
+바깥에는 REST, 배치, 카프카, JPA, SMTP, 결제사 HTTP 같은 **기술**이 있습니다.
+
+둘은 직접 알지 못합니다. 안쪽이 정한 인터페이스(포트)에, 바깥이 변환기(어댑터)로 연결됩니다.
+
+육각형은 "레이어가 여섯 개"라는 뜻이 아닙니다. 포트를 여러 면에 붙일 수 있다는 **그림**입니다. 면의 개수는 중요하지 않고, **안과 밖의 경계**가 중요합니다.
+
+---
+
+## 2. 왜 이 그림이 나왔는가
+
+전통적인 레이어드 아키텍처는 보통 이렇게 흐릅니다.
+
+```
+Controller → Service → Repository → Database
+```
+
+방향 자체는 단순하고, CRUD에는 잘 맞습니다. 시간이 지나면 서비스가 이런 것들을 한꺼번에 알게 됩니다.
+
+- 컨트롤러가 넘긴 HTTP DTO의 필드 이름
+- Spring Data 메서드 시그니처와 지연 로딩
+- `@Transactional`이 거는 트랜잭션 경계
+- 외부 결제 API의 JSON 필드
+
+업무 규칙("빈 주문은 거절한다", "결제 승인 후에만 주문을 저장한다")이 프레임워크 코드 사이에 흩어집니다. 단위 테스트를 하려면 스프링 컨텍스트와 DB가 필요하고, DB를 바꾸거나 진입점을 메시지 컨슈머로 늘리면 서비스 내부를 다시 엽니다.
+
+헥사고날은 질문을 바꿉니다.
+
+> 이 기능은 **누가 호출하든, 어디에 저장하든** 같은 규칙으로 동작하는가?
+
+그 규칙만 안쪽에 남기고, 호출 방법과 저장 방법은 교체 가능한 바깥으로 보냅니다.
+
+---
+
+## 3. 육각형 안과 밖
+
+```
+          [REST]    [CLI]    [테스트]
+             \        |        /
+              v       v       v
+        +---------------------------+
+        |   드라이빙 포트 (유스케이스)  |
+        |                           |
+        |     애플리케이션 / 도메인     |
+        |                           |
+        |   드리븐 포트 (저장, 결제…)   |
+        +---------------------------+
+              |        |        |
+              v        v        v
+           [JPA]   [결제 HTTP]  [메일]
+```
+
+| 위치 | 아는 것 | 모르는 것 |
+|------|---------|-----------|
+| **안쪽** | 주문 총액, 상태 전이, 승인 조건 | HTTP, SQL, JSON 필드명 |
+| **바깥** | URL, 테이블, 외부 API | 총액을 계산하는 규칙의 세부 |
+
+안쪽은 두 종류의 문을 가집니다.
+
+- **들어오는 문**: 누군가 주문을 넣고 싶다.
+- **나가는 문**: 주문을 저장하고, 결제를 요청하고 싶다.
+
+문은 인터페이스입니다. 그 문을 실제로 두드리는 클래스와, 문 너머 기술을 구현하는 클래스가 어댑터입니다.
+
+---
+
+## 4. 포트와 어댑터
+
+### 📌 포트 — 안쪽이 정한 계약
+
+포트는 기술 용어가 없는 인터페이스입니다. 방향에 따라 두 가지입니다.
+
+| 구분 | 다른 이름 | 누가 호출하나 | 예 |
+|------|-----------|----------------|----|
+| **드라이빙 포트** | Primary, Inbound | 바깥이 안쪽을 호출 | `PlaceOrderUseCase` |
+| **드리븐 포트** | Secondary, Outbound | 안쪽이 바깥에 요청 | `OrderRepository`, `PaymentPort` |
+
+드라이빙 포트는 **유스케이스**입니다. "주문을 접수한다"처럼 사용자 목표 단위로 작게 둡니다.  
+드리븐 포트는 **안쪽이 필요한 능력**입니다. "주문을 저장한다", "결제를 청구한다"이지, "JPA로 save 한다"가 아닙니다.
+
+### 📌 어댑터 — 기술을 계약에 번역
+
+| 구분 | 하는 일 | 예 |
+|------|---------|----|
+| **드라이빙 어댑터** | 바깥 요청을 포트 입력으로 바꿈 | REST 컨트롤러, 카프카 컨슈머, 테스트 |
+| **드리븐 어댑터** | 포트 출력을 실제 기술 호출로 바꿈 | JPA 구현, 결제사 클라이언트, 인메모리 저장소 |
+
+컨트롤러는 유스케이스를 호출할 뿐, 저장소 구현을 알지 않습니다.  
+JPA 구현은 `OrderRepository`를 구현할 뿐, URL을 알지 않습니다.  
+테스트는 REST 대신 유스케이스를 직접 호출하고, DB 대신 인메모리 어댑터를 꽂습니다. 같은 포트를 쓰기 때문에 업무 규칙은 한 벌입니다.
+
+---
+
+## 5. 의존성은 안쪽을 향한다
+
+컴파일 의존성의 방향은 호출 방향과 다를 수 있습니다. 이 한 줄이 구조의 전부입니다.
+
+> **바깥(어댑터)이 안쪽(포트·도메인)을 의존한다. 안쪽은 바깥을 의존하지 않는다.**
+
+드리븐 쪽은 특히 그렇습니다. 애플리케이션이 `PaymentPort.charge(...)`를 호출하지만, `PaymentPort` 인터페이스의 주인은 애플리케이션입니다. 결제사 SDK를 감싼 클래스가 그 인터페이스를 **구현**합니다. 그래서 결제사를 바꿔도 유스케이스 시그니처는 그대로입니다.
+
+Java/Spring에서 이 규칙을 지키려면 안쪽 코드에 다음이 들어오지 않아야 합니다.
+
+- `jakarta.persistence` 엔티티 애너테이션
+- `org.springframework.web`의 요청·응답 타입
+- 특정 DB 드라이버와 SQL 방언
+- 외부 API의 DTO
+
+스프링은 바깥의 조립 도구로 남습니다. 생성자 주입으로 포트에 어댑터를 꽂는 역할입니다.
+
+---
+
+## 6. 코드로 따라가기 — 주문 접수
+
+패키지는 역할이 보이게 나눕니다.
+
+```
+order
+├─ domain                 주문, 금액, 상태
+├─ application
+│  ├─ port.in             드라이빙 포트
+│  ├─ port.out            드리븐 포트
+│  └─ service             유스케이스 구현
+└─ adapter
+   ├─ in.web              REST 컨트롤러
+   └─ out
+      ├─ persistence      JPA
+      └─ payment          결제사 HTTP
+```
+
+### 📌 1) 도메인 — 규칙의 주인
+
+```java
+public final class Order {
+    private final OrderId id;
+    private final List<OrderLine> lines;
+    private final OrderStatus status;
+
+    private Order(OrderId id, List<OrderLine> lines, OrderStatus status) {
+        this.id = id;
+        this.lines = lines;
+        this.status = status;
+    }
+
+    public static Order place(OrderId id, List<OrderLine> lines) {
+        if (lines == null || lines.isEmpty()) {
+            throw new EmptyOrderException("주문 항목이 비어 있습니다.");
+        }
+        return new Order(id, List.copyOf(lines), OrderStatus.PLACED);
+    }
+
+    public Money total() {
+        return lines.stream()
+                .map(OrderLine::amount)
+                .reduce(Money.ZERO, Money::plus);
+    }
+
+    public OrderId id() {
+        return id;
+    }
+}
+```
+
+빈 주문을 거절하는 이유는 컨트롤러의 `if`가 아니라 `Order.place`에 있습니다. HTTP로 오든 배치로 오든 같은 검사가 실행됩니다.
+
+### 📌 2) 포트 — 입력과 출력 계약
+
+```java
+public interface PlaceOrderUseCase {
+    OrderId place(PlaceOrderCommand command);
+}
+
+public record PlaceOrderCommand(List<Line> lines, String paymentToken) {
+    public record Line(String sku, int quantity, long unitPrice) { }
+}
+```
+
+```java
+public interface OrderRepository {
+    void save(Order order);
+    Optional<Order> findById(OrderId id);
+}
+
+public interface PaymentPort {
+    PaymentResult charge(Money amount, String paymentToken);
+}
+```
+
+`PlaceOrderCommand`는 HTTP 바디가 아닙니다. `OrderRepository`의 인자는 JPA 엔티티가 아닙니다. 안쪽 언어로만 말합니다.
+
+### 📌 3) 애플리케이션 서비스 — 유스케이스 구현
+
+```java
+public class PlaceOrderService implements PlaceOrderUseCase {
+    private final OrderRepository orders;
+    private final PaymentPort payments;
+    private final OrderIdGenerator ids;
+
+    public PlaceOrderService(OrderRepository orders, PaymentPort payments, OrderIdGenerator ids) {
+        this.orders = orders;
+        this.payments = payments;
+        this.ids = ids;
+    }
+
+    @Override
+    public OrderId place(PlaceOrderCommand command) {
+        Order order = Order.place(ids.next(), toLines(command.lines()));
+        PaymentResult result = payments.charge(order.total(), command.paymentToken());
+        if (!result.approved()) {
+            throw new PaymentRejectedException(result.reason());
+        }
+        orders.save(order);
+        return order.id();
+    }
+
+    private List<OrderLine> toLines(List<PlaceOrderCommand.Line> lines) {
+        return lines.stream()
+                .map(line -> new OrderLine(line.sku(), line.quantity(), Money.of(line.unitPrice())))
+                .toList();
+    }
+}
+```
+
+이 클래스는 스프링 웹도, JPA도 모릅니다. 테스트에서 가짜 결제와 인메모리 저장소를 넣으면 그대로 동작합니다.
+
+### 📌 4) 드라이빙 어댑터 — HTTP를 명령으로
+
+```java
+@RestController
+@RequestMapping("/orders")
+public class OrderController {
+    private final PlaceOrderUseCase placeOrder;
+
+    public OrderController(PlaceOrderUseCase placeOrder) {
+        this.placeOrder = placeOrder;
+    }
+
+    @PostMapping
+    public ResponseEntity<OrderResponse> create(@RequestBody PlaceOrderRequest request) {
+        OrderId id = placeOrder.place(request.toCommand());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new OrderResponse(id.value()));
+    }
+}
+```
+
+컨트롤러의 일은 요청을 `PlaceOrderCommand`로 바꾸고, 도메인 예외를 HTTP 상태 코드로 바꾸는 것입니다. 총액 계산과 승인 판단은 안으로 넘깁니다.
+
+### 📌 5) 드리븐 어댑터 — 도메인을 테이블로
+
+```java
+@Repository
+public class JpaOrderRepository implements OrderRepository {
+    private final SpringDataOrderJpa jpa;
+
+    public JpaOrderRepository(SpringDataOrderJpa jpa) {
+        this.jpa = jpa;
+    }
+
+    @Override
+    public void save(Order order) {
+        jpa.save(OrderEntity.from(order));
+    }
+
+    @Override
+    public Optional<Order> findById(OrderId id) {
+        return jpa.findById(id.value()).map(OrderEntity::toDomain);
+    }
+}
+```
+
+`OrderEntity`는 테이블 컬럼을 아는 바깥 모델입니다. `Order`는 업무를 아는 안쪽 모델입니다. `from` / `toDomain`이 둘 사이의 번역입니다. 도메인에 `@Entity`를 붙이면 이 경계가 사라집니다.
+
+결제 어댑터도 같은 모양입니다. `PaymentPort`를 구현하고, 벤더 JSON은 어댑터 안에만 둡니다.
+
+### 📌 6) 테스트 — 어댑터만 바꾼다
+
+```java
+class PlaceOrderServiceTest {
+
+    @Test
+    void savesOrderWhenPaymentIsApproved() {
+        var orders = new InMemoryOrderRepository();
+        var payments = new FakePaymentPort(PaymentResult.approved());
+        var service = new PlaceOrderService(orders, payments, () -> OrderId.of("ord-1"));
+
+        OrderId id = service.place(new PlaceOrderCommand(
+                List.of(new PlaceOrderCommand.Line("SKU-1", 2, 1_500L)),
+                "tok_ok"
+        ));
+
+        assertThat(id.value()).isEqualTo("ord-1");
+        assertThat(orders.findById(id)).isPresent();
+        assertThat(orders.findById(id).orElseThrow().total()).isEqualTo(Money.of(3_000L));
+    }
+
+    @Test
+    void rejectsEmptyOrderBeforePayment() {
+        var payments = new FakePaymentPort(PaymentResult.approved());
+        var service = new PlaceOrderService(new InMemoryOrderRepository(), payments, () -> OrderId.of("ord-1"));
+
+        assertThatThrownBy(() -> service.place(new PlaceOrderCommand(List.of(), "tok_ok")))
+                .isInstanceOf(EmptyOrderException.class);
+        assertThat(payments.chargeCount()).isZero();
+    }
+}
+```
+
+첫 테스트는 승인된 결제일 때 총액 `1500 x 2`가 저장되는지 확인합니다.  
+둘째 테스트는 빈 주문이 결제 호출 전에 거절되는지 확인합니다. 스프링도 DB도 없습니다.
+
+REST 어댑터는 `@WebMvcTest`로 요청 변환만 보고, JPA 어댑터는 엔티티 매핑만 보면 됩니다. 규칙 테스트와 기술 테스트가 분리됩니다.
+
+---
+
+## 7. 옆에 두는 아키텍처
+
+이름은 달라도 의존성 방향은 같습니다. 바깥이 안쪽을 알고, 안쪽은 기술을 모릅니다.
+
+| 이름 | 중심 | 기억할 점 |
+|------|------|-----------|
+| **레이어드** | 표현 → 서비스 → 영속 | 계층은 있으나 서비스가 영속 기술에 자주 붙음 |
+| **헥사고날** | 유스케이스와 도메인 | 포트로 진입점·저장소·외부 시스템을 교체 |
+| **어니언** | 도메인 모델 | 동심원. 애플리케이션 서비스가 도메인을 감쌈 |
+| **클린 아키텍처** | 엔티티 + 유스케이스 | 동심원에 의존성 규칙을 명시. 헥사고날의 일반화에 가깝음 |
+
+실무에서 "헥사고날로 짜자"와 "클린 아키텍처로 짜자"가 다른 패키지 이름을 가리키는 경우는 많습니다. 지켜야 할 알맹이는 같습니다.
+
+1. 업무 규칙이 프레임워크 타입을 모름
+2. 입력 어댑터와 출력 어댑터가 그 규칙을 번역만 함
+3. 규칙 테스트가 DB 없이 돌아감
+
+---
+
+## 8. 언제 쓰고, 언제 과한가
+
+잘 맞는 경우입니다.
+
+- 규칙이 화면·배치·메시지 등 **진입점이 둘 이상**
+- DB, 결제사, 메일처럼 **바꿀 수 있는 바깥 시스템**이 있음
+- 규칙 변경의 비용이 크고, **DB 없이 테스트를 고정**하고 싶음
+- 팀이 도메인 언어(주문, 승인, 총액)를 코드에서 읽고 싶음
+
+과한 경우입니다.
+
+- 필드 몇 개의 CRUD이고 규칙이 거의 없음
+- 수일짜리 프로토타입
+- 포트가 유스케이스가 아니라 테이블 CRUD를 그대로 복제한 경우
+
+후자는 인터페이스만 늘고 보호되는 규칙이 없습니다. 헥사고날의 가치는 파일 수가 아니라, **바뀌면 안 되는 정책이 기술과 분리되어 있는가**에 있습니다.
+
+처음부터 모든 모듈에 포트를 깔 필요는 없습니다. 주문·결제·정산처럼 규칙이 진한 경계부터 적용하고, 단순 조회는 기존 레이어를 유지해도 됩니다.
+
+---
+
+## 9. 자주 무너지는 지점
+
+### 💡 1) 도메인이 애너테이션을 안다
+
+`Order`에 `@Entity`, `@Table`이 붙어 있으면 영속 모델과 업무 모델이 한 클래스입니다. 지연 로딩과 연관관계 설정이 업무 코드로 새어 들어옵니다. 엔티티는 드리븐 어댑터에 두고, 도메인과 서로 변환합니다.
+
+### 💡 2) 포트가 DTO와 SQL을 말한다
+
+`OrderRepository.findByStatusAndCreatedAtAfterOrderByIdDesc(String status, LocalDateTime from)`처럼 조회 기술이 포트 이름에 박혀 있으면, 저장소를 바꿔도 메서드를 유지해야 합니다. 안쪽 이름은 `findPlacedSince(Instant from)`처럼 **업무가 필요로 하는 질문**이어야 합니다. 복잡한 조회 화면은 별도의 조회 포트로 빼는 편이 유스케이스 포트를 깔끔하게 유지합니다.
+
+### 💡 3) 어댑터가 어댑터를 호출한다
+
+컨트롤러가 `JpaOrderRepository`를 직접 부르면 유스케이스가 우회됩니다. 빈 주문 검사와 결제 순서가 컨트롤러마다 달라집니다. 진입 어댑터는 드라이빙 포트만 호출합니다.
+
+### 💡 4) 포트가 지나치게 잘게 쪼개지거나, 하나로 뭉친다
+
+메서드마다 인터페이스를 만들면 탐색 비용만 커집니다. 반대로 `OrderPort` 하나에 생성·취소·통계·엑셀이 모두 있으면 변경 이유가 섞입니다. **한 유스케이스(또는 한 액터의 목표)에 포트 하나** 정도가 읽기 좋습니다. 드리븐 포트는 능력 단위(저장, 결제, 알림)로 나눕니다.
+
+### 💡 5) 트랜잭션을 도메인 안으로 끌고 온다
+
+`@Transactional`은 스프링이 제공하는 기술 경계입니다. 유스케이스 구현 클래스의 바깥쪽(애플리케이션 서비스)에 두는 경우가 많고, 도메인 엔티티 메서드에는 두지 않습니다. 트랜잭션 안에서 외부 결제 HTTP를 오래 붙잡고 있으면 커넥션이 묶이므로, 승인 호출과 저장의 경계를 어댑터와 함께 설계합니다.
+
+### 💡 6) 매핑 누락
+
+요청 DTO, 커맨드, 도메인, 엔티티, 응답 DTO는 서로 다른 모델입니다. 필드를 대충 복사하면 금액 단위(원/센트)나 상태 코드가 어긋납니다. 변환은 어댑터와 팩토리 한곳에 모으고, 매핑 테스트를 남깁니다.
+
+---
+
+## 마무리
+
+헥사고날 아키텍처는 육각형 다이어그램을 그리라는 규칙이 아닙니다. **업무 규칙을 기술의 교체면 안에 두라는** 규칙입니다.
+
+- **안쪽**은 주문과 결제 승인 같은 정책을 안다.
+- **포트**는 그 정책이 들어오고 나가는 계약이다.
+- **어댑터**는 HTTP, SQL, 외부 API를 그 계약으로 번역한다.
+- **테스트**는 어댑터를 가짜로 바꿔 정책을 고정한다.
+
+레이어가 이미 있다면, 서비스에서 프레임워크 타입을 걷어 내고 저장소·외부 호출을 인터페이스 뒤로 보내는 작업이 첫 헥사곤입니다. 패키지 이름을 `port.in`으로 바꾸는 일보다, 내일 DB나 진입점이 바뀌어도 테스트가 같은 규칙을 지키는지가 기준입니다.
+
+다음엔 같은 주문 예제를 **Spring Modulith 모듈 경계**나 **조회 전용 포트(CQRS의 읽기 쪽)** 로 나누는 실무 배치도 이어서 정리해 보겠습니다. 🙌
+
+감사합니다!
